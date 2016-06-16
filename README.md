@@ -4,4 +4,8 @@ Install dependencies:
 ```
 git submodule init
 git submodule update
+mkdir library/googletest/build
+cd library/googletest/build
+cmake ..
+make
 ```

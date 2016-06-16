@@ -12,14 +12,15 @@
 
 using namespace std;
 
-
-int main(int argc, const char * argv[]) {
+TEST(LinkedListTest, add) {
     LinkedList *linkedList = new LinkedList();
     
-    cout << linkedList->getTest() << endl;
-    cout << "test" << endl;
-    
-    return 0;
+    ASSERT_EQ(5, 5);
+}
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
 
 

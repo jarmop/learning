@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		AB7236AF1D0FD18D0016C2A9 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB7236AE1D0FD18D0016C2A9 /* main.cpp */; };
 		ABDCDECC1D111D010095ABE7 /* LinkedList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABDCDECA1D111D010095ABE7 /* LinkedList.cpp */; settings = {ASSET_TAGS = (); }; };
+		ABDCDECE1D120A780095ABE7 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABDCDECD1D120A780095ABE7 /* libgtest.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +29,7 @@
 		AB7236AE1D0FD18D0016C2A9 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		ABDCDECA1D111D010095ABE7 /* LinkedList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LinkedList.cpp; sourceTree = "<group>"; };
 		ABDCDECB1D111D010095ABE7 /* LinkedList.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LinkedList.hpp; sourceTree = "<group>"; };
+		ABDCDECD1D120A780095ABE7 /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = library/googletest/build/googlemock/gtest/libgtest.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,6 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABDCDECE1D120A780095ABE7 /* libgtest.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -44,6 +47,7 @@
 		AB7236A21D0FD18D0016C2A9 = {
 			isa = PBXGroup;
 			children = (
+				ABDCDECD1D120A780095ABE7 /* libgtest.a */,
 				AB7236AD1D0FD18D0016C2A9 /* data-structures-and-algorithms */,
 				AB7236AC1D0FD18D0016C2A9 /* Products */,
 			);
@@ -212,6 +216,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = library/googletest/googletest/include;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/library/googletest/build/googlemock/gtest",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -220,6 +228,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = library/googletest/googletest/include;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/library/googletest/build/googlemock/gtest",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
