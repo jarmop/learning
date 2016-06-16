@@ -12,10 +12,14 @@
 
 using namespace std;
 
-TEST(LinkedListTest, add) {
-    LinkedList *linkedList = new LinkedList();
+TEST(LinkedListTest, insertFirst) {
+    LinkedList *linkedList = new LinkedList;
+    linkedList->insertFirst(1, 2);    
+    struct node * first = linkedList->getFirst();
     
-    ASSERT_EQ(5, 5);
+    ASSERT_TRUE(first);
+    ASSERT_EQ(first->key, 1);
+    ASSERT_EQ(first->data, 2);
 }
 
 int main(int argc, char **argv) {

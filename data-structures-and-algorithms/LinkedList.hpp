@@ -11,10 +11,18 @@
 
 #include <stdio.h>
 
-class LinkedList{
-    int test = 5;
+struct node {
+    int key;
+    int data;
+    struct node * next;
+};
+
+class LinkedList {    
+    struct node * head;
+    struct node * tail;
 public:
-    int getTest();
+    void insertFirst(int key, int data);
+    struct node * getFirst();
 };
 
 #endif /* LinkedList_hpp */
