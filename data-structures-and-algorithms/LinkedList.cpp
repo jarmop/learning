@@ -21,6 +21,22 @@ void LinkedList::insertFirst(int key, int data) {
     }
 };
 
+void LinkedList::insertLast(int key, int data) {
+    struct node * node = new struct node;
+    node->key = key;
+    node->data = data;
+    if (!this->tail) {
+        this->head = node;
+        this->tail = node;
+    } else {
+        this->tail->next = node;
+    }
+};
+
 struct node * LinkedList::getFirst() {
     return this->head;
+}
+
+struct node * LinkedList::getLast() {
+    return this->tail;
 }

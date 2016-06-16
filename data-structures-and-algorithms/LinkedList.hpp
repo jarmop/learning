@@ -22,7 +22,9 @@ class LinkedList {
     struct node * tail;
 public:
     void insertFirst(int key, int data);
+    void insertLast(int key, int data);
     struct node * getFirst();
+    struct node * getLast();
 };
 
 #endif /* LinkedList_hpp */
