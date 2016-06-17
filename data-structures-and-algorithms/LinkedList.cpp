@@ -31,6 +31,14 @@ void LinkedList::insertLast(int data) {
     }
 };
 
+void LinkedList::removeFirst() {
+    this->head = this->head->next;
+}
+
+void LinkedList::removeLast() {
+    this->tail = this->tail->next;
+}
+
 int LinkedList::getFirst() {
     return this->head->data;
 }
