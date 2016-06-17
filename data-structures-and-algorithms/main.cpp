@@ -16,7 +16,7 @@ TEST(LinkedListTest, insertFirst) {
     LinkedList *linkedList = new LinkedList;
     linkedList->insertFirst(1);
     linkedList->insertFirst(2);
-    struct node * last = linkedList->getLast();
+    Node * last = linkedList->getLast();
     
     ASSERT_TRUE(last);
     ASSERT_EQ(last->data, 1);
@@ -26,7 +26,7 @@ TEST(LinkedListTest, insertLast) {
     LinkedList *linkedList = new LinkedList;
     linkedList->insertLast(1);
     linkedList->insertLast(2);
-    struct node * first = linkedList->getFirst();
+    Node * first = linkedList->getFirst();
     
     ASSERT_TRUE(first);
     ASSERT_EQ(first->data, 1);

@@ -10,20 +10,16 @@
 #define LinkedList_hpp
 
 #include <stdio.h>
-
-struct node {
-    int data;
-    struct node * next;
-};
+#include "Node.hpp"
 
 class LinkedList {    
-    struct node * head;
-    struct node * tail;
+    Node * head;
+    Node * tail;
 public:
     void insertFirst(int data);
     void insertLast(int data);
-    struct node * getFirst();
-    struct node * getLast();
+    Node * getFirst();
+    Node * getLast();
 };
 
 #endif /* LinkedList_hpp */

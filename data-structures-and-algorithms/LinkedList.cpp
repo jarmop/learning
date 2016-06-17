@@ -9,7 +9,7 @@
 #include "LinkedList.hpp"
 
 void LinkedList::insertFirst(int data) {
-    struct node * node = new struct node;
+    Node * node = new Node;
     node->data = data;
     if (!this->head) {
         this->head = node;
@@ -21,7 +21,7 @@ void LinkedList::insertFirst(int data) {
 };
 
 void LinkedList::insertLast(int data) {
-    struct node * node = new struct node;
+    Node * node = new Node;
     node->data = data;
     if (!this->tail) {
         this->head = node;
@@ -31,10 +31,10 @@ void LinkedList::insertLast(int data) {
     }
 };
 
-struct node * LinkedList::getFirst() {
+Node * LinkedList::getFirst() {
     return this->head;
 }
 
-struct node * LinkedList::getLast() {
+Node * LinkedList::getLast() {
     return this->tail;
 }
