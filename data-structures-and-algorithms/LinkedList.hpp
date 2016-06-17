@@ -12,7 +12,6 @@
 #include <stdio.h>
 
 struct node {
-    int key;
     int data;
     struct node * next;
 };
@@ -21,8 +20,8 @@ class LinkedList {
     struct node * head;
     struct node * tail;
 public:
-    void insertFirst(int key, int data);
-    void insertLast(int key, int data);
+    void insertFirst(int data);
+    void insertLast(int data);
     struct node * getFirst();
     struct node * getLast();
 };
