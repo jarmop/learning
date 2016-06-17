@@ -12,14 +12,14 @@
 #include <stdio.h>
 #include "Node.hpp"
 
-class LinkedList {    
+class LinkedList {
     Node * head;
     Node * tail;
 public:
     void insertFirst(int data);
     void insertLast(int data);
-    Node * getFirst();
-    Node * getLast();
+    int getFirst();
+    int getLast();
 };
 
 #endif /* LinkedList_hpp */

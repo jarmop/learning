@@ -31,10 +31,10 @@ void LinkedList::insertLast(int data) {
     }
 };
 
-Node * LinkedList::getFirst() {
-    return this->head;
+int LinkedList::getFirst() {
+    return this->head->data;
 }
 
-Node * LinkedList::getLast() {
-    return this->tail;
+int LinkedList::getLast() {
+    return this->tail->data;
 }

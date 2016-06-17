@@ -16,20 +16,14 @@ TEST(LinkedListTest, insertFirst) {
     LinkedList *linkedList = new LinkedList;
     linkedList->insertFirst(1);
     linkedList->insertFirst(2);
-    Node * last = linkedList->getLast();
-    
-    ASSERT_TRUE(last);
-    ASSERT_EQ(last->data, 1);
+    ASSERT_EQ(linkedList->getLast(), 1);
 }
 
 TEST(LinkedListTest, insertLast) {
     LinkedList *linkedList = new LinkedList;
     linkedList->insertLast(1);
     linkedList->insertLast(2);
-    Node * first = linkedList->getFirst();
-    
-    ASSERT_TRUE(first);
-    ASSERT_EQ(first->data, 1);
+    ASSERT_EQ(linkedList->getFirst(), 1);
 }
 
 int main(int argc, char **argv) {
