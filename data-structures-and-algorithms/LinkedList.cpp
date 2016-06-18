@@ -28,6 +28,7 @@ void LinkedList::insertLast(int data) {
         this->tail = node;
     } else {
         this->tail->next = node;
+        this->tail = node;
     }
 };
 

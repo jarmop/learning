@@ -19,14 +19,14 @@ TEST(LinkedListTest, insertFirst) {
     LinkedList * linkedList = new LinkedList;
     linkedList->insertFirst(1);
     linkedList->insertFirst(2);
-    ASSERT_EQ(linkedList->getLast(), 1);
+    ASSERT_EQ(linkedList->getFirst(), 2);
 }
 
 TEST(LinkedListTest, insertLast) {
     LinkedList * linkedList = new LinkedList;
     linkedList->insertLast(1);
     linkedList->insertLast(2);
-    ASSERT_EQ(linkedList->getFirst(), 1);
+    ASSERT_EQ(linkedList->getLast(), 2);
 }
 
 TEST(StackTest, pushAndPop) {
