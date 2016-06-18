@@ -12,6 +12,7 @@
 
 #include "LinkedList.hpp"
 #include "Stack.hpp"
+#include "Queue.hpp"
 
 using namespace std;
 
@@ -35,6 +36,14 @@ TEST(StackTest, pushAndPop) {
     stack->push(2);
     ASSERT_EQ(stack->pop(), 2);
     ASSERT_EQ(stack->pop(), 1);
+}
+
+TEST(QueueTest, pushAndPop) {
+    Queue * queue = new Queue;
+    queue->push(1);
+    queue->push(2);
+    ASSERT_EQ(queue->pop(), 1);
+    ASSERT_EQ(queue->pop(), 2);
 }
 
 int main(int argc, char **argv) {

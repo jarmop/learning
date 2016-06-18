@@ -19,7 +19,6 @@ public:
     void insertFirst(int data);
     void insertLast(int data);
     void removeFirst();
-    void removeLast();
     int getFirst();
     int getLast();
 };
