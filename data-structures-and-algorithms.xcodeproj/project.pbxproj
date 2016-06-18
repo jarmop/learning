@@ -7,11 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AB7236AF1D0FD18D0016C2A9 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB7236AE1D0FD18D0016C2A9 /* main.cpp */; };
-		ABDCDECC1D111D010095ABE7 /* LinkedList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABDCDECA1D111D010095ABE7 /* LinkedList.cpp */; settings = {ASSET_TAGS = (); }; };
 		ABDCDECE1D120A780095ABE7 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABDCDECD1D120A780095ABE7 /* libgtest.a */; };
-		ABDCDED21D14964E0095ABE7 /* Stack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABDCDED01D14964E0095ABE7 /* Stack.cpp */; settings = {ASSET_TAGS = (); }; };
-		ABDCDED81D15411A0095ABE7 /* Queue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABDCDED61D15411A0095ABE7 /* Queue.cpp */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,16 +23,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AB68F22F1D1552C800B2AE0C /* data-structures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "data-structures"; sourceTree = "<group>"; };
 		AB7236AB1D0FD18D0016C2A9 /* data-structures-and-algorithms */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "data-structures-and-algorithms"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AB7236AE1D0FD18D0016C2A9 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		ABDCDECA1D111D010095ABE7 /* LinkedList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LinkedList.cpp; sourceTree = "<group>"; };
-		ABDCDECB1D111D010095ABE7 /* LinkedList.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LinkedList.hpp; sourceTree = "<group>"; };
 		ABDCDECD1D120A780095ABE7 /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = library/googletest/build/googlemock/gtest/libgtest.a; sourceTree = "<group>"; };
-		ABDCDED01D14964E0095ABE7 /* Stack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Stack.cpp; sourceTree = "<group>"; };
-		ABDCDED11D14964E0095ABE7 /* Stack.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Stack.hpp; sourceTree = "<group>"; };
-		ABDCDED41D14970A0095ABE7 /* Node.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Node.hpp; sourceTree = "<group>"; };
-		ABDCDED61D15411A0095ABE7 /* Queue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Queue.cpp; sourceTree = "<group>"; };
-		ABDCDED71D15411A0095ABE7 /* Queue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Queue.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,14 +60,7 @@
 		AB7236AD1D0FD18D0016C2A9 /* data-structures-and-algorithms */ = {
 			isa = PBXGroup;
 			children = (
-				AB7236AE1D0FD18D0016C2A9 /* main.cpp */,
-				ABDCDECA1D111D010095ABE7 /* LinkedList.cpp */,
-				ABDCDECB1D111D010095ABE7 /* LinkedList.hpp */,
-				ABDCDED01D14964E0095ABE7 /* Stack.cpp */,
-				ABDCDED11D14964E0095ABE7 /* Stack.hpp */,
-				ABDCDED41D14970A0095ABE7 /* Node.hpp */,
-				ABDCDED61D15411A0095ABE7 /* Queue.cpp */,
-				ABDCDED71D15411A0095ABE7 /* Queue.hpp */,
+				AB68F22F1D1552C800B2AE0C /* data-structures */,
 			);
 			path = "data-structures-and-algorithms";
 			sourceTree = "<group>";
@@ -139,10 +121,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ABDCDECC1D111D010095ABE7 /* LinkedList.cpp in Sources */,
-				AB7236AF1D0FD18D0016C2A9 /* main.cpp in Sources */,
-				ABDCDED21D14964E0095ABE7 /* Stack.cpp in Sources */,
-				ABDCDED81D15411A0095ABE7 /* Queue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
