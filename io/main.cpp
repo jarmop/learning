@@ -8,6 +8,7 @@ int main() {
     cout << a << "\n";
 
     int b;
+    // validate input?
     cin >> b;
 
     string c;
