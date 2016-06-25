@@ -9,8 +9,14 @@ cd library/googletest/build
 cmake ..
 make
 ```
-
-Compile:
+Build with cmake:
 ```
-g++ src/data-structures/*.cpp -I library/googletest/googletest/include library/googletest/build/googlemock/gtest/libgtest.a
+mkdir build
+cd build
+cmake ..
+make
+```
+And run:
+```
+src/data-structures/main
 ```
