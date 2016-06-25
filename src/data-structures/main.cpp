@@ -24,14 +24,14 @@ TEST(LinkedListTest, insertFirst) {
 }
 
 TEST(LinkedListTest, insertLast) {
-    LinkedList * linkedList = new LinkedList;
-    linkedList->insertLast(1);
+    LinkedList* linkedList = new LinkedList;
+    linkedList->insertFirst(1);
     linkedList->insertLast(2);
     ASSERT_EQ(linkedList->getLast(), 2);
 }
 
 TEST(StackTest, pushAndPop) {
-    Stack * stack = new Stack;
+    Stack* stack = new Stack;
     stack->push(1);
     stack->push(2);
     ASSERT_EQ(stack->pop(), 2);
@@ -39,7 +39,7 @@ TEST(StackTest, pushAndPop) {
 }
 
 TEST(QueueTest, pushAndPop) {
-    Queue * queue = new Queue;
+    Queue* queue = new Queue;
     queue->push(1);
     queue->push(2);
     ASSERT_EQ(queue->pop(), 1);

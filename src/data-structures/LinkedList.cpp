@@ -9,33 +9,37 @@
 #include "LinkedList.hpp"
 
 void LinkedList::insertFirst(int data) {
-    Node * node = new Node;
+    Node* node = new Node;
     node->data = data;
-    if (!this->head) {
+    if (this->size == 0) {
         this->head = node;
         this->tail = node;
     } else {
         node->next = this->head;
         this->head = node;
     }
+    this->size++;
 };
 
 void LinkedList::insertLast(int data) {
-    Node * node = new Node;
+    Node* node = new Node;
     node->data = data;
-    if (!this->tail) {
+    if (this->size == 0) {
         this->head = node;
         this->tail = node;
     } else {
         this->tail->next = node;
         this->tail = node;
     }
+    this->size++;
 };
 
 void LinkedList::removeFirst() {
-    Node * oldHead = this->head;
-    this->head = oldHead->next;
-    delete oldHead;
+    if (this->size > 0) {
+        Node * oldHead = this->head;
+        this->head = oldHead->next;
+        delete oldHead;
+    }
 }
 
 int LinkedList::getFirst() {

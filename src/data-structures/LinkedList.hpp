@@ -13,6 +13,7 @@
 #include "Node.hpp"
 
 class LinkedList {
+    unsigned int size = 0;
     Node * head;
     Node * tail;
 public:
