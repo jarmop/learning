@@ -2,6 +2,8 @@
 #include <vector>
 #include <list>
 
+#include "SortAlgorithm.h"
+
 using namespace std;
 
 void printData(vector<int> &data) {
@@ -9,58 +11,6 @@ void printData(vector<int> &data) {
         cout << data[i];
     }
     cout << endl;
-}
-
-/**
- * 10k: 1.2 s, 20k: ~4.38 s, 30k: ~9 s, 40k: ~17 s => O(4n)
- */
-void bubbleSort(vector<int> &data) {
-    int swapCount = 0;
-    for (int i = 1; i < data.size(); i++) {
-//        cout << "i: " << data[i] << ", i-1: " << data[i-1] << endl;
-        if (data[i] > data[i - 1]) {
-            int temp = data[i - 1];
-            data[i - 1] = data[i];
-            data[i] = temp;
-            swapCount++;
-        }
-    }
-    if (swapCount > 0) {
-//        cout << "Do it again!" << endl;
-        bubbleSort(data);
-    }
-}
-
-/**
- * 10k: 1.6 s, 20k: ~4.45 s, 30k: ~10 s, 40k: 25 s => O(5n)
- * Lost to bubble sort :(
- */
-void jarmoSort(vector<int> &data) {
-    list<int> sortedData;
-    sortedData.push_back(data[0]);
-    for (int i = 1; i < data.size(); i++) {
-        list<int>::const_iterator it = sortedData.begin();
-//        cout << "data[i]: " << data[i] << endl;
-        while (it != sortedData.end()) {
-            if (data[i] > *it) {
-//                cout << "Replace *it: " << *it << endl;
-                sortedData.insert(it, data[i]);
-                break;
-            }
-            it++;
-            if (it == sortedData.end()) {
-//                cout << "push back" << endl;
-                sortedData.push_back(data[i]);
-            }
-        }
-    }
-    list<int>::const_iterator it = sortedData.begin();
-//    cout << "dafuk" << endl;
-    for (int i = 0; i < data.size(); i++) {
-//        cout << "*it" << *it << endl;
-        data[i] = *it;
-        it++;
-    }
 }
 
 clock_t startTime;
@@ -76,7 +26,53 @@ void stopTimer() {
     cout << "Time passed: " << elapsed_secs << " s" << endl;
 }
 
+vector<int> data, originalData;
+void initializeTestData() {
+    if (originalData.size() == 0) {
+        for (int i = 0; i < 10000; i++) {
+            originalData.push_back(rand() % 10);
+        }
+    }
+    data = originalData;
+}
+
+
+void runTest(SortAlgorithm &algorithm) {
+    initializeTestData();
+    startTimer();
+    algorithm.sort(data);
+    stopTimer();
+}
+
 int main() {
+    char selectedAlgorithm;
+
+    cout << "Select algorithm (default is C):" << endl;
+    cout << "[C]ustom [B]ubble" << endl;
+    cin >> selectedAlgorithm;
+
+//    cout << selectedAlgorithm << endl;
+
+
+    SortAlgorithm* sortAlgorithm;
+    switch (selectedAlgorithm) {
+        case 'B':
+        case 'b':
+            cout << "Selected B" << endl;
+            sortAlgorithm = new BubbleSort;
+            break;
+        case 'C':
+        case 'c':
+        default :
+            cout << "Selected C" << endl;
+            sortAlgorithm = new CustomSort;
+    }
+
+    runTest(*sortAlgorithm);
+
+
+    return 0;
+
     // Bubble sort
     vector<int> data;
     for (int i = 0; i < 40000; i++) {
@@ -88,7 +84,7 @@ int main() {
 
     startTimer();
 
-    bubbleSort(data);
+//    bubbleSort(data);
 
     stopTimer();
 
@@ -98,7 +94,7 @@ int main() {
 
     startTimer();
 
-    jarmoSort(data2);
+//    jarmoSort(data2);
 
     stopTimer();
 

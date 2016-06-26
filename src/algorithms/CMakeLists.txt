@@ -1,1 +1,1 @@
-add_executable(sort sort.cpp)
+add_executable(sort sort.cpp SortAlgorithm.cpp SortAlgorithm.h)
