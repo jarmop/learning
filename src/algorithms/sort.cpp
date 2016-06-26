@@ -29,7 +29,8 @@ void stopTimer() {
 vector<int> data, originalData;
 void initializeTestData() {
     if (originalData.size() == 0) {
-        for (int i = 0; i < 10; i++) {
+//        srand(time(0));
+        for (int i = 0; i < 40000; i++) {
             originalData.push_back(rand() % 10);
         }
     }
@@ -39,10 +40,12 @@ void initializeTestData() {
 
 void runTest(SortAlgorithm &algorithm) {
     initializeTestData();
-    printData(data);
+//    printData(data);
     startTimer();
     algorithm.sort(data);
     stopTimer();
+    //    printData(data);
+
 }
 
 SortAlgorithm* sortAlgorithm;
@@ -73,11 +76,9 @@ void askForSortAlgorithm() {
 }
 
 int main() {
-//    askForSortAlgorithm();
-    sortAlgorithm = new MergeSort;
+    askForSortAlgorithm();
+//    sortAlgorithm = new MergeSort;
     runTest(*sortAlgorithm);
-
-    printData(data);
 
     return 0;
 }

@@ -50,10 +50,23 @@ void CustomSort::sort(vector<int> &data) {
     }
 }
 
+void printList(list<int> l) {
+    list<int>::iterator it = l.begin();
+    while (it != l.end()) {
+        cout << *it << ',';
+        it++;
+    }
+    cout << endl;
+}
+
 list<int> MergeSort::mergeParts(list<int> part1, list<int> part2) {
+//    cout << "-----" << endl << "part1: ";
+//    printList(part1);
+//    cout << " part2: ";
+//    printList(part2);
     list<int> part;
     while (!part1.empty() && !part2.empty()) {
-        if (part1.front() >= part.front()) {
+        if (part1.front() >= part2.front()) {
             part.push_back(part1.front());
             part1.pop_front();
         } else {
@@ -70,23 +83,49 @@ list<int> MergeSort::mergeParts(list<int> part1, list<int> part2) {
         part.push_back(part2.front());
         part2.pop_front();
     }
+//    printList(part);
     return part;
 }
 
+void printContainer(vector<list<int>> &container) {
+    vector<list<int>>::iterator itprkl = container.begin();
+    while (itprkl != container.end()) {
+        list<int> fu = *itprkl;
+        list<int>::iterator it2 = fu.begin();
+        while (it2 != fu.end()) {
+            cout << *it2 << ',';
+            it2++;
+        }
+        cout << " | ";
+        itprkl++;
+    }
+    cout << endl;
+}
+
 vector<list<int>> MergeSort::merge(vector<list<int>> &container) {
+
+//    printContainer(container);
+
     vector<list<int>> sortedContainer;
     for (int i = 0; i < container.size(); i+=2) {
         list<int> part = this->mergeParts(container[i], container[i + 1]);
         if (i + 2 == container.size() - 1) {
             // We are at the end of an uneven container. We must handle the leftover unit.
-            this->mergeParts(part, container.back());
+            part = this->mergeParts(part, container.back());
+            sortedContainer.push_back(part);
             break;
         }
         sortedContainer.push_back(part);
     }
+//    printContainer(sortedContainer);
+
+//    cout << "sortcont size: " << sortedContainer.size() << endl;
     if (sortedContainer.size() > 1) {
-        this->merge(sortedContainer);
+        sortedContainer = this->merge(sortedContainer);
     }
+
+//    cout << "sortcont: ";
+//    printContainer(sortedContainer);
 
     return sortedContainer;
 }
@@ -117,6 +156,7 @@ void MergeSort::sort(vector<int> &data) {
         }
         container.push_back(part);
     }
+//    printContainer(container);
     vector<list<int>> sortedContainer = this->merge(container);
 
     data.clear();

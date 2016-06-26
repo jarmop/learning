@@ -33,6 +33,10 @@ public:
     void sort(vector<int> &data);
 };
 
+/**
+ * 10k: 0.12 s, 20k: 0.30 s, 30k: 0.47 s, 40k: 0.58 s => O(n log n)
+ * Wins bubble sort easily if n is over few thousands
+ */
 class MergeSort : public SortAlgorithm {
     vector<list<int>> merge(vector<list<int>> &container);
     list<int> mergeParts(list<int> part1, list<int> part2);
