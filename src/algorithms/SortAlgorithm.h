@@ -33,5 +33,12 @@ public:
     void sort(vector<int> &data);
 };
 
+class MergeSort : public SortAlgorithm {
+    vector<list<int>> merge(vector<list<int>> &container);
+    list<int> mergeParts(list<int> part1, list<int> part2);
+public:
+    void sort(vector<int> &data);
+};
+
 
 #endif //DATA_STRUCTURES_AND_ALGORITHMS_SORTALGORITHM_H

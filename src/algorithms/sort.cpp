@@ -29,7 +29,7 @@ void stopTimer() {
 vector<int> data, originalData;
 void initializeTestData() {
     if (originalData.size() == 0) {
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 10; i++) {
             originalData.push_back(rand() % 10);
         }
     }
@@ -39,22 +39,21 @@ void initializeTestData() {
 
 void runTest(SortAlgorithm &algorithm) {
     initializeTestData();
+    printData(data);
     startTimer();
     algorithm.sort(data);
     stopTimer();
 }
 
-int main() {
+SortAlgorithm* sortAlgorithm;
+
+void askForSortAlgorithm() {
     char selectedAlgorithm;
 
     cout << "Select algorithm (default is C):" << endl;
-    cout << "[C]ustom [B]ubble" << endl;
+    cout << "[C]ustom [B]ubble [M]erge" << endl;
     cin >> selectedAlgorithm;
 
-//    cout << selectedAlgorithm << endl;
-
-
-    SortAlgorithm* sortAlgorithm;
     switch (selectedAlgorithm) {
         case 'B':
         case 'b':
@@ -63,49 +62,22 @@ int main() {
             break;
         case 'C':
         case 'c':
-        default :
             cout << "Selected C" << endl;
             sortAlgorithm = new CustomSort;
+        case 'M':
+        case 'm':
+        default :
+            cout << "Selected M" << endl;
+            sortAlgorithm = new MergeSort;
     }
+}
 
+int main() {
+//    askForSortAlgorithm();
+    sortAlgorithm = new MergeSort;
     runTest(*sortAlgorithm);
 
+    printData(data);
 
     return 0;
-
-    // Bubble sort
-    vector<int> data;
-    for (int i = 0; i < 40000; i++) {
-        data.push_back(rand() % 10);
-    }
-    vector<int> data2 = data;
-
-//    printData(data);
-
-    startTimer();
-
-//    bubbleSort(data);
-
-    stopTimer();
-
-//    printData(data);
-
-//    printData(data2);
-
-    startTimer();
-
-//    jarmoSort(data2);
-
-    stopTimer();
-
-//    printData(data2);
-
-    // testaa omalla algoritmilla meneekö nopeammin isolla joukolla
-
-
-    // Merge sort
-
-    // Quick sort
-
-    cout << "test";
 }
