@@ -6,6 +6,8 @@
 
 using namespace std;
 
+int minSize = 1000;
+int maxSize = 1000<<3;
 vector<int> getTestData(int size) {
     vector<int> data;
     srand(time(0));
@@ -22,7 +24,7 @@ static void BM_MergeSort(benchmark::State& state) {
         mergeSort->sort(data);
     }
 }
-BENCHMARK(BM_MergeSort)->Range(1000, 10000);
+BENCHMARK(BM_MergeSort)->Range(minSize, maxSize);
 
 static void BM_BubbleSort(benchmark::State& state) {
     vector<int> data = getTestData(state.range_x());
@@ -31,7 +33,7 @@ static void BM_BubbleSort(benchmark::State& state) {
         sortAlgorithm->sort(data);
     }
 }
-BENCHMARK(BM_BubbleSort)->Range(1000, 10000);
+BENCHMARK(BM_BubbleSort)->Range(minSize, maxSize);
 
 static void BM_CustomSort(benchmark::State& state) {
     vector<int> data = getTestData(state.range_x());
@@ -40,6 +42,6 @@ static void BM_CustomSort(benchmark::State& state) {
         sortAlgorithm->sort(data);
     }
 }
-BENCHMARK(BM_CustomSort)->Range(1000, 10000);
+BENCHMARK(BM_CustomSort)->Range(minSize, maxSize);
 
 BENCHMARK_MAIN();
