@@ -1,0 +1,1 @@
+add_executable(HeapSortTest HeapSortTest.cpp ${CMAKE_SOURCE_DIR}/src/algorithms/HeapSort.cpp)
