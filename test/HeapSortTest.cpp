@@ -13,7 +13,7 @@ void printData(vector<int> &data) {
 
 int main() {
     vector<int> data;
-    srand(time(0));
+//    srand(time(0));
     for (int i = 0; i < 10; i++) {
         data.push_back(rand() % 10);
     }
@@ -28,7 +28,9 @@ int main() {
     heapSort->sort(data2);
 
 
-
+    cout << "STL: ";
     printData(data);
+
+    cout << "Custom: ";
     printData(data2);
 }

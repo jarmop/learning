@@ -13,7 +13,8 @@ public:
     int iParent(int i);
     int iLeftChild(int i);
     int iRightChild(int i);
-    vector<int>::iterator getChild(vector<int>::iterator it);
+    vector<int>::iterator getGreatestChild(vector<int>::iterator parent, vector<int>::iterator begin, vector<int>::iterator end);
+    void siftDown(vector<int>::iterator current, vector<int>::iterator begin, vector<int>::iterator end);
     void recursiveMakeHeap(vector<int>::iterator current, vector<int>::iterator begin, vector<int>::iterator end);
     void makeHeap(vector<int>::iterator begin, vector<int>::iterator end);
     void sort(vector<int> &data);

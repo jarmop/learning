@@ -28,6 +28,37 @@ int HeapSort::iRightChild(int i) {
 //    }
 //}
 
+vector<int>::iterator HeapSort::getGreatestChild(vector<int>::iterator current, vector<int>::iterator begin, vector<int>::iterator end) {
+    int currentIndex = current - begin;
+    vector<int>::iterator leftChild = current + this->iLeftChild(currentIndex);
+    vector<int>::iterator rightChild = current + this->iRightChild(currentIndex);
+    vector<int>::iterator greatestChild = end;
+    if (leftChild < end && rightChild < end) {
+        greatestChild = *leftChild > *rightChild ? leftChild : rightChild;
+    } else if (leftChild < end) {
+        greatestChild = leftChild;
+    } else if (rightChild < end) {
+        greatestChild = rightChild;
+    }
+
+    return greatestChild;
+}
+
+void HeapSort::siftDown(vector<int>::iterator current, vector<int>::iterator begin, vector<int>::iterator end) {
+    vector<int>::iterator greatestChild = this->getGreatestChild(current, begin, end);
+
+    while (greatestChild < end && *greatestChild > *current) {
+        cout << "siftDown" << endl;
+        int tempCurrent = *current;
+        *current = *greatestChild;
+        *greatestChild = tempCurrent;
+
+        current = greatestChild;
+
+        greatestChild = this->getGreatestChild(current, begin, end);
+    }
+}
+
 void HeapSort::recursiveMakeHeap(vector<int>::iterator current, vector<int>::iterator begin, vector<int>::iterator end) {
     int currentIndex = current - begin;
     if (current < end) {
@@ -39,23 +70,7 @@ void HeapSort::recursiveMakeHeap(vector<int>::iterator current, vector<int>::ite
         this->recursiveMakeHeap(leftChild, begin, end);
         this->recursiveMakeHeap(rightChild, begin, end);
 
-        bool hasChildren = true;
-        vector<int>::iterator greatestChild;
-        if (leftChild < end && rightChild < end) {
-            greatestChild = *leftChild > *rightChild ? leftChild : rightChild;
-        } else if (leftChild < end) {
-            greatestChild = leftChild;
-        } else if (rightChild < end) {
-            greatestChild = rightChild;
-        } else {
-            hasChildren = false;
-        }
-
-        if (hasChildren && *greatestChild > *current) {
-            int tempCurrent = *current;
-            *current = *greatestChild;
-            *greatestChild = tempCurrent;
-        }
+        siftDown(current, begin, end);
 
         cout << "At index: " << current - begin << ", data: ";
         vector<int>::iterator it = begin;
