@@ -91,12 +91,7 @@ void HeapSort::makeHeap(vector<int>::iterator begin, vector<int>::iterator end) 
         this->recursiveMakeHeap(leftChild, begin, end);
         cout << "Right child:" << endl;
         this->recursiveMakeHeap(rightChild, begin, end);
-        vector<int>::iterator greatestChild = *leftChild > *rightChild ? leftChild : rightChild;
-        if (*greatestChild > *begin) {
-            int tempBegin = *begin;
-            *begin = *greatestChild;
-            *greatestChild = tempBegin;
-        }
+        siftDown(begin, begin, end);
     }
 }
 

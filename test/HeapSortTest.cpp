@@ -28,7 +28,7 @@ int main() {
     heapSort->sort(data2);
 
 
-    cout << "STL: ";
+    cout << "---STL: ";
     printData(data);
 
     cout << "Custom: ";
