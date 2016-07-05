@@ -48,7 +48,7 @@ void HeapSort::siftDown(vector<int>::iterator current, vector<int>::iterator beg
     vector<int>::iterator greatestChild = this->getGreatestChild(current, begin, end);
 
     while (greatestChild < end && *greatestChild > *current) {
-        cout << "siftDown" << endl;
+//        cout << "siftDown" << endl;
         int tempCurrent = *current;
         *current = *greatestChild;
         *greatestChild = tempCurrent;
@@ -72,13 +72,13 @@ void HeapSort::recursiveMakeHeap(vector<int>::iterator current, vector<int>::ite
 
         siftDown(current, begin, end);
 
-        cout << "At index: " << current - begin << ", data: ";
-        vector<int>::iterator it = begin;
-        while (it != end) {
-            cout << *it << ' ';
-            it++;
-        }
-        cout << endl;
+//        cout << "At index: " << current - begin << ", data: ";
+//        vector<int>::iterator it = begin;
+//        while (it != end) {
+//            cout << *it << ' ';
+//            it++;
+//        }
+//        cout << endl;
 
     }
 }
@@ -87,9 +87,9 @@ void HeapSort::makeHeap(vector<int>::iterator begin, vector<int>::iterator end) 
     if (begin != end) {
         vector<int>::iterator leftChild = begin + this->iLeftChild(0);
         vector<int>::iterator rightChild = begin + this->iRightChild(0);
-        cout << "Left child:" << endl;
+//        cout << "Left child:" << endl;
         this->recursiveMakeHeap(leftChild, begin, end);
-        cout << "Right child:" << endl;
+//        cout << "Right child:" << endl;
         this->recursiveMakeHeap(rightChild, begin, end);
         siftDown(begin, begin, end);
     }
