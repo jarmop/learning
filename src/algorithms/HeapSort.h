@@ -17,6 +17,7 @@ public:
     void siftDown(vector<int>::iterator current, vector<int>::iterator begin, vector<int>::iterator end);
     void recursiveMakeHeap(vector<int>::iterator current, vector<int>::iterator begin, vector<int>::iterator end);
     void makeHeap(vector<int>::iterator begin, vector<int>::iterator end);
+    void sortHeap(vector<int>::iterator begin, vector<int>::iterator end);
     void sort(vector<int> &data);
 };
 

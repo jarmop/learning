@@ -5,7 +5,7 @@
 using namespace std;
 
 void printData(vector<int> &data) {
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < data.size(); i++) {
         cout << data[i] << ' ';
     }
     cout << endl;
@@ -13,9 +13,10 @@ void printData(vector<int> &data) {
 
 int main() {
     vector<int> data;
+    int size  = 10;
 //    srand(time(0));
-    for (int i = 0; i < 10; i++) {
-        data.push_back(rand() % 10);
+    for (int i = 0; i < size; i++) {
+        data.push_back(rand() % size);
     }
     vector<int> data2 = data;
 
@@ -25,12 +26,27 @@ int main() {
     make_heap(data.begin(), data.end());
 
     HeapSort* heapSort = new HeapSort;
-    heapSort->sort(data2);
+    heapSort->makeHeap(data2.begin(), data2.end());
 
 
-    cout << "---STL: ";
+    cout << "STL" << endl;
+    cout << "Heap: ";
+    printData(data);
+    cout << "isheap: " << is_heap(data.begin(), data.end()) << endl;
+
+    sort_heap(data.begin(), data.end());
+    cout << "Sorted: ";
     printData(data);
 
-    cout << "Custom: ";
+    cout << "******" << endl;
+
+    cout << "Custom" << endl;
+    cout << "Heap: ";
     printData(data2);
+    cout << "isheap: " << is_heap(data2.begin(), data2.end()) << endl;
+
+    heapSort->sortHeap(data2.begin(), data2.end());
+    cout << "Sorted: ";
+    printData(data2);
+
 }

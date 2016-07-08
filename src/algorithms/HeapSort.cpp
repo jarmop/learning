@@ -17,17 +17,6 @@ int HeapSort::iRightChild(int i) {
     return i + 2;
 }
 
-//vector<int>::iterator HeapSort::getChild(vector<int>::iterator it) {
-//    vector<int>::iterator leftChild = this->getChild(it + this->iLeftChild(0));
-//    vector<int>::iterator rightChild = this->getChild(it + this->iRightChild(0));
-//    vector<int>::iterator greatestChild = *leftChild > *rightChild ? leftChild : rightChild;
-//    if (*greatestChild > *it) {
-//        int tempIt = *it;
-//        *it = *greatestChild;
-//        *greatestChild = tempIt;
-//    }
-//}
-
 vector<int>::iterator HeapSort::getGreatestChild(vector<int>::iterator current, vector<int>::iterator begin, vector<int>::iterator end) {
     int currentIndex = current - begin;
     vector<int>::iterator leftChild = current + this->iLeftChild(currentIndex);
@@ -95,6 +84,27 @@ void HeapSort::makeHeap(vector<int>::iterator begin, vector<int>::iterator end) 
     }
 }
 
+//void printHeap(vector<int>::iterator begin, vector<int>::iterator end) {
+//    vector<int>::iterator it = begin;
+//    while (it != end) {
+//        cout << *it << ' ';
+//        it++;
+//    }
+//    cout << endl;
+//}
+
+void HeapSort::sortHeap(vector<int>::iterator begin, vector<int>::iterator end) {
+    vector<int>::iterator originalEnd = end;
+    while (end > begin) {
+        int lastElem = *(end - 1);
+        *(end - 1) = *begin;
+        end--;
+        *begin = lastElem;
+        this->siftDown(begin, begin, end);
+    }
+}
+
 void HeapSort::sort(vector<int> &data) {
     this->makeHeap(data.begin(), data.end());
+    this->sortHeap(data.begin(), data.end());
 }
