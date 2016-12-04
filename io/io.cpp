@@ -5,7 +5,7 @@ using namespace std;
 int main() {
     string a;
     cin >> a;
-    cout << a << "\n";
+    cout << a << endl;
 
     int b;
     // validate input?
@@ -14,7 +14,7 @@ int main() {
     string c;
     cin >> c;
 
-    cout << b << c << "\n";
+    cout << b << c << endl;
 
     return 0;
 }
