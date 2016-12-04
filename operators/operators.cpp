@@ -32,8 +32,16 @@ Point Point::operator++(int)
 int main()
 {
     Point* perkele = new Point;
+//    Point perkele;
 
-    perkele++;
-    ++perkele;
+    (*perkele)++;
+    ++*perkele;
+
+//    int a = 0;
+//    int b = a++;
+//    cout << a << ' ' << b << endl; // 1 0
+//
+//    b = ++a;
+//    cout << a << ' ' << b << endl; // 2 2
 
 }

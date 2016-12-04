@@ -2,12 +2,19 @@
 
 using namespace std;
 
+
+
 int main() {
     /**
      * Fundamental datatypes
      */
 
     bool b; // 2 bits
+    b = true;
+    cout << &b << endl;
+    int g = b;
+    cout << g;
+
     decltype(nullptr) wat;
 
     // integers
