@@ -50,5 +50,3 @@ int main() {
 
     cout << isPalindrome(str3);
 }
-
-// Solve all leetcode c++ problems. submit to test. use googletestsuite to run etc.
