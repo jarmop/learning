@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 3.5)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 project (learning-cpp)
 add_executable(io io/io.cpp)
 add_executable(pointers pointers/pointers.cpp)
