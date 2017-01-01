@@ -15,7 +15,7 @@ Building an executable file out of c++ source code is a four-step process.
 Simple build with one source file:
 
 ```
-g++ test.cc
+g++ test.cpp
 ```
 
 This goes through each step and produces an executable file named a.out.
@@ -24,7 +24,7 @@ G++ can also be used to go through each step separately.
 
 1. Preprocess
 ```
-g++ -E test.cc
+g++ -E test.cpp
 ```
 
 Iostream code seems to be added to the source file at this point. Shouldn't it be a shared library?
