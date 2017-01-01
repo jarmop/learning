@@ -1,6 +1,7 @@
 # Build process
 
 Building an executable file out of c source code is a four-step process.
+
 1. Preprocess
   - copy included header files into the source code file
   - generate code by macros
