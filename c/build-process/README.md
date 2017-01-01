@@ -20,17 +20,20 @@ gcc test.c
 
 This goes through each step and produces an executable file named a.out.
 
-G++ can also be used to go through each step separately.
+Flags can be set to stop build process after certain step
 
-1. Preprocess
+Stop after preprocess (prints to standard out)
 ```
 gcc -E test.c
 ```
 
-Iostream code seems to be added to the source file at this point. Shouldn't it be a shared library?
-
-2. Compile
+Stop after compiling to assembly code (creates test.s)
+```
+gcc -S test.c
 ```
 
+Stop after assembling (creates test.o)
+```
+gcc -c test.c
 ```
 
