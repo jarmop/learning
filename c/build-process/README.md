@@ -38,3 +38,30 @@ Stop after assembling (creates test.o)
 gcc -c test.c
 ```
 
+## Header files
+
+If code in one source file calls a function from another source file, the function must be declared in the first source file before it is called. The actual function definition can be after the call.
+
+In most cases the declaration is placed in a separate header file which is then included where ever the declaration is needed.
+
+User defined header files are surrounded in quotes.
+```c
+#include "header.h"
+```
+This tells compiler to look in the same directory where the source code is.
+
+System header files are surrounded with arrows.
+```c
+#include <stdio.h>
+```
+This tells compiler to look in the standard list of system directories.
+
+When compiling, both source files must be included in the command:
+```
+gcc test.c test2.c
+```
+
+Header file only has to be somewhere where compiler can find it. As default compiler searches from the directory where the source file is. Additional directories can be added with -I flag.
+```
+gcc -I lib test.c test2.c
+```

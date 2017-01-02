@@ -1,5 +1,10 @@
-#include <stdio.h>
+//#include <stdio.h>
+
+//#include "header.h"
 
 int main() {
-    printf("perg\n");  
+	//int i = testi();
+
+    //printf("%i\n", i);  
 }
+
