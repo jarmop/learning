@@ -59,3 +59,5 @@ as exit-mac-64-gcc.s -o exit-mac-64-gcc.o
 gcc exit-mac-64-gcc.o
 ./a.out
 ```
+
+"As" is a generic command for the default assembler on the given machine [https://en.wikipedia.org/wiki/As_(Unix)]. On my Mac it is Apple LLVM version 8.0.0. LLVM Assembler should be "extremely compatible with GAS" [http://clang.llvm.org/compatibility.html#inline-asm].
