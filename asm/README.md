@@ -4,7 +4,7 @@ Assembly code differs based on various things, eg. OS, bit-depth of the processo
 
 To run pure assembly program (ie. flat binary) you need to run it in BIOS/UEFI. 
 
-When running assembly programs in an OS the binary file needs to be in a specific executable file format that the OS can recognize. Furthermore OS expects to find certain keywords in the file, and each assembly program will have atleast one OS implemented syscall (for exiting).
+When running assembly programs in an OS the binary file needs to be in a specific executable file format that the OS can recognize. Furthermore OS expects to find certain keywords in the file, and each assembly program will have at least one OS implemented syscall (for exiting).
 
 Some popular assemblers: gas, nasm, yasm. Gas is part of gcc and yasm is a rewrite of nasm. Default gcc uses the executable file format appropriate for the machine where gcc is installed, eg. elf64 for linux. For yasm executable file format can be specified when compiling.
 
