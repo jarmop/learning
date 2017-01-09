@@ -24,7 +24,7 @@ cat boot.bin | xxd
 
 Create disk image:
 ```sh
-dd if=boot of=boot.img
+dd if=boot.bin of=boot.img
 ```
 
 Now you can insert boot.img into a Floppy device of a Virtual Machine and see that the machine finds our boot sector and hangs (as told to) instead of giving FATAL when boot sector is missing. 
