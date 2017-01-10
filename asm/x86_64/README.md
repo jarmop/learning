@@ -10,7 +10,7 @@ hang:
     times 512-($-$$) db 0
 ```
 
-The times prefix causes instrucion to be assembled multiple times. "$" evaluates to the beginning of the line and "$$" evaluates to the beginning of the current section; so you can tell how far into the section you are by using ($-$$). So "times 512-($-$$) db 0" tells yasm to fill up zeros up to 512th byte. [http://www.tortall.net/projects/yasm/manual/html/manual.html]
+The times prefix causes instruction to be assembled multiple times. "$" evaluates to the beginning of the line and "$$" evaluates to the beginning of the current section; so you can tell how far into the section you are by using ($-$$). So "times 512-($-$$) db 0" tells yasm to fill up zeros up to 512th byte. [http://www.tortall.net/projects/yasm/manual/html/manual.html]
 
 (Without zeros BIOS/UEFI won't recognize the boot sector. Is this behaviour documented somewhere?)
 
