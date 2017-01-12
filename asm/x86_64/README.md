@@ -41,3 +41,19 @@ dd if=boot.bin of=boot.img
 Now you can insert boot.img into a Floppy device of a Virtual Machine and see that the machine finds our boot sector and hangs (as told to) instead of giving FATAL when boot sector is missing. 
 
 N.B. To use optical drive you need to create ISO file which requires some special formatting to be recognized by machines. 
+
+## Vim shortcut for convenience
+To enable running whole build process and starting virtual machine directly from vim editor,  do the following:
+
+Enable local .vimrc by adding following lines to  ~/.vimrc:
+```sh
+set exrc
+set secure
+```
+
+Now add following line to .vimrc in the directory where boot.asm resides:
+```sh
+map <C-R> :!./run.sh
+```
+
+Now you can run the script by pressing C-R + Enter.
