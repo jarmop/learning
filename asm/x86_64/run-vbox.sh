@@ -13,5 +13,4 @@ file_basename="${filename_parts[0]}"
 
 yasm -f bin $filename -o "$file_basename".bin
 dd if="$file_basename".bin of="$file_basename".img
-
-./run-qemu.sh "$file_basename".img
+VBoxManage startvm boot-test

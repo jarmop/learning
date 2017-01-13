@@ -1,1 +1,1 @@
-map <C-R> :!./run.sh
+map <C-R> :!./run.sh %
