@@ -4,9 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "browser-sync start --server 'app' --files 'app'"
+    "start": "browser-sync start --server --files '*'"
   },
   "dependencies": {
+    "babel": "^6.23.0",
     "browser-sync": "^2.18.8",
     "react": "^15.5.3",
     "react-dom": "^15.5.3"
