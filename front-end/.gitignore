@@ -1,4 +1,4 @@
 dist
 .babelrc
-__tests__
+__snapshots__
 package.json
