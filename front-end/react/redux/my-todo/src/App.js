@@ -25,18 +25,10 @@ class App extends Component {
     }
 
     render() {
-        let todoList = this.state.todos.map((todo, index) =>
-            <Todo key={index} index={index} text={todo} onRemove={this.removeTodo.bind(this)}/>
-        );
-
         return (
             <div>
                 <TodoForm onSubmit={this.addTodo.bind(this)}/>
-                <div>
-                    <ul>
-                        {todoList}
-                    </ul>
-                </div>
+                <TodoList todos={this.state.todos} onRemoveTodo={this.removeTodo.bind(this)}/>
             </div>
         );
     }
@@ -69,9 +61,23 @@ class TodoForm extends Component {
     }
 }
 
+const TodoList = (props) => {
+    return (
+        <ul>
+            {props.todos.map((todo, index) =>
+                <Todo key={index} index={index} text={todo} onRemove={props.onRemoveTodo.bind(this)}/>
+            )}
+        </ul>
+    );
+};
+
 const Todo = (props) => {
     return (
-        <li>{props.text} <button onClick={() => props.onRemove(props.index)}>X</button></li>
+        <li>
+            {props.text}
+            {' '}
+            <button onClick={() => props.onRemove(props.index)}>X</button>
+        </li>
     );
 };
 
