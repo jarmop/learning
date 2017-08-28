@@ -1,46 +1,92 @@
-class Clock extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {date: new Date()};
+let nextTodoId = 2;
+const addTodo = (text) => ({
+    type: 'ADD_TODO',
+    id: nextTodoId++,
+    text
+});
+
+const removeTodo = (id) => ({
+    type: 'REMOVE_TODO',
+    id
+});
+
+const myReducer = (state = [], action) => {
+    switch (action.type) {
+        case 'ADD_TODO':
+            return {
+                todos: [
+                    ...state.todos,
+                    {
+                        id: action.id,
+                        text: action.text
+                    }
+                ]
+            };
+        case 'REMOVE_TODO':
+            return {
+                todos: state.todos.filter(todo => todo.id !== action.id)
+            };
+        default:
+            return state
     }
+};
 
-    componentDidMount() {
-        this.timerID = setInterval(
-            () => this.tick(),
-            1000
-        );
+let App = ({dispatch, todos}) => {
+    let input;
 
-        $(document).ready(() => {
-            // $('#ad').html('<script>console.log("test1");</script>');
-            // $('#ad').html('<script>document.write("egerh");</script>');
-        });
+    return (
+        <div>
+            <form onSubmit={e => {
+                e.preventDefault();
+                if (!input.value.trim()) {
+                    return
+                }
+                dispatch(addTodo(input.value));
+                input.value = ''
+            }}>
+                <input ref={node => {
+                    input = node
+                }}/>
+                <button type="submit">
+                    Add Todo
+                </button>
+            </form>
+            <ul>
+                {todos.map((todo) =>
+                    <li key={todo.id}>
+                        {todo.text}
+                        <button onClick={() => dispatch(removeTodo(todo.id))}>X</button>
+                    </li>
+                )}
+            </ul>
+        </div>
+    )
+};
 
-        // postscribe('#ad', '<script>console.log("test1");</script>');
-        postscribe('#ad', '<script>document.write("egerh");</script>');
-    }
+const mapStateToProps = (state) => ({
+    todos: state.todos
+});
 
-    componentWillUnmount() {
-        clearInterval(this.timerID);
-    }
+App = ReactRedux.connect(mapStateToProps)(App);
 
-    tick() {
-        this.setState({
-            date: new Date()
-        });
-    }
+let store = Redux.createStore(myReducer, {
+    todos: [
+        {
+            id: 0,
+            text: 'first todo'
+        },
+        {
+            id: 1,
+            text: 'second todo'
+        }
+    ]
+});
 
-    render() {
-        return (
-            <div>
-                <h1>Hello, world!</h1>
-                <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
-                <div id="ad">test</div>
-            </div>
-        );
-    }
-}
+const Provider = ReactRedux.createProvider();
 
 ReactDOM.render(
-    <Clock />,
+    <Provider store={store}>
+        <App />
+    </Provider>,
     document.getElementById('root')
 );
