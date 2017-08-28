@@ -6,8 +6,14 @@ import { Provider } from 'react-redux'
 import { createStore } from 'redux'
 
 let store = createStore(myReducer, {todos: [
-    'first todo',
-    'second todo',
+    {
+        id: 0,
+        text: 'first todo'
+    },
+    {
+        id: 1,
+        text: 'second todo'
+    }
 ]});
 
 ReactDOM.render(
