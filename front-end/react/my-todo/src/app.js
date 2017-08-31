@@ -1,3 +1,6 @@
+const {connect, createProvider} = ReactRedux;
+const {createStore} = Redux;
+
 let nextTodoId = 2;
 const addTodo = (text) => ({
     type: 'ADD_TODO',
@@ -67,9 +70,9 @@ const mapStateToProps = (state) => ({
     todos: state.todos
 });
 
-App = ReactRedux.connect(mapStateToProps)(App);
+App = connect(mapStateToProps)(App);
 
-let store = Redux.createStore(myReducer, {
+let store = createStore(myReducer, {
     todos: [
         {
             id: 0,
@@ -82,7 +85,7 @@ let store = Redux.createStore(myReducer, {
     ]
 });
 
-const Provider = ReactRedux.createProvider();
+const Provider = createProvider();
 
 ReactDOM.render(
     <Provider store={store}>
