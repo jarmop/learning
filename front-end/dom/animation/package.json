@@ -1,0 +1,12 @@
+{
+  "name": "animation",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "browser-sync": "^2.18.13"
+  },
+  "scripts": {
+    "start": "browser-sync start --server --files '*.js,*.html'"
+  }
+}
