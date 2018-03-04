@@ -1,6 +1,8 @@
 # Hello World app with docker
 
-https://docs.docker.com/get-started/part2/
+https://docs.docker.com/get-started
+
+## Part 2
 
 Build and run
 ```
@@ -28,7 +30,7 @@ Run from repository (pulls if necessary)
 docker run -p 4000:80 jarmop/get-started:part2
 ```
 
-## Used commands and some related ones
+### Used commands and some related ones
 ```
 docker build -t friendlyhello .  # Create image using this directory's Dockerfile
 docker run -p 4000:80 friendlyhello  # Run "friendlyname" mapping port 4000 to 80
@@ -46,4 +48,31 @@ docker login             # Log in this CLI session using your Docker credentials
 docker tag <image> username/repository:tag  # Tag <image> for upload to registry
 docker push username/repository:tag            # Upload tagged image to registry
 docker run username/repository:tag                   # Run image from a registry
+```
+
+## Part 3
+```
+docker swarm init
+docker stack deploy -c docker-compose.yml getstartedlab
+docker service ls
+docker service ps getstartedlab_web
+docker container ls
+```
+
+Take down the app and the swarm
+```
+docker stack rm getstartedlab
+docker swarm leave --force
+```
+
+### Used commands and some related ones
+```
+docker stack ls                                            # List stacks or apps
+docker stack deploy -c <composefile> <appname>  # Run the specified Compose file
+docker service ls                 # List running services associated with an app
+docker service ps <service>                  # List tasks associated with an app
+docker inspect <task or container>                   # Inspect task or container
+docker container ls -q                                      # List container IDs
+docker stack rm <appname>                             # Tear down an application
+docker swarm leave --force      # Take down a single node swarm from the manager`
 ```
