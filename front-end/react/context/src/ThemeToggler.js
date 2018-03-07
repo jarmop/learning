@@ -1,11 +1,15 @@
 import React from "react";
 
-type Theme = 'red' | 'green';
 // Pass a default theme to ensure type correctness
-export const ThemeContext: Context<Theme> = React.createContext('red');
+export const ThemeContext = React.createContext();
 
 class ThemeToggler extends React.Component {
-    state = {theme: 'red'};
+    state = {
+        theme: {
+            color: 'red',
+            name: 'ruby',
+        }
+    };
 
     render() {
         return (
@@ -15,7 +19,10 @@ class ThemeToggler extends React.Component {
                 <button
                     onClick={() =>
                         this.setState(state => ({
-                            theme: state.theme === 'red' ? 'green' : 'red',
+                            theme: {
+                                color: state.theme.color === 'red' ? 'green' : 'red',
+                                name: state.theme.name === 'ruby' ? 'emerald' : 'ruby',
+                            }
                         }))
                     }>
                     Toggle theme

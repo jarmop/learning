@@ -6,11 +6,20 @@ const Title = ({children}) => (
     // props namespace.
     <ThemeContext.Consumer>
         {theme => (
-            <h1 style={{color: theme === 'red' ? '#f00' : '#0f0'}}>
+            <h1 style={{color: theme.color === 'red' ? '#f00' : '#0f0'}}>
                 {children}
+                <Postfix/>
             </h1>
         )}
     </ThemeContext.Consumer>
 );
 
 export default Title;
+
+const Postfix = () => (
+    <ThemeContext.Consumer>
+        {theme => (
+            <span>-{theme.name}</span>
+        )}
+    </ThemeContext.Consumer>
+);
