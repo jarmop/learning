@@ -15,7 +15,17 @@ class ThemeToggler extends React.Component {
         return (
             // Pass the current context value to the Provider's `value` prop.
             // Changes are detected using strict comparison (Object.is)
-            <ThemeContext.Provider value={this.state.theme}>
+            <ThemeContext.Provider value={{
+                    theme: this.state.theme,
+                    actions: {
+                        setColor: color => this.setState({
+                            theme: {
+                                ...this.state.theme,
+                                color: color,
+                            }
+                        })
+                    }
+            }}>
                 <button
                     onClick={() =>
                         this.setState(state => ({
@@ -27,6 +37,7 @@ class ThemeToggler extends React.Component {
                     }>
                     Toggle theme
                 </button>
+                <SetRed/>
                 {this.props.children}
             </ThemeContext.Provider>
         );
@@ -34,3 +45,16 @@ class ThemeToggler extends React.Component {
 }
 
 export default ThemeToggler;
+
+const SetRed = () => (
+    <ThemeContext.Consumer>
+        {({actions}) => (
+            <button
+                onClick={() =>
+                    actions.setColor('red')
+                }>
+                Set red
+            </button>
+        )}
+    </ThemeContext.Consumer>
+);
