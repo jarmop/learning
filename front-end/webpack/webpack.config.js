@@ -1,4 +1,4 @@
-var CustomPlugin = require('./custom-plugin');
+let CustomPlugin = require('./custom-plugin');
 
 module.exports = {
   mode: 'production',
@@ -9,4 +9,13 @@ module.exports = {
   plugins: [
       new CustomPlugin({customOption: 'custom option value'})
   ],
+  // loaders
+  module: {
+    rules: [
+      {
+        test: /\.txt$/,
+        use: './custom-loader'
+      }
+    ]
+  }
 };
