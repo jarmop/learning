@@ -1,6 +1,12 @@
+var CustomPlugin = require('./custom-plugin');
+
 module.exports = {
-    entry: './app.js',
-    output: {
-        filename: 'bundle.js'
-    }
-}
+  mode: 'production',
+  entry: './app.js',
+  output: {
+    filename: 'bundle.js'
+  },
+  plugins: [
+      new CustomPlugin({customOption: 'custom option value'})
+  ],
+};
