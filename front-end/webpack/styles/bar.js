@@ -1,4 +1,4 @@
 export default function bar() {
-  let a = 'rtwtr';
+  let a = 'grerllle';
   console.log(a);
 }
