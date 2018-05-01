@@ -1,4 +1,4 @@
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   devtool: false, // Disable source maps to make output files easier to explore
@@ -7,4 +7,17 @@ module.exports = {
       template: 'index.html',
     }),
   ],
+  devServer: {
+    open: true, // Open the page in browser
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        // include,
+        // exclude,
+        use: ["style-loader", "css-loader"],
+      },
+    ],
+  },
 };
