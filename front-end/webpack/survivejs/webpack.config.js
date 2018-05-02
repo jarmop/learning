@@ -1,23 +1,38 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const merge = require("webpack-merge");
 
-module.exports = {
-  devtool: false, // Disable source maps to make output files easier to explore
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: 'index.html',
-    }),
-  ],
-  devServer: {
-    open: true, // Open the page in browser
-  },
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        // include,
-        // exclude,
-        use: ["style-loader", "css-loader"],
-      },
+const parts = require("./webpack.parts");
+
+const commonConfig = merge([
+  {
+    devtool: false,
+    plugins: [
+      new HtmlWebpackPlugin({
+        title: "Webpack demo",
+      }),
     ],
   },
+]);
+
+const productionConfig = merge([
+  parts.extractCSS({
+    use: 'css-loader',
+  })
+]);
+
+const developmentConfig = merge([
+  parts.devServer({
+    // Customize host/port here if needed
+    host: process.env.HOST,
+    port: process.env.PORT,
+  }),
+  parts.loadCSS(),
+]);
+
+module.exports = mode => {
+  if (mode === "production") {
+    return merge(commonConfig, productionConfig, {mode});
+  }
+
+  return merge(commonConfig, developmentConfig, {mode});
 };
