@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML elements</title>
+</head>
+<body>
+<article>
+    <header>
+        <h1 itemprop="headline">Main title</h1>
+        <h2>Subtitle</h2>
+        <p>Some header description</p>
+        <p><time itemprop="datePublished" datetime="2009-10-09">3 days ago</time></p>
+        <link itemprop="url" href="?comments=0">
+    </header>
+    <p>First paragraph of the actual article (content).</p>
+    <section>
+        <h1>Comments</h1>
+        <article itemprop="comment">
+            <link itemprop="url" href="#c1">
+            <footer>
+                <p>Information about the commentator. "The footer element can appear at the start of its section when
+                    appropriate, such as this case. (Using header in this case wouldn't be wrong either; it's mostly a
+                    matter of authoring preference.)"</p>
+                <p><time itemprop="commentTime" datetime="2009-10-10">5 minutes ago</time></p>
+            </footer>
+            <p>Comment content.</p>
+        </article>
+    </section>
+</article>
+</body>
+</html>
