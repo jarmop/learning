@@ -1,12 +1,20 @@
-const createElement = (content) => {
-  return content
+const createElement = (type, props, children) => {
+  if (typeof type === 'function') {
+    return type(props);
+  }
+
+  return '<' + type + '>' + children + '</' + type + '>';
 };
 
-const render = (element, container) => {
-  container.innerHTML = element;
+const App = (props) => {
+  return createElement('p', props, 'dynamic');
+};
+
+const render = (content, container) => {
+  container.innerHTML = content;
 };
 
 render(
-    createElement('dynamic'),
+    createElement(App),
     document.querySelector('#root'),
 );
