@@ -7,7 +7,7 @@ const createElement = (type, props, children) => {
     children = children.join('');
   }
 
-  return '<' + type + '>' + children + '</' + type + '>';
+  return `<${type}>${children}</${type}>`;
 };
 
 const DateTime = (props) => {
