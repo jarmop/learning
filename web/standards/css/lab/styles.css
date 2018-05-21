@@ -1,13 +1,14 @@
 .grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-gap: 10px;
+    grid-gap: 20px;
     grid-auto-rows: minmax(100px, auto);
 }
 .grid div {
-    border: 1px solid black;
-    background-color: green;
-    opacity: 0.5;
+    border: 2px solid rgba(76, 175, 80, 0.4);
+    background-color: rgba(76, 175, 80, 0.5);
+    padding: 10px;
+    border-radius: 5px;
 }
 .one {
     grid-column: 1 / 3;
