@@ -1,0 +1,7 @@
+.reference-row {
+    display: flex;
+}
+
+.reference-item {
+    padding: 20px;
+}
