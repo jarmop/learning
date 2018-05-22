@@ -2,17 +2,17 @@ import React, { Component } from 'react';
 
 class Grid extends Component {
   render() {
-    let {gridStyle, cellStyle} = this.props.styles;
+    let {styles} = this.props;
 
     let cells = [];
     for (let i = 0; i < 9; i++) {
       cells.push(
-          <div key={i} className="cell" style={cellStyle}>{i}</div>
+          <div key={i} style={styles.cell}>{i}</div>
       );
     }
 
     return (
-        <div className="grid" style={gridStyle}>
+        <div style={styles.grid}>
           {cells}
         </div>
     );

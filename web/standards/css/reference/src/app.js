@@ -4,13 +4,13 @@ import Grid from './grid';
 import Code from './code';
 
 const styles = {
-  gridStyle: {
+  grid: {
     display: 'grid',
     gridTemplateRows: 'repeat(3, 100px)',
     gridTemplateColumns: 'repeat(3, 100px)',
     gridGap: '10px',
   },
-  cellStyle: {
+  cell: {
     backgroundColor: 'grey',
     display: 'flex',
     justifyContent: 'center',
@@ -26,7 +26,7 @@ class App extends Component {
     return (
         <div className="reference-row">
           <div className="reference-item">
-            <Code/>
+            <Code cssObject={styles}/>
           </div>
           <div className="reference-item">
             <Grid styles={styles}/>
