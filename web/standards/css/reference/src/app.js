@@ -10,15 +10,6 @@ const styles = {
     gridTemplateColumns: 'repeat(3, 100px)',
     gridGap: '10px',
   },
-  cell: {
-    backgroundColor: 'grey',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    fontSize: '30px',
-    cursor: 'pointer',
-    color: 'white',
-  },
 };
 
 class App extends Component {
