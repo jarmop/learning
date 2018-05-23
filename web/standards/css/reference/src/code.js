@@ -1,19 +1,19 @@
 import React, {Component} from 'react';
-import 'prismjs/themes/prism.css';
-import Prism from 'prismjs';
 
-function camelCaseToDash (str) {
-  return str.replace(/([a-zA-Z])(?=[A-Z])/g, '$1-').toLowerCase()
+import './code.css';
+
+function camelCaseToDash(str) {
+  return str.replace(/([a-zA-Z])(?=[A-Z])/g, '$1-').toLowerCase();
 }
 
 function cssObjectToString(cssObject) {
   let cssString = '';
   for (let selector in cssObject) {
-    cssString += '.' + selector + ' {\n';
+    cssString += '<span class="selector">.' + selector + '</span> {\n';
     let block = cssObject[selector];
     for (let property in block) {
       let value = block[property];
-      cssString += '  ' + camelCaseToDash(property) + ': ' + value + ';\n';
+      cssString += '  <span class="property">' + camelCaseToDash(property) + '</span>: <span class="value">' + value + '</span>;\n';
     }
     cssString += '}\n';
   }
@@ -28,17 +28,8 @@ class Code extends Component {
 
     return (
         <pre>
-          <code
-              className="code"
-              dangerouslySetInnerHTML={{
-                __html: Prism.highlight(
-                    cssString,
-                    Prism.languages.css,
-                    'css'
-                )
-              }}
-          >
-        </code>
+          <code dangerouslySetInnerHTML={{__html: cssString}}>
+          </code>
         </pre>
     );
   }

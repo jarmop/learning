@@ -19,9 +19,9 @@ const styles2 = {
     gridTemplateColumns: 'repeat(3, 60px)',
     gridGap: '10px',
   },
-  b: {
+  a: {
     gridColumn: 2,
-    gridRow: 2,
+    gridRow: 3,
   }
 };
 
@@ -65,9 +65,9 @@ class App extends Component {
             </div>
             <div className="reference-item">
               <div className="grid" style={styles2.grid}>
-                <div className="cell">a</div>
-                <div className="cell" style={styles2.b}>b</div>
-                <div className="cell">c</div>
+                <div className="cell" style={styles2.a}>a</div>
+                <div className="cell"></div>
+                <div className="cell"></div>
               </div>
             </div>
           </div>
