@@ -6,6 +6,11 @@
     padding: 20px;
 }
 
+.grid {
+    /*border: 1px solid black;*/
+    /*background-color: black;*/
+}
+
 .cell {
     border: 1px solid black;
     display: flex;

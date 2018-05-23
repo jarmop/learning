@@ -14,7 +14,7 @@ class Grid extends Component {
     }
 
     return (
-        <div style={styles.grid}>
+        <div className="grid" style={styles.grid}>
           {cells}
         </div>
     );
