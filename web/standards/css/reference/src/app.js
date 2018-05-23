@@ -49,39 +49,31 @@ const styles3 = {
 class App extends Component {
   render() {
     return (
-        <div>
-          <div className="reference-row">
-            <div className="reference-item">
-              <Code cssObject={styles}/>
-            </div>
-            <div className="reference-item">
-              <Grid styles={styles}/>
+        <div className="reference">
+          <div className="reference-item">
+            <Code cssObject={styles}/>
+          </div>
+          <div className="reference-item">
+            <Grid styles={styles}/>
+          </div>
+          <div className="reference-item">
+            <Code cssObject={styles2}/>
+          </div>
+          <div className="reference-item">
+            <div className="grid" style={styles2.grid}>
+              <div className="cell" style={styles2.a}>a</div>
+              <div className="cell"></div>
+              <div className="cell"></div>
             </div>
           </div>
-          <hr/>
-          <div className="reference-row">
-            <div className="reference-item">
-              <Code cssObject={styles2}/>
-            </div>
-            <div className="reference-item">
-              <div className="grid" style={styles2.grid}>
-                <div className="cell" style={styles2.a}>a</div>
-                <div className="cell"></div>
-                <div className="cell"></div>
-              </div>
-            </div>
+          <div className="reference-item">
+            <Code cssObject={styles3}/>
           </div>
-          <hr/>
-          <div className="reference-row">
-            <div className="reference-item">
-              <Code cssObject={styles3}/>
-            </div>
-            <div className="reference-item">
-              <div className="grid" style={styles3.grid}>
-                <div className="cell" style={styles3.a}>a</div>
-                <div className="cell" style={styles3.b}>b</div>
-                <div className="cell" style={styles3.c}>c</div>
-              </div>
+          <div className="reference-item">
+            <div className="grid" style={styles3.grid}>
+              <div className="cell" style={styles3.a}>a</div>
+              <div className="cell" style={styles3.b}>b</div>
+              <div className="cell" style={styles3.c}>c</div>
             </div>
           </div>
         </div>

@@ -1,16 +1,16 @@
-.reference-row {
-    display: flex;
+.reference {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-gap: 3rem 0;
+    margin: 1rem;
 }
-
 .reference-item {
-    padding: 20px;
+    justify-self: baseline;
 }
-
 .grid {
     border: 1px solid black;
     padding: 10px;
 }
-
 .cell {
     border: 1px solid black;
     display: flex;
