@@ -9,7 +9,7 @@ class Grid extends Component {
     let cells = [];
     for (let i = 0; i < 9; i++) {
       cells.push(
-          <div key={i} className="cell" style={styles.cell}>{i}</div>
+          <div key={i} className="cell" style={styles.cell}></div>
       );
     }
 
