@@ -1,36 +1,38 @@
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 
 import './code.css';
 
 function camelCaseToDash(str) {
+  str += ''; // make sure str is a string
   return str.replace(/([a-zA-Z])(?=[A-Z])/g, '$1-').toLowerCase();
-}
-
-function cssObjectToString(cssObject) {
-  let cssString = '';
-  for (let selector in cssObject) {
-    cssString += '<span class="selector">.' + selector + '</span> {\n';
-    let block = cssObject[selector];
-    for (let property in block) {
-      let value = block[property];
-      cssString += '  <span class="property">' + camelCaseToDash(property) + '</span>: <span class="value">' + value + '</span>;\n';
-    }
-    cssString += '}\n';
-  }
-
-  return cssString;
 }
 
 class Code extends Component {
   render() {
     let {cssObject} = this.props;
-    let cssString = cssObjectToString(cssObject);
 
     return (
-        <pre>
-          <code dangerouslySetInnerHTML={{__html: cssString}}>
-          </code>
-        </pre>
+        <div className="code-block">
+          {Object.keys(cssObject).map(selector =>
+              <Fragment key={selector}>
+                <span className="selector">{'.' + camelCaseToDash(selector)}</span>
+                {' {'}
+                <br/>
+                {Object.keys(cssObject[selector]).map(property =>
+                    <Fragment key={property}>
+                      &nbsp;&nbsp;
+                      <span className="property">{camelCaseToDash(property)}</span>
+                      {': '}
+                      <span className="value">{camelCaseToDash(cssObject[selector][property])}</span>
+                      {';'}
+                      <br/>
+                    </Fragment>
+                )}
+                {'}'}
+                <br/>
+              </Fragment>
+          )}
+        </div>
     );
   }
 }
