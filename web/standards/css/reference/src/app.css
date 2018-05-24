@@ -1,19 +1,18 @@
 .reference {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-gap: 3rem 0;
-    margin: 1rem;
+  display: grid;
+  grid-template-columns: minmax(200px, auto) minmax(140px, 220px);
+  grid-gap: 2rem 0;
 }
-.reference-item {
-    justify-self: baseline;
+.result {
+  height: 160px;
+  border: 5px solid black;
 }
 .grid {
-    border: 1px solid black;
-    padding: 10px;
+  /*margin: 10px;*/
 }
 .cell {
-    border: 1px solid black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  border: 1px dashed black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

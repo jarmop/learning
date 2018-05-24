@@ -53,13 +53,13 @@ class App extends Component {
           <div className="reference-item">
             <Code cssObject={styles}/>
           </div>
-          <div className="reference-item">
+          <div className="result">
             <Grid styles={styles}/>
           </div>
           <div className="reference-item">
             <Code cssObject={styles2}/>
           </div>
-          <div className="reference-item">
+          <div className="result">
             <div className="grid" style={styles2.grid}>
               <div className="cell" style={styles2.a}>a</div>
               <div className="cell"></div>
@@ -69,7 +69,7 @@ class App extends Component {
           <div className="reference-item">
             <Code cssObject={styles3}/>
           </div>
-          <div className="reference-item">
+          <div className="result">
             <div className="grid" style={styles3.grid}>
               <div className="cell" style={styles3.a}>a</div>
               <div className="cell" style={styles3.b}>b</div>

@@ -7,7 +7,7 @@ class Grid extends Component {
     let {styles} = this.props;
 
     let cells = [];
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < 5; i++) {
       cells.push(
           <div key={i} className="cell" style={styles.cell}></div>
       );
