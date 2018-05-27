@@ -1,13 +1,14 @@
 .code-block {
-    font-family: monospace;
-    font-size: 12px;
+  font-family: monospace;
+  font-size: 12px;
+  /*background-color: lavender;*/
 }
 .selector {
-    color: darkblue;
+  color: darkblue;
 }
 .property {
-    color: blue;
+  color: blue;
 }
 .value {
-    color: green;
+  color: green;
 }
