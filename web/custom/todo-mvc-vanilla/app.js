@@ -2,8 +2,7 @@
  * Use cases:
  * - DONE add todo
  * - DONE remove todo
- * - set todo completed
- * - unset todo completed
+ * - DONE toggle todo completion
  * - show active
  * - show completed
  * - clear completed
@@ -13,6 +12,17 @@ const KEY_ENTER = 'Enter';
 
 let todoList = document.querySelector('.todo-list');
 
+const bindToggle = (toggleButton) => {
+  toggleButton.onclick = (event) => {
+    let listItem = event.target.parentElement.parentElement;
+    if (listItem.className) {
+      listItem.className = '';
+    } else {
+      listItem.className = 'completed';
+    }
+  };
+};
+
 const bindDestruction = (destroyButton) => {
   destroyButton.onclick = (event) => {
     event.target.parentElement.parentElement.remove();
@@ -20,9 +30,10 @@ const bindDestruction = (destroyButton) => {
 };
 
 const addTodo = (text) => {
-  let input = document.createElement('input');
-  input.className = 'toggle';
-  input.setAttribute('type', 'checkbox');
+  let toggleButton = document.createElement('input');
+  toggleButton.className = 'toggle';
+  toggleButton.setAttribute('type', 'checkbox');
+  bindToggle(toggleButton);
 
   let label = document.createElement('label');
   label.innerHTML = text;
@@ -33,7 +44,7 @@ const addTodo = (text) => {
 
   let view = document.createElement('div');
   view.className = 'view';
-  view.appendChild(input);
+  view.appendChild(toggleButton);
   view.appendChild(label);
   view.appendChild(destroyButton);
 
@@ -55,3 +66,7 @@ destroyButtons.forEach(destroyButton => {
   bindDestruction(destroyButton);
 });
 
+let toggleButtons = document.querySelectorAll('.toggle');
+toggleButtons.forEach(toggleButton => {
+  bindToggle(toggleButton);
+});
