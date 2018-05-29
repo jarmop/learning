@@ -1,16 +1,42 @@
 /**
  * Use cases:
- * - DONE add todo
- * - DONE remove todo
- * - DONE toggle todo completion
- * - show active
- * - show completed
+ * - DONE add
+ * - DONE remove
+ * - DONE toggle completion
+ * - DONE apply filters
  * - clear completed
+ * - save to local storage
  */
 
 const KEY_ENTER = 'Enter';
 
 let todoList = document.querySelector('.todo-list');
+
+const applyFilter = (filter) => {
+  let handleVisibility = listItem => {listItem.style = 'display: list-item'};
+  if (filter === 'completed') {
+    handleVisibility = listItem => {
+      if (listItem.className === filter) {
+        listItem.style = 'display: list-item';
+      } else {
+        listItem.style = 'display: none';
+      }
+    };
+  } else if (filter === 'active') {
+    handleVisibility = listItem => {
+      if (!listItem.className) {
+        listItem.style = 'display: list-item';
+      } else {
+        listItem.style = 'display: none';
+      }
+    };
+  }
+  document.querySelectorAll('.todo-list li').forEach(handleVisibility);
+};
+
+const getUrlFragment = (url) => {
+  return url.substring(url.lastIndexOf('/') + 1);
+};
 
 const bindToggle = (toggleButton) => {
   toggleButton.onclick = (event) => {
@@ -61,12 +87,18 @@ window.onkeypress = (event) => {
   }
 };
 
-let destroyButtons = document.querySelectorAll('.destroy');
-destroyButtons.forEach(destroyButton => {
+document.querySelectorAll('.destroy').forEach(destroyButton => {
   bindDestruction(destroyButton);
 });
 
-let toggleButtons = document.querySelectorAll('.toggle');
-toggleButtons.forEach(toggleButton => {
+document.querySelectorAll('.toggle').forEach(toggleButton => {
   bindToggle(toggleButton);
+});
+
+applyFilter(getUrlFragment(window.location.hash));
+
+document.querySelectorAll('.filters li a').forEach(filterLink => {
+  filterLink.onclick = (event) => {
+    applyFilter(getUrlFragment(event.target.href));
+  };
 });
