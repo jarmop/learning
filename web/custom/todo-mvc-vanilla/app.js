@@ -15,8 +15,9 @@ let todoList = document.querySelector('.todo-list');
 
 const updateActiveCount = () => {
   let activeCount = document.querySelectorAll('.todo-list li:not(.completed)').length;
+  let itemOrItems = activeCount > 1 ? 'items' : 'item';
   document.querySelector('.todo-count')
-      .innerHTML = `<strong>${activeCount}</strong> item left`;
+      .innerHTML = `<strong>${activeCount}</strong> ${itemOrItems} left`;
 };
 
 const clearCompleted = () => {
