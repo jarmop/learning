@@ -8,7 +8,7 @@
  * - DONE show amount of active todos
  * - DONE save todo texts to local storage
  * - DONE highlight selected filter
- * - save todo completion status to local storage
+ * - DONE save todo completion status to local storage
  * - edit todos
  */
 
@@ -17,7 +17,8 @@ const KEY_ENTER = 'Enter';
 let todoList = document.querySelector('.todo-list');
 
 const updateActiveCount = () => {
-  let activeCount = document.querySelectorAll('.todo-list li:not(.completed)').length;
+  let activeCount = document.querySelectorAll(
+      '.todo-list li:not(.completed)').length;
   let itemOrItems = activeCount > 1 ? 'items' : 'item';
   document.querySelector('.todo-count')
       .innerHTML = `<strong>${activeCount}</strong> ${itemOrItems} left`;
@@ -26,8 +27,12 @@ const updateActiveCount = () => {
 const updateState = () => {
   updateActiveCount();
   let todos = [];
-  document.querySelectorAll('.todo-list label').forEach(todoLabel => todos.push(todoLabel.innerHTML));
-  console.log(todos);
+  document.querySelectorAll('.todo-list li').forEach(listItem => todos.push(
+      {
+        text: listItem.querySelector('label').innerHTML,
+        completed: listItem.className === 'completed',
+      },
+  ));
   localStorage.setItem('todos', JSON.stringify(todos));
 };
 
@@ -59,8 +64,15 @@ const applyFilter = (filter) => {
   document.querySelectorAll('.todo-list li').forEach(handleVisibility);
 };
 
-const getUrlFragment = (url) => {
+const parseFilterFromUrl = (url) => {
   return url.substring(url.lastIndexOf('/') + 1);
+};
+
+const setFilter = (filter) => {
+  applyFilter(filter);
+  document.querySelectorAll('.filters li a').forEach(filterLink => {
+    filterLink.className = parseFilterFromUrl(filterLink.href) === filter ? 'selected' : '';
+  });
 };
 
 const bindToggle = (toggleButton) => {
@@ -83,6 +95,9 @@ const bindDestruction = (destroyButton) => {
 };
 
 const addTodo = (text) => {
+  if (!text) {
+    return null;
+  }
   let toggleButton = document.createElement('input');
   toggleButton.className = 'toggle';
   toggleButton.setAttribute('type', 'checkbox');
@@ -107,6 +122,8 @@ const addTodo = (text) => {
   todoList.appendChild(listItem);
 
   updateState();
+
+  return listItem;
 };
 
 window.onkeypress = (event) => {
@@ -124,15 +141,9 @@ document.querySelectorAll('.toggle').forEach(toggleButton => {
   bindToggle(toggleButton);
 });
 
-applyFilter(getUrlFragment(window.location.hash));
-
 document.querySelectorAll('.filters li a').forEach(filterLink => {
   filterLink.onclick = (event) => {
-    applyFilter(getUrlFragment(event.target.href));
-    document.querySelectorAll('.filters li a').forEach(filterLink => {
-      filterLink.className = '';
-    });
-    event.target.className = 'selected';
+    setFilter(parseFilterFromUrl(event.target.href));
   };
 });
 
@@ -140,5 +151,13 @@ document.querySelector('.clear-completed').onclick = () => {
   clearCompleted();
 };
 
-JSON.parse(localStorage.getItem('todos')).map(todo => addTodo(todo));
+JSON.parse(localStorage.getItem('todos')).map(todo => {
+  todoElement = addTodo(todo.text);
+  if (todo.completed) {
+    todoElement.className = 'completed';
+    todoElement.querySelector('.toggle').checked = true;
+  }
+});
+
+setFilter(parseFilterFromUrl(window.location.hash));
 updateState();
