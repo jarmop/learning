@@ -6,7 +6,10 @@
  * - DONE apply filters
  * - DONE clear completed
  * - DONE show amount of active todos
- * - save to local storage
+ * - DONE save todo texts to local storage
+ * - save todo completion status to local storage
+ * - edit todos
+ * - highlight selected filter
  */
 
 const KEY_ENTER = 'Enter';
@@ -20,10 +23,18 @@ const updateActiveCount = () => {
       .innerHTML = `<strong>${activeCount}</strong> ${itemOrItems} left`;
 };
 
+const updateState = () => {
+  updateActiveCount();
+  let todos = [];
+  document.querySelectorAll('.todo-list label').forEach(todoLabel => todos.push(todoLabel.innerHTML));
+  console.log(todos);
+  localStorage.setItem('todos', JSON.stringify(todos));
+};
+
 const clearCompleted = () => {
   document.querySelectorAll('.completed')
       .forEach(listItem => listItem.remove());
-  updateActiveCount();
+  updateState();
 };
 
 const applyFilter = (filter) => {
@@ -60,14 +71,14 @@ const bindToggle = (toggleButton) => {
     } else {
       listItem.className = 'completed';
     }
-    updateActiveCount();
+    updateState();
   };
 };
 
 const bindDestruction = (destroyButton) => {
   destroyButton.onclick = (event) => {
     event.target.parentElement.parentElement.remove();
-    updateActiveCount();
+    updateState();
   };
 };
 
@@ -95,7 +106,7 @@ const addTodo = (text) => {
 
   todoList.appendChild(listItem);
 
-  updateActiveCount();
+  updateState();
 };
 
 window.onkeypress = (event) => {
@@ -125,4 +136,5 @@ document.querySelector('.clear-completed').onclick = () => {
   clearCompleted();
 };
 
-updateActiveCount();
+JSON.parse(localStorage.getItem('todos')).map(todo => addTodo(todo));
+updateState();
