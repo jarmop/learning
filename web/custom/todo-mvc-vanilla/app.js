@@ -7,9 +7,9 @@
  * - DONE clear completed
  * - DONE show amount of active todos
  * - DONE save todo texts to local storage
+ * - DONE highlight selected filter
  * - save todo completion status to local storage
  * - edit todos
- * - highlight selected filter
  */
 
 const KEY_ENTER = 'Enter';
@@ -129,6 +129,10 @@ applyFilter(getUrlFragment(window.location.hash));
 document.querySelectorAll('.filters li a').forEach(filterLink => {
   filterLink.onclick = (event) => {
     applyFilter(getUrlFragment(event.target.href));
+    document.querySelectorAll('.filters li a').forEach(filterLink => {
+      filterLink.className = '';
+    });
+    event.target.className = 'selected';
   };
 });
 
