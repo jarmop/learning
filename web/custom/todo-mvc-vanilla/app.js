@@ -4,7 +4,8 @@
  * - DONE remove
  * - DONE toggle completion
  * - DONE apply filters
- * - clear completed
+ * - DONE clear completed
+ * - show amount of active todos
  * - save to local storage
  */
 
@@ -12,8 +13,12 @@ const KEY_ENTER = 'Enter';
 
 let todoList = document.querySelector('.todo-list');
 
+const clearCompleted = () => {
+  document.querySelectorAll('.completed').forEach(listItem => listItem.remove());
+};
+
 const applyFilter = (filter) => {
-  let handleVisibility = listItem => {listItem.style = 'display: list-item'};
+  let handleVisibility = listItem => {listItem.style = 'display: list-item';};
   if (filter === 'completed') {
     handleVisibility = listItem => {
       if (listItem.className === filter) {
@@ -102,3 +107,7 @@ document.querySelectorAll('.filters li a').forEach(filterLink => {
     applyFilter(getUrlFragment(event.target.href));
   };
 });
+
+document.querySelector('.clear-completed').onclick = () => {
+  clearCompleted();
+};
