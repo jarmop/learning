@@ -9,7 +9,7 @@
  * - DONE save todo texts to local storage
  * - DONE highlight selected filter
  * - DONE save todo completion status to local storage
- * - edit todos
+ * - DONE edit todos
  */
 
 const KEY_ENTER = 'Enter';
@@ -38,7 +38,7 @@ const updateState = () => {
   document.querySelectorAll('.todo-list li').forEach(listItem =>
     todos.push({
       text: listItem.querySelector('label').innerHTML,
-      completed: listItem.className === 'completed'
+      completed: listItem.className === 'completed',
     })
   );
   localStorage.setItem('todos', JSON.stringify(todos));
