@@ -16,6 +16,13 @@ const KEY_ENTER = 'Enter';
 
 let todoList = document.querySelector('.todo-list');
 
+const closeEdit = input => {
+  let listItem = input.parentElement;
+  listItem.querySelector('label').innerHTML = input.value;
+  listItem.className = listItem.className.replace('editing', '');
+  updateState();
+};
+
 const updateActiveCount = () => {
   let activeCount = document.querySelectorAll('.todo-list li:not(.completed)')
     .length;
@@ -99,6 +106,19 @@ const bindDestruction = destroyButton => {
   };
 };
 
+const bindEdit = label => {
+  label.ondblclick = event => {
+    let listItem = event.target.parentElement.parentElement;
+    listItem.className += ' editing';
+    let input = document.createElement('input');
+    input.value = label.innerHTML;
+    input.className = 'edit';
+    input.onclick = event => event.stopPropagation();
+    listItem.appendChild(input);
+    input.focus();
+  };
+};
+
 const addTodo = text => {
   if (!text) {
     return null;
@@ -109,7 +129,9 @@ const addTodo = text => {
   bindToggle(toggleButton);
 
   let label = document.createElement('label');
+  label.className = 'todo-label';
   label.innerHTML = text;
+  bindEdit(label);
 
   let destroyButton = document.createElement('button');
   destroyButton.className = 'destroy';
@@ -133,18 +155,15 @@ const addTodo = text => {
 
 window.onkeypress = event => {
   if (event.key === KEY_ENTER) {
-    addTodo(event.target.value);
-    event.target.value = '';
+    let input = event.target;
+    if (input.className === 'new-todo') {
+      addTodo(event.target.value);
+      input.value = '';
+    } else if (input.className === 'edit') {
+      closeEdit(input);
+    }
   }
 };
-
-document.querySelectorAll('.destroy').forEach(destroyButton => {
-  bindDestruction(destroyButton);
-});
-
-document.querySelectorAll('.toggle').forEach(toggleButton => {
-  bindToggle(toggleButton);
-});
 
 document.querySelectorAll('.filters li a').forEach(filterLink => {
   filterLink.onclick = event => {
@@ -166,3 +185,9 @@ JSON.parse(localStorage.getItem('todos')).map(todo => {
 
 setFilter(parseFilterFromUrl(window.location.hash));
 updateState();
+
+window.onclick = event => {
+  document.querySelectorAll('.edit').forEach(todoInput => {
+    closeEdit(todoInput);
+  });
+};
