@@ -17,33 +17,37 @@ const KEY_ENTER = 'Enter';
 let todoList = document.querySelector('.todo-list');
 
 const updateActiveCount = () => {
-  let activeCount = document.querySelectorAll(
-      '.todo-list li:not(.completed)').length;
+  let activeCount = document.querySelectorAll('.todo-list li:not(.completed)')
+    .length;
   let itemOrItems = activeCount > 1 ? 'items' : 'item';
-  document.querySelector('.todo-count')
-      .innerHTML = `<strong>${activeCount}</strong> ${itemOrItems} left`;
+  document.querySelector(
+    '.todo-count'
+  ).innerHTML = `<strong>${activeCount}</strong> ${itemOrItems} left`;
 };
 
 const updateState = () => {
   updateActiveCount();
   let todos = [];
-  document.querySelectorAll('.todo-list li').forEach(listItem => todos.push(
-      {
-        text: listItem.querySelector('label').innerHTML,
-        completed: listItem.className === 'completed',
-      },
-  ));
+  document.querySelectorAll('.todo-list li').forEach(listItem =>
+    todos.push({
+      text: listItem.querySelector('label').innerHTML,
+      completed: listItem.className === 'completed'
+    })
+  );
   localStorage.setItem('todos', JSON.stringify(todos));
 };
 
 const clearCompleted = () => {
-  document.querySelectorAll('.completed')
-      .forEach(listItem => listItem.remove());
+  document
+    .querySelectorAll('.completed')
+    .forEach(listItem => listItem.remove());
   updateState();
 };
 
-const applyFilter = (filter) => {
-  let handleVisibility = listItem => {listItem.style = 'display: list-item';};
+const applyFilter = filter => {
+  let handleVisibility = listItem => {
+    listItem.style = 'display: list-item';
+  };
   if (filter === 'completed') {
     handleVisibility = listItem => {
       if (listItem.className === filter) {
@@ -64,19 +68,20 @@ const applyFilter = (filter) => {
   document.querySelectorAll('.todo-list li').forEach(handleVisibility);
 };
 
-const parseFilterFromUrl = (url) => {
+const parseFilterFromUrl = url => {
   return url.substring(url.lastIndexOf('/') + 1);
 };
 
-const setFilter = (filter) => {
+const setFilter = filter => {
   applyFilter(filter);
   document.querySelectorAll('.filters li a').forEach(filterLink => {
-    filterLink.className = parseFilterFromUrl(filterLink.href) === filter ? 'selected' : '';
+    filterLink.className =
+      parseFilterFromUrl(filterLink.href) === filter ? 'selected' : '';
   });
 };
 
-const bindToggle = (toggleButton) => {
-  toggleButton.onclick = (event) => {
+const bindToggle = toggleButton => {
+  toggleButton.onclick = event => {
     let listItem = event.target.parentElement.parentElement;
     if (listItem.className) {
       listItem.className = '';
@@ -87,14 +92,14 @@ const bindToggle = (toggleButton) => {
   };
 };
 
-const bindDestruction = (destroyButton) => {
-  destroyButton.onclick = (event) => {
+const bindDestruction = destroyButton => {
+  destroyButton.onclick = event => {
     event.target.parentElement.parentElement.remove();
     updateState();
   };
 };
 
-const addTodo = (text) => {
+const addTodo = text => {
   if (!text) {
     return null;
   }
@@ -126,7 +131,7 @@ const addTodo = (text) => {
   return listItem;
 };
 
-window.onkeypress = (event) => {
+window.onkeypress = event => {
   if (event.key === KEY_ENTER) {
     addTodo(event.target.value);
     event.target.value = '';
@@ -142,7 +147,7 @@ document.querySelectorAll('.toggle').forEach(toggleButton => {
 });
 
 document.querySelectorAll('.filters li a').forEach(filterLink => {
-  filterLink.onclick = (event) => {
+  filterLink.onclick = event => {
     setFilter(parseFilterFromUrl(event.target.href));
   };
 });
