@@ -2,24 +2,27 @@ const A = function() {
   this.a = 1;
 
   this.callbackWithRegularFunction = function() {
+    console.log(this); // A {...}
     setTimeout(function() {
-      console.log(this);
+      console.log(this); // Timeout {...}
     }, 100);
   };
 
   this.callbackWithArrowFunction = function() {
+    console.log(this); // A {...}
     setTimeout(() => {
-      console.log(this);
-    }, 100);
+      console.log(this); // A {...}
+    }, 200);
   };
 
-  console.log(this);
+  console.log(this); // A {...}
   // console.log(arguments);
   // console.log(super);
   // console.log(new.target);
 };
 
 // A();
+console.log(this); // {}
 let a = new A(2, 5);
 a.callbackWithRegularFunction();
 a.callbackWithArrowFunction();
