@@ -113,7 +113,7 @@ const bindEdit = label => {
     let input = document.createElement('input');
     input.value = label.innerHTML;
     input.className = 'edit';
-    input.onclick = event => event.stopPropagation();
+    input.onblur = event => closeEdit(input);
     listItem.appendChild(input);
     input.focus();
   };
@@ -185,9 +185,3 @@ JSON.parse(localStorage.getItem('todos')).map(todo => {
 
 setFilter(parseFilterFromUrl(window.location.hash));
 updateState();
-
-window.onclick = event => {
-  document.querySelectorAll('.edit').forEach(todoInput => {
-    closeEdit(todoInput);
-  });
-};
