@@ -16,10 +16,17 @@ const KEY_ENTER = 'Enter';
 
 let todoList = document.querySelector('.todo-list');
 
+const removeClass = (element, classToRemove) => {
+  element.className = element.className
+    .split(/\s+/)
+    .filter(className => className !== classToRemove)
+    .join(' ');
+};
+
 const closeEdit = input => {
   let listItem = input.parentElement;
   listItem.querySelector('label').innerHTML = input.value;
-  listItem.className = listItem.className.replace('editing', '');
+  removeClass(listItem, 'editing');
   updateState();
 };
 
