@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server --mode development --open"
   },
   "dependencies": {
     "react": "^16.4.0",
@@ -8,7 +8,6 @@
     "todomvc-app-css": "^2.1.2"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.7.0",
