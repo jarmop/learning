@@ -4,10 +4,12 @@
  * - DONE edit todos
  * - DONE remove
  * - DONE toggle completion
- * - show amount of active todos
+ * - DONE show amount of active todos
  * - apply filters (highlight selected)
  * - clear completed
  * - save state
+ * - use Flow?
+ * - use Redux?
  */
 
 import React from 'react';
@@ -84,7 +86,7 @@ class App extends React.Component {
             </ul>
           </section>
           <footer className="footer">
-            <span className="todo-count"><strong>0</strong> item left</span>
+            <TodoCount count={this.state.todos.length}/>
             <ul className="filters">
               <li>
                 <a className="selected" href="#/">All</a>
@@ -190,6 +192,10 @@ const TodoInput = ({onAdd}) => (
           }
         }}
     />
+);
+
+const TodoCount = ({count}) => (
+    <span className="todo-count"><strong>{count}</strong> item{count === 1 ? '' : 's'} left</span>
 );
 
 export default App;
