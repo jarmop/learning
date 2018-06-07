@@ -2,7 +2,7 @@
  * Use cases:
  * - DONE add
  * - DONE edit todos
- * - remove
+ * - DONE remove
  * - toggle completion
  * - show amount of active todos
  * - apply filters (highlight selected)
@@ -29,6 +29,7 @@ class App extends React.Component {
 
     this.addTodo = this.addTodo.bind(this);
     this.changeTodo = this.changeTodo.bind(this);
+    this.removeTodo = this.removeTodo.bind(this);
   }
 
   addTodo(value) {
@@ -55,6 +56,12 @@ class App extends React.Component {
     });
   }
 
+  removeTodo(indexToRemove) {
+    this.setState({
+      todos: this.state.todos.filter((todo, index) => index !== indexToRemove)
+    });
+  }
+
   render() {
     return (
         <section className="todoapp">
@@ -71,6 +78,7 @@ class App extends React.Component {
                       key={index}
                       todo={todo}
                       onChange={todo => this.changeTodo(index, todo)}
+                      onRemove={() => this.removeTodo(index)}
                   />,
               )}
             </ul>
@@ -114,7 +122,7 @@ class Todo extends React.Component {
   }
 
   render() {
-    let {todo, onChange} = this.props;
+    let {todo, onRemove} = this.props;
 
     let classes = [];
     if (todo.completed) {
@@ -146,7 +154,7 @@ class Todo extends React.Component {
                 <label onDoubleClick={event => this.setState({editing: true})}>
                   {todo.text}
                 </label>
-                <button className="destroy"></button>
+                <button className="destroy" onClick={event => onRemove()}></button>
               </div>
           }
         </li>
