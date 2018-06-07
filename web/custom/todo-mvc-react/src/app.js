@@ -3,7 +3,7 @@
  * - DONE add
  * - DONE edit todos
  * - DONE remove
- * - toggle completion
+ * - DONE toggle completion
  * - show amount of active todos
  * - apply filters (highlight selected)
  * - clear completed
@@ -113,11 +113,22 @@ class Todo extends React.Component {
     };
   }
 
-  save(value) {
+  save(todo) {
     this.setState({editing: false});
-    this.props.onChange({
+    this.props.onChange(todo);
+  }
+
+  saveText(value) {
+    this.save({
       ...this.props.todo,
       text: value,
+    });
+  }
+
+  saveCompletion(completion) {
+    this.save({
+      ...this.props.todo,
+      completed: completion,
     });
   }
 
@@ -140,9 +151,9 @@ class Todo extends React.Component {
                   className="edit"
                   defaultValue={todo.text}
                   autoFocus={true}
-                  onBlur={event => this.save(event.target.value)}
+                  onBlur={event => this.saveText(event.target.value)}
                   onKeyPress={event => event.key === KEY_ENTER &&
-                      this.save(event.target.value)}
+                      this.saveText(event.target.value)}
               />
               :
               <div className="view">
@@ -150,6 +161,7 @@ class Todo extends React.Component {
                     className="toggle"
                     type="checkbox"
                     defaultChecked={todo.completed}
+                    onChange={event => this.saveCompletion(event.target.checked)}
                 />
                 <label onDoubleClick={event => this.setState({editing: true})}>
                   {todo.text}
