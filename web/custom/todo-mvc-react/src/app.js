@@ -7,7 +7,7 @@
  * - DONE show amount of active todos
  * - DONE apply filters (highlight selected)
  * - DONE clear completed
- * - save state
+ * - DONE save state
  * - use Flow?
  * - use Redux?
  */
@@ -32,22 +32,15 @@ const filters = [
     description: 'Completed',
   },
 ];
+const STORAGE_KEY = 'todomvc-react-todos';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
 
+    let storedTodos = localStorage.getItem(STORAGE_KEY);
     this.state = {
-      todos: [
-        {
-          text: 'completed',
-          completed: true,
-        },
-        {
-          text: 'active',
-          completed: false,
-        },
-      ],
+      todos: storedTodos ? JSON.parse(storedTodos) : [],
       filter: window.location.hash.replace(/#\//, ''),
     };
 
@@ -56,6 +49,10 @@ class App extends React.Component {
     this.removeTodo = this.removeTodo.bind(this);
     this.setFilter = this.setFilter.bind(this);
     this.clearCompleted = this.clearCompleted.bind(this);
+  }
+
+  componentDidUpdate() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state.todos));
   }
 
   addTodo(value) {
