@@ -6,7 +6,7 @@
  * - DONE toggle completion
  * - DONE show amount of active todos
  * - DONE apply filters (highlight selected)
- * - clear completed
+ * - DONE clear completed
  * - save state
  * - use Flow?
  * - use Redux?
@@ -55,6 +55,7 @@ class App extends React.Component {
     this.changeTodo = this.changeTodo.bind(this);
     this.removeTodo = this.removeTodo.bind(this);
     this.setFilter = this.setFilter.bind(this);
+    this.clearCompleted = this.clearCompleted.bind(this);
   }
 
   addTodo(value) {
@@ -92,12 +93,18 @@ class App extends React.Component {
         ||
         (this.state.filter === FILTER_COMPLETED && todo.completed)
         ||
-        (this.state.filter === FILTER_ALL)
+        (this.state.filter === FILTER_ALL);
   }
 
   setFilter(filter) {
     this.setState({
       filter: filter,
+    });
+  }
+
+  clearCompleted() {
+    this.setState({
+      todos: this.state.todos.filter(todo => !todo.completed),
     });
   }
 
@@ -128,9 +135,17 @@ class App extends React.Component {
           </section>
           <footer className="footer">
             <TodoCount count={this.state.todos.length}/>
-            <SelectFilter filters={filters} selected={this.state.filter}
-                          onSelect={selected => this.setFilter(selected)}/>
-            <button className="clear-completed">Clear completed</button>
+            <SelectFilter
+                filters={filters}
+                selected={this.state.filter}
+                onSelect={selected => this.setFilter(selected)}
+            />
+            <button
+                className="clear-completed"
+                onClick={this.clearCompleted}
+            >
+              Clear completed
+            </button>
           </footer>
         </section>
     );
