@@ -2,28 +2,27 @@
     <section class="todoapp">
         <header class="header">
             <h1>todos</h1>
-            <input class="new-todo" placeholder="What needs to be done?" autofocus>
+            <input
+                    class="new-todo"
+                    placeholder="What needs to be done?"
+                    autofocus
+                    v-model="todoInputValue"
+                    v-on:blur="addTodo"
+                    v-on:keyup.13="addTodo"
+            >
         </header>
         <!-- This section should be hidden by default and shown when there are todos -->
         <section class="main">
             <input id="toggle-all" class="toggle-all" type="checkbox">
             <label for="toggle-all">Mark all as complete</label>
             <ul class="todo-list">
-                <li class="completed">
+                <li v-for="todo in todos" v-bind:class="{completed: todo.isCompleted}">
                     <div class="view">
-                        <input class="toggle" type="checkbox" checked>
-                        <label>Taste JavaScript</label>
+                        <input class="toggle" type="checkbox" v-bind:checked="todo.isCompleted">
+                        <label>{{ todo.text }}</label>
                         <button class="destroy"></button>
                     </div>
                     <input class="edit" value="Create a TodoMVC template">
-                </li>
-                <li>
-                    <div class="view">
-                        <input class="toggle" type="checkbox">
-                        <label>Buy a unicorn</label>
-                        <button class="destroy"></button>
-                    </div>
-                    <input class="edit" value="Rule the web">
                 </li>
             </ul>
         </section>
@@ -48,3 +47,47 @@
         </footer>
     </section>
 </template>
+
+<script>
+  /**
+   * Use cases:
+   * - DONE add
+   * - edit
+   * - remove
+   * - toggle completion
+   * - show amount of active todos
+   * - apply filters (highlight selected)
+   * - clear completed
+   * - save state
+   */
+
+  export default {
+    data() {
+      return {
+        todos: [
+          {
+            text: 'first',
+            isCompleted: true,
+          },
+          {
+            text: 'second',
+            isCompleted: false,
+          }
+        ],
+        todoInputValue: ''
+      };
+    },
+    methods: {
+      addTodo(text) {
+        if (this.todoInputValue.length === 0) {
+          return;
+        }
+        this.todos.push({
+          text: this.todoInputValue,
+          isCompleted: false,
+        });
+        this.todoInputValue = '';
+      }
+    },
+  };
+</script>
