@@ -1,0 +1,11 @@
+@import 'settings';
+
+body {
+    background: $bg-color;
+    border: 1px solid;
+}
+
+div {
+    background: red;
+    border: 1px solid;
+}

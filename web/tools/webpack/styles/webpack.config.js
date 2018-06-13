@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode: 'none',
   devtool: false, // disable source maps
-  entry: './src/app.js',
+  entry: './src/foo.js',
   plugins: [
     new HtmlWebpackPlugin({
       template: 'src/index.html',
