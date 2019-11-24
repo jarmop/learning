@@ -7,13 +7,18 @@ import 'prismjs/themes/prism.css';
 import './App.css';
 
 const run = (code) => {
-  // console.log('run code');
-  let frame = document.querySelector('iframe');
+  const oldFrame = document.querySelector('#sandbox');
+  if (oldFrame) {
+    oldFrame.remove();
+  }
+  const frame = document.createElement('iframe');
+  frame.id = 'sandbox';
+  frame.style = 'display: none';
   document.body.appendChild(frame);
-  let win = frame.contentWindow;
+  const win = frame.contentWindow;
   win.console.log = (msg) => win.document.write(msg);
   win.eval(code);
-  let val = win.document.querySelector('body').innerText;
+  const val = win.document.querySelector('body').innerText;
 
   return val;
 };
@@ -45,7 +50,6 @@ function App() {
         />
         <button onClick={() => runCode(code)}>Run code</button>
         <div id="output">{output}</div>
-        <iframe title="output" style={{display: 'none'}}></iframe>
       </div>
   );
 }
