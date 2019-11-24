@@ -6,23 +6,16 @@ import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css';
 import './App.css';
 
-let runCode = (code) => {
-  console.log('run code');
-  //let frame = document.createElement("iframe");
+const run = (code) => {
+  // console.log('run code');
   let frame = document.querySelector('iframe');
   document.body.appendChild(frame);
   let win = frame.contentWindow;
   win.console.log = (msg) => win.document.write(msg);
-//win.console.log = (msg) => alert(msg);
-
-//console.log(win);
-  //code = document.querySelector('#editor').innerText;
   win.eval(code);
   let val = win.document.querySelector('body').innerText;
 
-  document.querySelector('#output').innerText = val;
-
-//console.log(window.document.querySelector('#output'));
+  return val;
 };
 
 const initialCode = `for (let i = 0; i<5; i++) {
@@ -31,6 +24,12 @@ const initialCode = `for (let i = 0; i<5; i++) {
 
 function App() {
   const [code, setCode] = useState(initialCode);
+  const [output, setOutput] = useState('');
+
+  const runCode = (code) => {
+    const result = run(code);
+    setOutput(result);
+  };
 
   return (
       <div className="App">
@@ -45,7 +44,7 @@ function App() {
           }}
         />
         <button onClick={() => runCode(code)}>Run code</button>
-        <div id="output"></div>
+        <div id="output">{output}</div>
         <iframe title="output" style={{display: 'none'}}></iframe>
       </div>
   );
