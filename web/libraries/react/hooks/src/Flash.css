@@ -1,0 +1,16 @@
+.Flash {
+    margin-top: 20px;
+}
+
+.Flasher {
+    padding: 20px;
+    background-color: green;
+}
+
+.Flasher--flashing {
+    animation: flash linear 0.7s 1;
+}
+
+@keyframes flash {
+    0% { background-color: red; }
+}
