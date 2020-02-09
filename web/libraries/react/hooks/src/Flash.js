@@ -1,26 +1,21 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import './Flash.css'
 
 const Flash = () => {
     const [flashIndex, setFlashIndex] = useState(-1)
-    const [flashEnabled, setFlashEnabled] = useState(false)
     const [something, setSomething] = useState('wrtwr')
 
     useEffect(() => {
-        console.log('flashIndex: ' + flashIndex)
-        setFlashEnabled(true)
-    })
+        if (flashIndex !== -1) {
+            setFlashIndex(-1)
+        }
+    }, [setFlashIndex, flashIndex])
 
     const doFlash = (index) => {
         setFlashIndex(index)
-        setFlashEnabled(false)
-        // setTimeout(() => {
-        //     setFlash(true)
-        // }, 1)
     }
 
     const doNotFlash = () => {
-        console.log('do not flash')
         setSomething(Math.random() * 100)
     }
 
@@ -38,8 +33,8 @@ const Flash = () => {
                 </button>
             </div>
             {something}
-            <Flasher flash={flashEnabled && flashIndex === 0} />
-            <Flasher flash={flashEnabled && flashIndex === 1} />
+            <Flasher flash={flashIndex === 0} />
+            <Flasher flash={flashIndex === 1} />
         </div>
     )
 }
@@ -47,9 +42,35 @@ const Flash = () => {
 export default Flash
 
 const Flasher = ({ flash = false }) => {
+    const ref = useRef()
+    // const [domObject, setDomObject] = useState()
+
+    // const setDomObjecti = (domo) => {
+    //     console.log('set dom')
+    //     setDomObject(domo)
+    // }
+
+    useEffect(() => {
+        console.log('yru')
+        console.log(flash)
+        if (flash) {
+            ref.current.classList.remove('Flasher--flashing')
+            // console.log(domObject)
+            // domObject.classList.remove('Flasher--flashing')
+            window.requestAnimationFrame(() => {
+                console.log('addFlash')
+                ref.current.classList.add('Flasher--flashing')
+                // domObject.classList.add('Flasher--flashing')
+
+            })
+        }
+    // }, [flash, domObject])
+    }, [flash])
+
     return (
-        <div className={'Flasher' + (flash ? ' Flasher--flashing' : '')}>
-            {flash ? 'flashing' : 'not flashing'}
+        <div ref={ref} className="Flasher">
+        {/* <div ref={setDomObjecti} className="Flasher"> */}
+            {flash ? 'wrth' : 'wrtrwt'}
         </div>
     )
 }
