@@ -9,7 +9,10 @@ module.exports = {
         test: /\.js$/,
         exclude: /node_modules/,
         loader: 'babel-loader',
-        options: { presets: ['env', 'react', 'stage-2'] }
+        options: { presets: [
+          '@babel/env', 
+          '@babel/react', 
+        ] }
       },
     ]
   },
