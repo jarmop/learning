@@ -1,5 +1,5 @@
 ```
-yarn install
-yarn run webpack
+npm install
+npm run build
 open index.html
 ```
