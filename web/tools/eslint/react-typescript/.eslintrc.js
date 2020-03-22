@@ -24,5 +24,24 @@ module.exports = {
     '@typescript-eslint',
   ],
   rules: {
+    'react/jsx-filename-extension': [
+      2,
+      {
+        extensions: ['.tsx']
+      }
+    ],
+    'import/extensions': [
+      2,
+      'never',
+    ],
+    'semi': [
+      2,
+      'never'
+    ],
   },
+  settings: {
+    react: {
+      version: 'detect',
+    }
+  }
 };
