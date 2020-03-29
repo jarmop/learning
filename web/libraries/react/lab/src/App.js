@@ -1,12 +1,13 @@
 import React from 'react';
+import ListKey from './ListKey';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <h1>React list key</h1>
+      <ListKey/>
     </div>
-  );
+  )
 }
 
 export default App;
