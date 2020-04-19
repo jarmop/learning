@@ -4,7 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "lint": "eslint . --ext .tsx,.js",
+    "lint:fix": "yarn run lint --fix"
   },
   "devDependencies": {
     "@types/react": "16.9.11",
