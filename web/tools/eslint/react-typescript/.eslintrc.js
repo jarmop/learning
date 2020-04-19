@@ -42,6 +42,8 @@ module.exports = {
     ],
     // allow multiple jsx expressions per line
     'react/jsx-one-expression-per-line': 0,
+    // this stupid import checker fails to detect whether import is correct or not, so let's disable it
+    'import/no-unresolved': 0,
   },
   settings: {
     react: {
