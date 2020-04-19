@@ -30,14 +30,18 @@ module.exports = {
         extensions: ['.tsx']
       }
     ],
+    // prohibit extensions in imports (2 = triggers error)
     'import/extensions': [
       2,
       'never',
     ],
+    // prohibit semicolons
     'semi': [
       2,
       'never'
     ],
+    // allow multiple jsx expressions per line
+    'react/jsx-one-expression-per-line': 0,
   },
   settings: {
     react: {
