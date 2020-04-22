@@ -7,6 +7,8 @@ module.exports = {
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
     extensions: ['.ts', '.tsx'],
+    // search absolute imports from src
+    modules: ['src'],
   },
 
   module: {

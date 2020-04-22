@@ -1,4 +1,5 @@
 import * as React from 'react'
+import SpecialComponent from './SpecialComponent/SpecialComponent'
 
 export interface HelloProps {
   compiler: string;
@@ -11,5 +12,6 @@ export const Hello = ({
 }: HelloProps) => (
   <h1>
     Hello from {compiler} and {framework}!
+    <SpecialComponent/>
   </h1>
 )
