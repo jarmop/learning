@@ -1,9 +1,14 @@
+function readonlyTuple() {
+    const foo: readonly [string, number] = ['foo', 5];
+    // foo[0] = 'bar'; // error
+}
+
 function readonlyArray() {
     const rarr: ReadonlyArray<number> = [1, 2, 3];
-    // rarr[1] = 5;
+    // rarr[1] = 5; // error
 
     const rarr2: readonly number[] = [10, 20, 30];
-    // rarr2[2] = 7;
+    // rarr2[2] = 7; // error
 }
 
 function readonlyProperty() {
@@ -12,7 +17,7 @@ function readonlyProperty() {
         readonly y: number;
     }
     let p1: Point = { x: 10, y: 20 };
-    // p1.x = 5;
+    // p1.x = 5; // error
 
     class Octopus {
         readonly name: string;
@@ -23,7 +28,7 @@ function readonlyProperty() {
     }
 
     const dad = new Octopus("Man with the 8 strong legs");
-    // dad.name = "Man with the 3-piece suit"; // error! name is readonly.
+    // dad.name = "Man with the 3-piece suit"; // error
 }
 
 function readonlyUtilityType() {
@@ -78,6 +83,7 @@ function readonlyUtilityType() {
 }
 
 export default () => {
+    readonlyTuple();
     readonlyArray();
     readonlyProperty();
     readonlyUtilityType();
