@@ -2,6 +2,8 @@ function greeter(person: string) {
     return 'Hello, ' + person;
 }
 
-let user = "Jane User";
+export default () => {
+    let user = "Jane User";
 
-console.log(greeter(user));
+    console.log(greeter(user));
+}
