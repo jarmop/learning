@@ -1,4 +1,4 @@
 ```
 yarn install
-yarn run compileAndRun
+yarn start
 ```
