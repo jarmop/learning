@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "baseUrl": "wtf"
+  },
+  "exclude": ["node_modules"]
+}
