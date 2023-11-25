@@ -25,7 +25,7 @@ docker image ls
 
 List Docker containers (running, all, all in quiet mode)
 ```
-docker container ls
-docker container ls --all
-docker container ls -a -q
+docker ps
+docker ps --all
+docker ps -a -q
 ```
