@@ -1,4 +1,25 @@
-export function tasksReducer(tasks, action) {
+import { useReducer } from 'react'
+
+export function addTask(text) {
+  return {
+    type: 'added',
+    id: nextId++,
+    text: text,
+  }
+}
+
+export function changeTask(task) {
+  return {
+    type: 'changed',
+    task: task,
+  }
+}
+
+export function deleteTask(taskId) {
+  return { type: 'deleted', id: taskId }
+}
+
+function tasksReducer(tasks, action) {
   switch (action.type) {
     case 'added': {
       return [
@@ -27,3 +48,14 @@ export function tasksReducer(tasks, action) {
     }
   }
 }
+
+export function useTasksReducer() {
+  return useReducer(tasksReducer, initialTasks)
+}
+
+let nextId = 3
+const initialTasks = [
+  { id: 0, text: 'Visit Kafka Museum', done: true },
+  { id: 1, text: 'Watch a puppet show', done: false },
+  { id: 2, text: 'Lennon Wall pic', done: false },
+]

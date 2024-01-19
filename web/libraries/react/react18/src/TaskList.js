@@ -1,11 +1,15 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import { TasksContext, TasksDispatchContext } from './TasksContext'
+import { changeTask, deleteTask } from './tasksReducer'
 
-export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
+export default function TaskList() {
+  const tasks = useContext(TasksContext)
+
   return (
     <ul>
       {tasks.map((task) => (
         <li key={task.id}>
-          <Task task={task} onChange={onChangeTask} onDelete={onDeleteTask} />
+          <Task task={task} />
         </li>
       ))}
     </ul>
@@ -14,18 +18,20 @@ export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
 
 function Task({ task, onChange, onDelete }) {
   const [isEditing, setIsEditing] = useState(false)
+  const dispatch = useContext(TasksDispatchContext)
+
   let taskContent
   if (isEditing) {
     taskContent = (
       <>
         <input
           value={task.text}
-          onChange={(e) => {
-            onChange({
+          onChange={(e) =>
+            dispatch(changeTask({
               ...task,
               text: e.target.value,
-            })
-          }}
+            }))
+          }
         />
         <button onClick={() => setIsEditing(false)}>Save</button>
       </>
@@ -43,15 +49,15 @@ function Task({ task, onChange, onDelete }) {
       <input
         type="checkbox"
         checked={task.done}
-        onChange={(e) => {
-          onChange({
+        onChange={(e) =>
+          dispatch(changeTask({
             ...task,
             done: e.target.checked,
-          })
-        }}
+          }))
+        }
       />
       {taskContent}
-      <button onClick={() => onDelete(task.id)}>Delete</button>
+      <button onClick={() => dispatch(deleteTask(task.id))}>Delete</button>
     </label>
   )
 }
