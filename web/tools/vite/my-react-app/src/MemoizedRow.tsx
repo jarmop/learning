@@ -1,28 +1,17 @@
-import { memo, useEffect, useRef } from 'react'
-import { replaceAtIndex } from './util'
+import { memo } from 'react'
 import { MemoizedCell } from './MemoizedCell'
 
 interface RowProps {
   row: string[]
   i: number
-  onChange: (row: string[]) => void
+  onChange: (row: string, j: number) => void
 }
 
 export const MemoizedRow = memo(({ row, i, onChange }: RowProps) => {
-  const rowRef = useRef(row)
-
-  useEffect(() => {
-    rowRef.current = row
-  }, [row])
-
   return (
     <tr>
       {row.map((col, j) => (
-        <MemoizedCell
-          key={`${i}-${j}`}
-          value={col}
-          onChange={(value) => onChange(replaceAtIndex(rowRef.current, j, value))}
-        />
+        <MemoizedCell key={`${i}-${j}`} value={col} onChange={(value) => onChange(value, j)} />
       ))}
     </tr>
   )
