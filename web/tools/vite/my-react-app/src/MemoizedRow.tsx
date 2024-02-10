@@ -4,19 +4,14 @@ import { MemoizedCell } from './MemoizedCell'
 interface RowProps {
   row: string[]
   i: number
-  onChange: (row: string, j: number) => void
 }
 
-export const MemoizedRow = memo(({ row, i, onChange }: RowProps) => {
+export const MemoizedRow = memo(({ row, i }: RowProps) => {
   return (
     <tr>
       {row.map((col, j) => (
-        <MemoizedCell key={`${i}-${j}`} value={col} onChange={(value) => onChange(value, j)} />
+        <MemoizedCell key={`${i}-${j}`} value={col} i={i} j={j} />
       ))}
     </tr>
   )
-}, arePropsEqual)
-
-function arePropsEqual(oldProps: RowProps, newProps: RowProps) {
-  return oldProps.row === newProps.row
-}
+})

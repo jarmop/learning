@@ -1,18 +1,22 @@
-import { memo } from 'react'
+import { memo, useContext } from 'react'
+import { DispatchContext } from './reducer'
 
 interface CellProps {
   value: string
-  onChange: (value: string) => void
+  i: number
+  j: number
 }
 
-export const MemoizedCell = memo(({ value, onChange }: CellProps) => {
+export const MemoizedCell = memo(({ value, i, j }: CellProps) => {
+  const dispatch = useContext(DispatchContext)
+
   return (
     <td>
-      <input type="text" value={value} onChange={(event) => onChange(event.target.value)} />
+      <input
+        type="text"
+        value={value}
+        onChange={(event) => dispatch({ type: 'changeCell', value: event.target.value, i, j })}
+      />
     </td>
   )
-}, arePropsEqual)
-
-function arePropsEqual(oldProps: CellProps, newProps: CellProps) {
-  return oldProps.value === newProps.value
-}
+})

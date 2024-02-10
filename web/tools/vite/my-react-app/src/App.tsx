@@ -1,6 +1,6 @@
 import { useReducer } from 'react'
 import { MemoizedRow } from './MemoizedRow'
-import { reducer } from './reducer'
+import { DispatchContext, reducer } from './reducer'
 
 const initialData: string[][] = new Array(10).fill(new Array(6).fill('foo'))
 
@@ -17,20 +17,16 @@ const initialData: string[][] = new Array(10).fill(new Array(6).fill('foo'))
 function App() {
   const [state, dispatch] = useReducer(reducer, { data: initialData })
 
-  const handleCellChange = (value: string, i: number, j: number) => {
-    dispatch({ type: 'changeCell', value, i, j })
-  }
-
   return (
-    <>
+    <DispatchContext.Provider value={dispatch}>
       <table>
         <tbody>
           {state.data.map((row, i) => (
-            <MemoizedRow key={i} row={row} i={i} onChange={(value, j) => handleCellChange(value, i, j)} />
+            <MemoizedRow key={i} row={row} i={i} />
           ))}
         </tbody>
       </table>
-    </>
+    </DispatchContext.Provider>
   )
 }
 

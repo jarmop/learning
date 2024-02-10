@@ -1,4 +1,5 @@
-import { replaceAtIndex } from "./util"
+import { Dispatch, createContext } from 'react'
+import { replaceAtIndex } from './util'
 
 interface SetDataAction {
   type: 'setData'
@@ -22,6 +23,7 @@ interface State {
   data: string[][]
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function reducer(state: State, action: SetDataAction | ChangeRowAction | ChangeCellAction) {
   switch (action.type) {
     case 'setData': {
@@ -40,3 +42,5 @@ export function reducer(state: State, action: SetDataAction | ChangeRowAction | 
     }
   }
 }
+
+export const DispatchContext = createContext<Dispatch<SetDataAction | ChangeRowAction | ChangeCellAction>>(() => {})
