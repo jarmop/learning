@@ -1,0 +1,87 @@
+{
+  "name": "myremote",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/react/myremote/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "dist/apps/react/myremote",
+        "index": "apps/react/myremote/src/index.html",
+        "baseHref": "/",
+        "main": "apps/react/myremote/src/main.ts",
+        "tsConfig": "apps/react/myremote/tsconfig.app.json",
+        "assets": [
+          "apps/react/myremote/src/favicon.ico",
+          "apps/react/myremote/src/assets"
+        ],
+        "styles": ["apps/react/myremote/src/styles.css"],
+        "scripts": [],
+        "webpackConfig": "apps/react/myremote/webpack.config.ts"
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/react/myremote/src/environments/environment.ts",
+              "with": "apps/react/myremote/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false,
+          "webpackConfig": "apps/react/myremote/webpack.config.prod.ts"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/react:module-federation-dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "myremote:build",
+        "hmr": true,
+        "port": 4201
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "myremote:build:development"
+        },
+        "production": {
+          "buildTarget": "myremote:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "defaultConfiguration": "production",
+      "options": {
+        "buildTarget": "myremote:build",
+        "watch": false,
+        "port": 4201
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "myremote:build:development"
+        },
+        "production": {
+          "buildTarget": "myremote:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}
