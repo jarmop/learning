@@ -63,5 +63,16 @@
       }
     }
   },
-  "nxCloudAccessToken": "Nzg3MTJkNjMtNjUwMC00OTJkLTlmZGItNjU1MTkwZTQ0MmU4fHJlYWQtd3JpdGU="
+  "nxCloudAccessToken": "Nzg3MTJkNjMtNjUwMC00OTJkLTlmZGItNjU1MTkwZTQ0MmU4fHJlYWQtd3JpdGU=",
+  "targetDefaults": {
+    "@nx/webpack:webpack": {
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "env": "NX_MF_DEV_SERVER_STATIC_REMOTES"
+        }
+      ]
+    }
+  }
 }
