@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => {
       },
       federation({
         filename: 'remoteEntry.js',
-        name: 'remote',
+        name: 'content1',
         exposes: {
           './remote-app': './src/App.tsx',
         },

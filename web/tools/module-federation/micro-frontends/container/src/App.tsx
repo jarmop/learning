@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 
 const Remote = lazy(
   // @ts-expect-error module-federation stuff
-  async () => import('remote/remote-app')
+  async () => import('content1/remote-app')
 )
 
 const App = () => {

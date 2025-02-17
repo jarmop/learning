@@ -18,14 +18,14 @@ export default defineConfig(() => {
     },
     plugins: [
       federation({
-        name: 'host',
+        name: 'container',
         remotes: {
-          remote: {
+          content1: {
             type: 'module',
-            name: 'remote',
+            name: 'content1',
             entry: 'http://localhost:4174/remoteEntry.js',
             // entry: 'http://www.jarmo.com:4174/remoteEntry.js',
-            entryGlobalName: 'remote',
+            entryGlobalName: 'content1',
             shareScope: 'default',
           },
         },
