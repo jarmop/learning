@@ -36,10 +36,12 @@ void sigchld_handler(int s)
 void *get_in_addr(struct sockaddr *sa)
 {
 	if (sa->sa_family == AF_INET) {
-		return &(((struct sockaddr_in*)sa)->sin_addr);
+		struct sockaddr_in *sa_in = sa;
+		return &(sa_in->sin_addr);
 	}
 
-	return &(((struct sockaddr_in6*)sa)->sin6_addr);
+	struct sockaddr_in6 *sa_in6 = sa;
+	return &(sa_in6->sin6_addr);
 }
 
 int main(void)
