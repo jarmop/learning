@@ -25,7 +25,9 @@
 */
 #include <sys/un.h>
 #include <sys/socket.h>
-#include "lib/my_tlpi_hdr.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #define SV_SOCK_PATH "/tmp/us_xfr"
 
