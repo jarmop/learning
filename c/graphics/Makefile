@@ -1,3 +1,5 @@
+default: run-hello-world
+
 build-gtk-test:
 	gcc gtk-test.c $(shell pkg-config --cflags --libs gtk4) -o bin/gtk-test
 run-gtk-test: build-gtk-test

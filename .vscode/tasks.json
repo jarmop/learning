@@ -7,10 +7,6 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
             "dependsOn": "prebuild"
         },
         {
@@ -23,6 +19,18 @@
             "type": "shell",
             "label": "clean",
             "command": "rm -rf ${fileDirname}/bin"
+        },
+        {
+            "type": "shell",
+            "label": "Run make in the current directory",
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "command": "make",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ],
     "version": "2.0.0"
