@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "*.svg": "html"
+        "*.svg": "html",
+        "*.c": "c",
+        "*.h": "c"
     }
 }
