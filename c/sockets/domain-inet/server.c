@@ -11,20 +11,12 @@
 #define BACKLOG 50
 #define ADDRSTRLEN (NI_MAXHOST + NI_MAXSERV + 10)
 
-int main(int argc, char *argv[])
+int initListeningSocket(int lSocket)
 {
-    uint32_t seqNum = 0;
-    char reqLenStr[INT_LEN];            /* Length of requested sequence */
-    char seqNumStr[INT_LEN];            /* Start of granted sequence */
-    struct sockaddr_storage claddr;
-    int lSocket, cSocket, optval, reqLen;
-    socklen_t addrlen;
+    int optval;
     struct addrinfo hints;
     struct addrinfo *result, *currResult;
-    char addrStr[ADDRSTRLEN];
-    char host[NI_MAXHOST];
-    char service[NI_MAXSERV];
-    
+
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_canonname = NULL;
     hints.ai_addr = NULL;
@@ -61,6 +53,23 @@ int main(int argc, char *argv[])
     listen(lSocket, BACKLOG);
 
     freeaddrinfo(result);
+
+    return lSocket;
+}
+
+int main(int argc, char *argv[])
+{
+    uint32_t seqNum = 0;
+    char reqLenStr[INT_LEN];            /* Length of requested sequence */
+    char seqNumStr[INT_LEN];            /* Start of granted sequence */
+    struct sockaddr_storage claddr;
+    int lSocket, cSocket, reqLen;
+    socklen_t addrlen;
+    char addrStr[ADDRSTRLEN];
+    char host[NI_MAXHOST];
+    char service[NI_MAXSERV];
+
+    lSocket = initListeningSocket(lSocket);
 
     for (;;) {                  /* Handle clients iteratively */
 
