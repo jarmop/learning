@@ -1,16 +1,14 @@
-/* is_seqnum_cl.c
-
-   A simple Internet stream socket client. This client requests a sequence
+/* A simple Internet stream socket client. This client requests a sequence
    number from the server.
-
-   See also is_seqnum_sv.c.
 */
-#define _DEFAULT_SOURCE             /* To get definitions of NI_MAXHOST and
-                                   NI_MAXSERV from <netdb.h> */
+
+// To get definitions of NI_MAXHOST and NI_MAXSERV from <netdb.h>
+#define _DEFAULT_SOURCE
+
 #include <netdb.h>
 #include "common.h"
-int
-main(int argc, char *argv[])
+
+int main(int argc, char *argv[])
 {
     char *reqLenStr;                    /* Requested length of sequence */
     char seqNumStr[INT_LEN];            /* Start of granted sequence */
@@ -19,12 +17,8 @@ main(int argc, char *argv[])
     struct addrinfo hints;
     struct addrinfo *result, *rp;
 
-    if (argc < 2 || strcmp(argv[1], "--help") == 0)
-        usageErr("%s server-host [sequence-len]\n", argv[0]);
-
     /* Call getaddrinfo() to obtain a list of addresses that
        we can try connecting to */
-
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_canonname = NULL;
     hints.ai_addr = NULL;
@@ -33,12 +27,10 @@ main(int argc, char *argv[])
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_NUMERICSERV;
 
-    if (getaddrinfo(argv[1], PORT_NUM, &hints, &result) != 0)
-        errExit("getaddrinfo");
+    getaddrinfo(argv[1], PORT_NUM, &hints, &result);
 
     /* Walk through returned list until we find an address structure
        that can be used to successfully connect a socket */
-
     for (rp = result; rp != NULL; rp = rp->ai_next) {
 
         cfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
@@ -53,27 +45,15 @@ main(int argc, char *argv[])
         close(cfd);
     }
 
-    if (rp == NULL)
-        fatal("Could not connect socket to any address");
-
     freeaddrinfo(result);
 
     /* Send requested sequence length, with terminating newline */
-
     reqLenStr = (argc > 2) ? argv[2] : "1";
-    if (write(cfd, reqLenStr, strlen(reqLenStr)) !=
-            (ssize_t) strlen(reqLenStr))
-        fatal("Partial/failed write (reqLenStr)");
-    if (write(cfd, "\n", 1) != 1)
-        fatal("Partial/failed write (newline)");
+    write(cfd, reqLenStr, strlen(reqLenStr));
+    write(cfd, "\n", 1);
 
     /* Read and display sequence number returned by server */
-
     numRead = readLine(cfd, seqNumStr, INT_LEN);
-    if (numRead == -1)
-        errExit("readLine");
-    if (numRead == 0)
-        fatal("Unexpected EOF from server");
 
     printf("Sequence number: %s", seqNumStr);   /* Includes '\n' */
 
