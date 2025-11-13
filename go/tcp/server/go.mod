@@ -1,0 +1,3 @@
+module example/tcp
+
+go 1.25.4
