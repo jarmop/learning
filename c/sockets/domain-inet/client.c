@@ -12,48 +12,53 @@ int main(int argc, char *argv[])
 {
     char *reqLenStr;                    /* Requested length of sequence */
     char seqNumStr[INT_LEN];            /* Start of granted sequence */
-    int cfd;
+    int cSocketFd;
     ssize_t numRead;
-    struct addrinfo hints;
-    struct addrinfo *result, *rp;
+    struct addrinfo aiSpec;
+    struct addrinfo *firstAI, *currAI;
 
     /* Call getaddrinfo() to obtain a list of addresses that
        we can try connecting to */
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_canonname = NULL;
-    hints.ai_addr = NULL;
-    hints.ai_next = NULL;
-    hints.ai_family = AF_UNSPEC;                /* Allows IPv4 or IPv6 */
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_NUMERICSERV;
+    memset(&aiSpec, 0, sizeof(struct addrinfo));
+    aiSpec.ai_canonname = NULL;
+    aiSpec.ai_addr = NULL;
+    aiSpec.ai_next = NULL;
+    aiSpec.ai_family = AF_UNSPEC;                /* Allows IPv4 or IPv6 */
+    aiSpec.ai_socktype = SOCK_STREAM;
+    aiSpec.ai_flags = AI_NUMERICSERV;
 
-    getaddrinfo(argv[1], PORT_NUM, &hints, &result);
+    getaddrinfo(argv[1], PORT_NUM, &aiSpec, &firstAI);
 
     /* Walk through returned list until we find an address structure
        that can be used to successfully connect a socket */
-    for (rp = result; rp != NULL; rp = rp->ai_next) {
+    for (currAI = firstAI; currAI != NULL; currAI = currAI->ai_next) {
+        cSocketFd = socket(
+            currAI->ai_family, 
+            currAI->ai_socktype, 
+            currAI->ai_protocol
+        );
 
-        cfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if (cfd == -1)
-            continue;                   /* On error, try next address */
+        // On error, try next address
+        if (cSocketFd == -1)
+            continue;                   
 
-        if (connect(cfd, rp->ai_addr, rp->ai_addrlen) == 0)
+        if (connect(cSocketFd, currAI->ai_addr, currAI->ai_addrlen) == 0)
             break;                              /* Success */
 
         /* Connect failed: close this socket and try next address */
 
-        close(cfd);
+        close(cSocketFd);
     }
 
-    freeaddrinfo(result);
+    freeaddrinfo(firstAI);
 
     /* Send requested sequence length, with terminating newline */
     reqLenStr = (argc > 2) ? argv[2] : "1";
-    write(cfd, reqLenStr, strlen(reqLenStr));
-    write(cfd, "\n", 1);
+    write(cSocketFd, reqLenStr, strlen(reqLenStr));
+    write(cSocketFd, "\n", 1);
 
     /* Read and display sequence number returned by server */
-    numRead = readLine(cfd, seqNumStr, INT_LEN);
+    numRead = readLine(cSocketFd, seqNumStr, INT_LEN);
 
     printf("Sequence number: %s", seqNumStr);   /* Includes '\n' */
 

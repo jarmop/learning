@@ -11,50 +11,72 @@
 #define BACKLOG 50
 #define ADDRSTRLEN (NI_MAXHOST + NI_MAXSERV + 10)
 
-int initListeningSocket(int lSocket)
+int initListeningSocket(int lSocketFd)
 {
     int optval;
-    struct addrinfo hints;
-    struct addrinfo *result, *currResult;
+    struct addrinfo aiSpec;
+    struct addrinfo *firstAI, *currAI;
 
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_canonname = NULL;
-    hints.ai_addr = NULL;
-    hints.ai_next = NULL;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_family = AF_UNSPEC;        /* Allows IPv4 or IPv6 */
-    hints.ai_flags = AI_PASSIVE | AI_NUMERICSERV;
+    memset(&aiSpec, 0, sizeof(struct addrinfo));
+    // options.ai_addr = NULL;
+    // options.ai_canonname = NULL;
+    // options.ai_next = NULL;
+    aiSpec.ai_flags = AI_PASSIVE | AI_NUMERICSERV;
+    aiSpec.ai_family = AF_UNSPEC;        /* Allows IPv4 or IPv6 */
+    aiSpec.ai_socktype = SOCK_STREAM;
 
-    /* Get a list of addresses for binding to. The hints argument specifies
-    criteria for selecting the values returned in the result list */
-    getaddrinfo(NULL, PORT_NUM, &hints, &result);
+    /** 
+     * Get a list of potential IP address structures from the local DNS for
+     * binding the listening socket to. The hints argument specifies criteria for
+     * selecting the addrinfo structures.    
+     * 
+     * There are several reasons why the linked list may have more than one 
+     * addrinfo structure, including: 
+     *   - the network host is multihomed, accessible over multiple protocols 
+     *     (for example, both AF_INET and AF_INET6); 
+     *   - the same service is available from multiple socket types (one
+     *     SOCK_STREAM address and another SOCK_DGRAM address, for example) 
+     */
+    getaddrinfo(NULL, PORT_NUM, &aiSpec, &firstAI);
 
     /* Walk through returned list until we find an address structure
        that can be used to successfully create and bind a socket */
     optval = 1;
-    for (currResult = result; currResult != NULL; currResult = currResult->ai_next) {
-        lSocket = socket(
-            currResult->ai_family, 
-            currResult->ai_socktype, 
-            currResult->ai_protocol
+    for (currAI = firstAI; currAI != NULL; currAI = currAI->ai_next) {
+        lSocketFd = socket(
+            currAI->ai_family, 
+            currAI->ai_socktype, 
+            currAI->ai_protocol
         );
-        if (lSocket == -1)
-            continue;                   /* On error, try next address */
 
-        setsockopt(lSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+        // On error, try next address
+        if (lSocketFd == -1) {
+            continue;
+        }
 
-        if (bind(lSocket, currResult->ai_addr, currResult->ai_addrlen) == 0)
-            break;                      /* Success */
+        /**
+         * Set the option SO_REUSEADDR at level SOL_SOCKET to value pointed by 
+         * optval for the socket associated with the lSocketFd file descriptor.
+         * 
+         * The setsockopt() function provides an application program with the
+         * means to control socket behavior. An application program can use
+         * setsockopt() to allocate buffer space, control timeouts, or permit
+         * socket data broadcasts.
+         */
+        setsockopt(lSocketFd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
-        /* bind() failed: close this socket and try next address */
-        close(lSocket);
+        if (bind(lSocketFd, currAI->ai_addr, currAI->ai_addrlen) == 0)
+            break; // Success
+
+        // bind() failed: close this socket and try next address
+        close(lSocketFd);
     }
 
-    listen(lSocket, BACKLOG);
+    listen(lSocketFd, BACKLOG);
 
-    freeaddrinfo(result);
+    freeaddrinfo(firstAI);
 
-    return lSocket;
+    return lSocketFd;
 }
 
 int main(int argc, char *argv[])
@@ -63,20 +85,20 @@ int main(int argc, char *argv[])
     char reqLenStr[INT_LEN];            /* Length of requested sequence */
     char seqNumStr[INT_LEN];            /* Start of granted sequence */
     struct sockaddr_storage claddr;
-    int lSocket, cSocket, reqLen;
+    int lSocketFd, cSocket, reqLen;
     socklen_t addrlen;
     char addrStr[ADDRSTRLEN];
     char host[NI_MAXHOST];
     char service[NI_MAXSERV];
 
-    lSocket = initListeningSocket(lSocket);
+    lSocketFd = initListeningSocket(lSocketFd);
 
     for (;;) {                  /* Handle clients iteratively */
 
         /* Accept a client connection, obtaining client's address */
 
         addrlen = sizeof(struct sockaddr_storage);
-        cSocket = accept(lSocket, (struct sockaddr *) &claddr, &addrlen);
+        cSocket = accept(lSocketFd, (struct sockaddr *) &claddr, &addrlen);
 
         if (getnameinfo((struct sockaddr *) &claddr, addrlen,
                     host, NI_MAXHOST, service, NI_MAXSERV, 0) == 0) {
