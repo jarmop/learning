@@ -5,6 +5,6 @@
         "*.h": "c"
     },
     "rust-analyzer.linkedProjects": [
-        "rust/iced/counter/Cargo.toml"
+        "rust/gui/iced/counter/Cargo.toml"
     ]
 }
