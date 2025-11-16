@@ -3,5 +3,8 @@
         "*.svg": "html",
         "*.c": "c",
         "*.h": "c"
-    }
+    },
+    "rust-analyzer.linkedProjects": [
+        "rust/iced/counter/Cargo.toml"
+    ]
 }
