@@ -16,6 +16,6 @@ print_char:
 hang:
     jmp hang
  
-msg db 'Hello World mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmma', 13, 10 ; 13 = carriage return, 10 = new line
+msg db 'Hello World!', 13, 10 ; 13 = carriage return, 10 = new line
     times 510-($-$$) db 0 ; add extra bytes to make total file size 512B
     db 0x55, 0xAA         ; magic number to tell (old) BIOS this is a boot sector
