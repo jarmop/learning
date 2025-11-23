@@ -2,10 +2,18 @@
     "files.associations": {
         "*.svg": "html",
         "*.c": "c",
-        "*.h": "c"
+        "*.h": "c",
+        "*.rs": "rust"
     },
     "rust-analyzer.linkedProjects": [
-        "rust/gui/iced/counter/Cargo.toml"
+        "rust/gui/iced/counter/Cargo.toml",
+        "rust/rust_by_example/Cargo.toml"
     ],
-    "editor.tabSize": 2
+    "rust-analyzer.inlayHints.genericParameterHints.const.enable": false,
+    "rust-analyzer.inlayHints.typeHints.enable": false,
+    "rust-analyzer.inlayHints.chainingHints.enable": false,
+    "rust-analyzer.inlayHints.renderColons": false,
+    "rust-analyzer.inlayHints.closingBraceHints.enable": false,
+    "rust-analyzer.inlayHints.expressionAdjustmentHints.disableReborrows": false,
+    "rust-analyzer.inlayHints.parameterHints.enable": false
 }
