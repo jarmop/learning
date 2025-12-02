@@ -10,7 +10,7 @@ ubuntu-24.04.3-desktop-amd64.iso
 
 Create a storage drive for the virtual machine:
 
-```
+```sh
 qemu-img create -f qcow2 ubuntu.img 40G
 ```
 

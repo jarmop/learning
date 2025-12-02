@@ -3,3 +3,4 @@ bin
 main
 target
 a.out
+*.qcow2
