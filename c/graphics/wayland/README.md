@@ -1,5 +1,3 @@
-## For wayland2.c
-
 Generate the xdg-shell header file:
 
 ```sh
