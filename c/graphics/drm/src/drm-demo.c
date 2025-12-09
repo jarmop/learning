@@ -14,54 +14,7 @@
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
-void drawGradient(uint16_t width, u_int16_t height, uint8_t *map, uint32_t pitch) {
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            uint8_t r = (x * 255) / width;
-            uint8_t g = (y * 255) / height;
-            uint8_t b = 128;
-
-            // Combine rgb values into one 3 byte value by shifting r bitwise to the 
-            // left by 2 bytes, and g by 1 byte, and then doing bitwise or for each
-            uint32_t pixel = (r << 16) | (g <<  8) | b;
-
-            memcpy(map + y * pitch + x * 4, &pixel, 4);
-        }
-    }
-}
-
-void drawCheckers(uint16_t width, u_int16_t height, uint8_t *map, uint32_t pitch) {
-    int yinc = height / 10;
-    int xinc = width / 10;
-    for (int y = 0; y < height; y ++) {
-        bool even_y = y/yinc%2 == 0;
-        int scale_a, scale_b;
-        if (even_y) {
-            scale_a = 255; scale_b = 0;
-        } else {
-            scale_a = 0; scale_b = 255;
-        }
-        int scale_a = y/yinc%2 * 255;
-        for (int x = 0; x < width; x ++) {
-            bool even_x = x/xinc%2 == 0;
-            int scale;
-            if (even_x) {
-                scale = scale_a;
-            } else {
-                scale = scale_b;
-            }
-            uint8_t r = scale;
-            uint8_t g = scale;
-            uint8_t b = scale;
-
-            // Combine rgb values into one 3 byte value by shifting r bitwise to the 
-            // left by 2 bytes, and g by 1 byte, and then doing bitwise or for each
-            uint32_t pixel = (r << 16) | (g <<  8) | b;
-
-            memcpy(map + y * pitch + x * 4, &pixel, 4);
-        }
-    }
-}
+#include "drm-demo.h"
 
 int main() {
     // Open the file representing the DRM device
