@@ -1,15 +1,12 @@
-// drm-minimal.c
-// Minimal DRM/KMS dumb-buffer demo.
-// Draws a color gradient on the primary monitor using direct modesetting.
-
-#include <stdio.h>
+// #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <fcntl.h>
+// #include <unistd.h>
+// #include <stdint.h>
+// #include <fcntl.h>
 #include <errno.h>
 #include <sys/mman.h>
+#include <linux/input.h>
 
 #include <xf86drm.h>
 #include <xf86drmMode.h>
@@ -54,11 +51,11 @@ int main() {
     int mode_i = 12;
 
     drmModeModeInfo mode = conn->modes[mode_i];  // choose first mode (usually preferred)
-    fprintf(stderr, "Available modes:\n");
-    for (int i = 0; i < conn->count_modes; i++) {
-        fprintf(stderr, "  %d: %s\n", i, conn->modes[i].name);
-    }
-    fprintf(stderr, "Using mode %d: %s\n", mode_i, mode.name);
+    // fprintf(stderr, "Available modes:\n");
+    // for (int i = 0; i < conn->count_modes; i++) {
+    //     fprintf(stderr, "  %d: %s\n", i, conn->modes[i].name);
+    // }
+    // fprintf(stderr, "Using mode %d: %s\n", mode_i, mode.name);
 
     // Find an encoder + CRTC
     drmModeEncoder *enc = drmModeGetEncoder(fd, conn->encoder_id);
@@ -76,19 +73,21 @@ int main() {
     cdumb.height = mode.vdisplay;
     cdumb.bpp    = 32; // ARGB8888
 
-    if (drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &cdumb) < 0) {
+    int error = drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &cdumb) < 0;
+    if (error) {
         perror("CREATE_DUMB");
         return 1;
     }
 
-    fprintf(stderr, "Screen width in pixels: %d \n", cdumb.width);
-    fprintf(stderr, "Screen height in pixels: %d \n", cdumb.height);
-    fprintf(stderr, "Bytes per pixel: %d \n", cdumb.bpp / 8);
-    fprintf(stderr, "Screen size in bytes: %lld \n", cdumb.size);
+    // fprintf(stderr, "Screen width in pixels: %d \n", cdumb.width);
+    // fprintf(stderr, "Screen height in pixels: %d \n", cdumb.height);
+    // fprintf(stderr, "Bytes per pixel: %d \n", cdumb.bpp / 8);
+    // fprintf(stderr, "Screen size in bytes: %lld \n", cdumb.size);
+    // fprintf(stderr, "Pitch: %d \n", cdumb.pitch);
 
     // Register the dumb buffer as a framebuffer object.
     uint32_t fb_id;
-    int error = drmModeAddFB(fd, cdumb.width, cdumb.height, 24, 32, cdumb.pitch, cdumb.handle, &fb_id);
+    error = drmModeAddFB(fd, cdumb.width, cdumb.height, 24, 32, cdumb.pitch, cdumb.handle, &fb_id);
     if (error) {
         perror("drmModeAddFB");
         return 1;
@@ -109,18 +108,61 @@ int main() {
         return 1;
     }
 
-    // drawGradient(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
-    drawCheckers(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
+    drawGradient(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
+    // drawCheckers(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
 
-    // Display it
-    error = drmModeSetCrtc(fd, crtc_id, fb_id, 0, 0, &conn_id, 1, &mode);
-    if (error) {
-        perror("drmModeSetCrtc");
-        return 1;
+    int mouse_fd = open("/dev/input/event3", O_RDONLY | O_CLOEXEC);
+    struct input_event ev;
+    int mouse_x = -1; int mouse_y = -1;
+    
+    // evtest Max 65535
+    // int screen_width = 1200; int screen_height = 800;
+    // int max_abs_x = 65482; int max_abs_y = 65452;
+    int screen_width = 800; int screen_height = 600;
+    int max_abs_x = 65452; int max_abs_y = 65424;
+
+    int track_mouse = 1;
+    while (track_mouse) {
+        read(mouse_fd, &ev, sizeof(ev));
+
+        if (ev.type == EV_REL) {
+            if (ev.code == REL_X) mouse_x += ev.value;
+            if (ev.code == REL_Y) mouse_y += ev.value;
+            fprintf(stderr, "mouse x: %d, y: %d\n", mouse_x, mouse_y);
+        }
+
+        if (ev.type == EV_ABS) {
+            if (ev.code == REL_X) mouse_x = ev.value * screen_width / max_abs_x;
+            if (ev.code == REL_Y) mouse_y = ev.value * screen_height / max_abs_y;
+            fprintf(stderr, "mouse x: %d, y: %d\n", mouse_x, mouse_y);
+        }
+
+        if (ev.type == EV_KEY && ev.code == BTN_LEFT) {
+            if (ev.value == 1) printf("Left button pressed\n");
+            if (ev.value == 0) {
+                printf("Left button released\n");
+                track_mouse = 0;
+            }
+        }
+
+        // Redraw cursor here
+        if (ev.type == EV_ABS && mouse_x > 0 && mouse_x < cdumb.width - 10 && mouse_y > 0 && mouse_y < cdumb.height - 10) {
+            fprintf(stderr, "Draw mouse\n");
+            drawPlain(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
+            drawMouse(mouse_x, mouse_y, map, cdumb.pitch);
+        }
+
+        // Display it with the KMS modeset call
+        error = drmModeSetCrtc(fd, crtc_id, fb_id, 0, 0, &conn_id, 1, &mode);
+        if (error) {
+            perror("drmModeSetCrtc");
+            return 1;
+        }
     }
 
-    fprintf(stderr, "Gradient displayed! Sleeping 5 seconds…\n");
-    sleep(5);
+    // mouse();
+
+    // sleep(5);
 
     // Cleanup: unmap, rmfb, destroy dumb buffer
     munmap(map, cdumb.size);

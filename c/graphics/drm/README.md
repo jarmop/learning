@@ -9,3 +9,11 @@ apk add libdrm-dev linux-headers musl-dev
 ```sh
 gcc drm-demo.c  $(pkg-config --cflags --libs libdrm) -std=gnu11
 ```
+
+## Useful commands for Alpine:
+
+List input devices:
+
+```sh
+cat /proc/bus/input/devices
+```
