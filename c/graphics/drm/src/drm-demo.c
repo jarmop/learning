@@ -14,6 +14,18 @@
 #include "drm-demo.h"
 
 int main() {
+    // alpine
+    char mouse_event[] = "/dev/input/event3";
+    int mode_i = 12;
+    int screen_width = 800; int screen_height = 600;
+    int max_abs_x = 65452; int max_abs_y = 65424;
+
+    // ubuntu
+    // char mouse_event[] = "/dev/input/event2";
+    // int mode_i = 0;
+    // int screen_width = 1280; int screen_height = 800;
+    // int max_abs_x = 65482; int max_abs_y = 65452;
+
     // Open the file representing the DRM device
     // CLOEXEC = close on exec
     int fd = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
@@ -48,14 +60,13 @@ int main() {
         return 1;
     }
 
-    int mode_i = 12;
 
     drmModeModeInfo mode = conn->modes[mode_i];  // choose first mode (usually preferred)
-    // fprintf(stderr, "Available modes:\n");
-    // for (int i = 0; i < conn->count_modes; i++) {
-    //     fprintf(stderr, "  %d: %s\n", i, conn->modes[i].name);
-    // }
-    // fprintf(stderr, "Using mode %d: %s\n", mode_i, mode.name);
+    fprintf(stderr, "Available modes:\n");
+    for (int i = 0; i < conn->count_modes; i++) {
+        fprintf(stderr, "  %d: %s\n", i, conn->modes[i].name);
+    }
+    fprintf(stderr, "Using mode %d: %s\n", mode_i, mode.name);
 
     // Find an encoder + CRTC
     drmModeEncoder *enc = drmModeGetEncoder(fd, conn->encoder_id);
@@ -79,11 +90,11 @@ int main() {
         return 1;
     }
 
-    // fprintf(stderr, "Screen width in pixels: %d \n", cdumb.width);
-    // fprintf(stderr, "Screen height in pixels: %d \n", cdumb.height);
-    // fprintf(stderr, "Bytes per pixel: %d \n", cdumb.bpp / 8);
-    // fprintf(stderr, "Screen size in bytes: %lld \n", cdumb.size);
-    // fprintf(stderr, "Pitch: %d \n", cdumb.pitch);
+    fprintf(stderr, "Screen width in pixels: %d \n", cdumb.width);
+    fprintf(stderr, "Screen height in pixels: %d \n", cdumb.height);
+    fprintf(stderr, "Bytes per pixel: %d \n", cdumb.bpp / 8);
+    fprintf(stderr, "Screen size in bytes: %lld \n", cdumb.size);
+    fprintf(stderr, "Pitch: %d \n", cdumb.pitch);
 
     // Register the dumb buffer as a framebuffer object.
     uint32_t fb_id;
@@ -108,19 +119,16 @@ int main() {
         return 1;
     }
 
-    drawGradient(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
+    // drawGradient(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
     // drawCheckers(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
 
-    int mouse_fd = open("/dev/input/event3", O_RDONLY | O_CLOEXEC);
+    int mouse_fd = open(mouse_event, O_RDONLY | O_CLOEXEC);
+
+    fprintf(stderr, "Mousefile: %s \n", mouse_event);
+
     struct input_event ev;
     int mouse_x = -1; int mouse_y = -1;
     
-    // evtest Max 65535
-    // int screen_width = 1200; int screen_height = 800;
-    // int max_abs_x = 65482; int max_abs_y = 65452;
-    int screen_width = 800; int screen_height = 600;
-    int max_abs_x = 65452; int max_abs_y = 65424;
-
     int track_mouse = 1;
     while (track_mouse) {
         read(mouse_fd, &ev, sizeof(ev));
@@ -132,8 +140,14 @@ int main() {
         }
 
         if (ev.type == EV_ABS) {
-            if (ev.code == REL_X) mouse_x = ev.value * screen_width / max_abs_x;
-            if (ev.code == REL_Y) mouse_y = ev.value * screen_height / max_abs_y;
+            if (ev.code == REL_X) {
+                mouse_x = ev.value * screen_width / max_abs_x;
+                fprintf(stderr, "ev.value x: %d\n", ev.value);
+            }
+            if (ev.code == REL_Y) { 
+                mouse_y = ev.value * screen_height / max_abs_y; 
+                fprintf(stderr, "ev.value x: %d\n", ev.value);
+            }
             fprintf(stderr, "mouse x: %d, y: %d\n", mouse_x, mouse_y);
         }
 
