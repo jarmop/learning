@@ -1,22 +1,33 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <wayland-server.h>
-
-// struct my_state {
-//     /* Globals */
-//     struct wl_display *wl_display;
-//     struct wl_registry *wl_registry;
-//     struct wl_shm *wl_shm;
-//     struct wl_compositor *wl_compositor;
-//     struct xdg_wm_base *xdg_wm_base;
-//     /* Objects */
-//     struct wl_surface *wl_surface;
-//     struct xdg_surface *xdg_surface;
-//     struct xdg_toplevel *xdg_toplevel;
-// };
 
 struct my_state {
     /* Globals */
     struct wl_display *wl_display;
+    // struct my_output *client_outputs[5];
+};
+
+struct my_output {
+    struct wl_resource *resource;
+    struct my_state *state;
+};
+
+static void wl_output_handle_resource_destroy(struct wl_resource *resource)
+{
+    struct my_output *client_output = wl_resource_get_user_data(resource);
+
+    // TODO: Clean up resource
+
+    // remove_to_list(client_output->state->client_outputs, client_output);
+}
+
+static void wl_output_handle_release(struct wl_client *client, struct wl_resource *resource) {
+    wl_resource_destroy(resource);
+}
+
+static const struct wl_output_interface wl_output_implementation = {
+    .release = wl_output_handle_release,
 };
 
 static void wl_output_handle_bind(
@@ -27,7 +38,41 @@ static void wl_output_handle_bind(
 ) {
     fprintf(stderr, "Binding to wl_output.\n");
     struct my_state *state = data;
-    // TODO
+    
+    struct my_output *client_output = calloc(1, sizeof(struct my_output));
+
+    struct wl_resource *resource = wl_resource_create(
+        client, 
+        &wl_output_interface, 
+        wl_output_interface.version, 
+        id
+    );
+
+    wl_resource_set_implementation(
+        resource, 
+        &wl_output_implementation,
+        client_output, 
+        wl_output_handle_resource_destroy
+    );
+
+    client_output->resource = resource;
+    client_output->state = state;
+
+    wl_output_send_geometry(
+        resource, 
+        0,
+        0,
+        // 1920,
+        // 1080,
+        1280,
+        800,
+        WL_OUTPUT_SUBPIXEL_UNKNOWN, 
+        "Foobar, Inc",
+        "Fancy Monitor 9001 4K HD 120 FPS Noscope",
+        WL_OUTPUT_TRANSFORM_NORMAL
+    );
+
+    // add_to_list(state->client_outputs, client_output);
 }
 
 int main(int argc, char *argv[]) {
