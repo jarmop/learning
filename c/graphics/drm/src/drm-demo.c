@@ -15,16 +15,16 @@
 
 int main() {
     // alpine
-    char mouse_event[] = "/dev/input/event3";
-    int mode_i = 12;
-    int screen_width = 800; int screen_height = 600;
-    int max_abs_x = 65452; int max_abs_y = 65424;
+    // char mouse_event[] = "/dev/input/event3";
+    // int mode_i = 12;
+    // int screen_width = 800; int screen_height = 600;
+    // int max_abs_x = 65452; int max_abs_y = 65424;
 
     // ubuntu
-    // char mouse_event[] = "/dev/input/event2";
-    // int mode_i = 0;
-    // int screen_width = 1280; int screen_height = 800;
-    // int max_abs_x = 65482; int max_abs_y = 65452;
+    char mouse_event[] = "/dev/input/event2";
+    int mode_i = 0;
+    int screen_width = 1280; int screen_height = 800;
+    int max_abs_x = 65482; int max_abs_y = 65452;
 
     // Open the file representing the DRM device
     // CLOEXEC = close on exec
@@ -146,7 +146,7 @@ int main() {
             }
             if (ev.code == REL_Y) { 
                 mouse_y = ev.value * screen_height / max_abs_y; 
-                fprintf(stderr, "ev.value x: %d\n", ev.value);
+                fprintf(stderr, "ev.value y: %d\n", ev.value);
             }
             fprintf(stderr, "mouse x: %d, y: %d\n", mouse_x, mouse_y);
         }
