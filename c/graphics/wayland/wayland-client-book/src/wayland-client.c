@@ -50,7 +50,6 @@ static int allocate_shm_file(size_t size) {
     return fd;
 }
 
-/* Wayland code */
 struct client_state {
     /* Globals */
     struct wl_display *wl_display;
@@ -64,9 +63,7 @@ struct client_state {
     struct xdg_toplevel *xdg_toplevel;
 };
 
-static void
-wl_buffer_release(void *data, struct wl_buffer *wl_buffer)
-{
+static void wl_buffer_release(void *data, struct wl_buffer *wl_buffer) {
     /* Sent by the compositor when it's no longer using this buffer */
     wl_buffer_destroy(wl_buffer);
 }
