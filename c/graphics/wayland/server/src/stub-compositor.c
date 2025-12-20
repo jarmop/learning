@@ -24,6 +24,7 @@ static struct compositor comp;
 /* wl_buffer implementation */
 
 static void buffer_destroy(struct wl_client *client, struct wl_resource *resource) {
+    fprintf(stderr, "buffer_destroy\n");
     wl_resource_destroy(resource);
 }
 
@@ -40,6 +41,7 @@ struct shm_pool {
 };
 
 static void shm_pool_destroy(struct wl_client *client, struct wl_resource *resource) {
+    fprintf(stderr, "shm_pool_destroy\n");
     struct shm_pool *pool = wl_resource_get_user_data(resource);
     munmap(pool->data, pool->size);
     free(pool);
@@ -56,12 +58,14 @@ static void shm_pool_create_buffer(
     int32_t stride,
     uint32_t format
 ) {
+    fprintf(stderr, "shm_pool_create_buffer\n");
     struct wl_resource *buffer = wl_resource_create(client, &wl_buffer_interface, 1, id);
-
     wl_resource_set_implementation(buffer, &buffer_impl, NULL, NULL);
 }
 
-static void shm_pool_resize(struct wl_client *client, struct wl_resource *resource, int32_t size) {}
+static void shm_pool_resize(struct wl_client *client, struct wl_resource *resource, int32_t size) {
+    fprintf(stderr, "shm_pool_resize\n");
+}
 
 static const struct wl_shm_pool_interface shm_pool_impl = {
     .destroy = shm_pool_destroy,
@@ -79,6 +83,7 @@ static void shm_create_pool(
     int fd,
     int32_t size
 ) {
+    fprintf(stderr, "shm_create_pool\n");
     struct shm_pool *pool = calloc(1, sizeof *pool);
     pool->size = size;
     pool->data = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
@@ -97,6 +102,7 @@ static const struct wl_shm_interface shm_impl = {
 /* wl_surface implementation */
 
 static void surface_destroy(struct wl_client *client, struct wl_resource *resource) {
+    fprintf(stderr, "surface_destroy\n");
     wl_resource_destroy(resource);
 }
 
@@ -107,6 +113,7 @@ static void surface_attach(
     int32_t x,
     int32_t y
 ) {
+    fprintf(stderr, "surface_attach\n");
     (void)client;
     (void)resource;
     (void)buffer;
@@ -122,10 +129,11 @@ static void surface_damage(
     int32_t width,
     int32_t height
 ) {
-
+    fprintf(stderr, "surface_damage\n");
 }
 
 static void surface_commit(struct wl_client *client, struct wl_resource *resource) {
+    fprintf(stderr, "surface_commit\n");
     (void)client;
     (void)resource;
 }
@@ -141,6 +149,7 @@ static const struct wl_surface_interface surface_impl = {
 /* wl_compositor implementation */
 
 static void compositor_create_surface(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
+    fprintf(stderr, "compositor_create_surface\n");
     struct wl_resource *surface = wl_resource_create(client, &wl_surface_interface, 4, id);
     wl_resource_set_implementation(surface, &surface_impl, NULL, NULL);
 }
@@ -154,6 +163,7 @@ static const struct wl_compositor_interface compositor_impl = {
 /* xdg_surface and xdg_toplevel implementations */
 
 static void xdg_toplevel_destroy(struct wl_client *client, struct wl_resource *resource) {
+    fprintf(stderr, "xdg_toplevel_destroy\n");
     wl_resource_destroy(resource);
 }
 
@@ -162,15 +172,18 @@ static const struct xdg_toplevel_interface xdg_toplevel_impl = {
 };
 
 static void xdg_surface_get_toplevel(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
+    fprintf(stderr, "xdg_surface_get_toplevel\n");
     struct wl_resource *toplevel = wl_resource_create(client, &xdg_toplevel_interface, 1, id);
     wl_resource_set_implementation(toplevel, &xdg_toplevel_impl, NULL, NULL);
 }
 
 static void xdg_surface_destroy(struct wl_client *client, struct wl_resource *resource) {
+    fprintf(stderr, "xdg_surface_destroy\n");
     wl_resource_destroy(resource);
 }
 
 static void xdg_surface_ack_configure(struct wl_client *client, struct wl_resource *resource, uint32_t serial) {
+    fprintf(stderr, "xdg_surface_ack_configure\n");
     (void)client;
     (void)resource;
     (void)serial;
@@ -186,6 +199,7 @@ static const struct xdg_surface_interface xdg_surface_impl = {
 /* xdg_wm_base implementation */
 
 static void xdg_wm_base_destroy(struct wl_client *client, struct wl_resource *resource) {
+    fprintf(stderr, "xdg_wm_base_destroy\n");
     wl_resource_destroy(resource);
 }
 
@@ -204,6 +218,7 @@ static void xdg_wm_base_get_xdg_surface(
 }
 
 static void xdg_wm_base_pong(struct wl_client *client, struct wl_resource *resource, uint32_t serial) {
+    fprintf(stderr, "xdg_wm_base_pong\n");
     (void)client;
     (void)resource;
     (void)serial;
@@ -220,17 +235,20 @@ static const struct xdg_wm_base_interface xdg_wm_base_impl = {
 /* Registry binders */
 
 static void bind_compositor(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
+    fprintf(stderr, "bind_compositor\n");
     struct wl_resource *res = wl_resource_create(client, &wl_compositor_interface, 4, id);
     wl_resource_set_implementation(res, &compositor_impl, NULL, NULL);
 }
 
 static void bind_shm(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
+    fprintf(stderr, "bind_shm\n");
     struct wl_resource *res = wl_resource_create(client, &wl_shm_interface, 1, id);
     wl_resource_set_implementation(res, &shm_impl, NULL, NULL);
     wl_shm_send_format(res, WL_SHM_FORMAT_XRGB8888);
 }
 
 static void bind_xdg_wm_base(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
+    fprintf(stderr, "bind_xdg_wm_base\n");
     struct wl_resource *res = wl_resource_create(client, &xdg_wm_base_interface, 1, id);
     wl_resource_set_implementation(res, &xdg_wm_base_impl, NULL, NULL);
 }
