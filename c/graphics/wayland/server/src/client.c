@@ -102,6 +102,18 @@ static struct wl_buffer* draw_frame(
     wl_surface_commit(surface);
 }
 
+static void xdg_wm_base_ping(
+    void *data, 
+    struct xdg_wm_base *xdg_wm_base, 
+    uint32_t serial
+) {
+    xdg_wm_base_pong(xdg_wm_base, serial);
+}
+
+static const struct xdg_wm_base_listener xdg_wm_base_listener = {
+    .ping = xdg_wm_base_ping,
+};
+
 static void registry_global(
     void *data, 
     struct wl_registry *wl_registry,
@@ -118,6 +130,7 @@ static void registry_global(
         state->shm = wl_registry_bind(wl_registry, name, &wl_shm_interface, 1);
     } else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
         state->xdg_wm_base = wl_registry_bind(wl_registry, name, &xdg_wm_base_interface, 1);
+        xdg_wm_base_add_listener(state->xdg_wm_base, &xdg_wm_base_listener, state);
     }
 }
 
