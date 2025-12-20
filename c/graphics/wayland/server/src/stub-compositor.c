@@ -134,7 +134,7 @@ surface_commit(struct wl_client *client,
 }
 
 static const struct wl_surface_interface surface_impl = {
-    .destroy = wl_resource_destroy,
+    // .destroy = wl_resource_destroy,
     .attach = surface_attach,
     .commit = surface_commit,
 };
@@ -150,7 +150,7 @@ compositor_create_surface(struct wl_client *client,
     struct wl_resource *surface =
         wl_resource_create(client, &wl_surface_interface, 4, id);
 
-    wl_resource_set_implementation(surface, &surface_impl, NULL, NULL);
+    wl_resource_set_implementation(surface, &surface_impl, NULL, wl_resource_destroy);
 }
 
 static const struct wl_compositor_interface compositor_impl = {
@@ -273,16 +273,16 @@ bind_xdg_wm_base(struct wl_client *client, void *data,
     wl_resource_set_implementation(res, &xdg_wm_base_impl, NULL, NULL);
 }
 
-static void
-registry_global(void *data,
-                struct wl_registry *registry,
-                uint32_t name,
-                const char *interface,
-                uint32_t version)
-{
-    if (strcmp(interface, "wl_compositor") == 0)
-        wl_registry_bind(registry, name, &wl_compositor_interface, 4);
-}
+// static void
+// registry_global(void *data,
+//                 struct wl_registry *registry,
+//                 uint32_t name,
+//                 const char *interface,
+//                 uint32_t version)
+// {
+//     if (strcmp(interface, "wl_compositor") == 0)
+//         wl_registry_bind(registry, name, &wl_compositor_interface, 4);
+// }
 
 /* ------------------------------------------------ */
 /* Main */
