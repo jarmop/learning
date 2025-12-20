@@ -21,7 +21,7 @@ struct compositor {
 static struct compositor comp;
 
 /* ------------------------------------------------ */
-/* wl_buffer */
+/* wl_buffer implementation */
 
 static void buffer_destroy(struct wl_client *client, struct wl_resource *resource) {
     wl_resource_destroy(resource);
@@ -32,7 +32,7 @@ static const struct wl_buffer_interface buffer_impl = {
 };
 
 /* ------------------------------------------------ */
-/* wl_shm_pool */
+/* wl_shm_pool implementation */
 
 struct shm_pool {
     void *data;
@@ -61,9 +61,7 @@ static void shm_pool_create_buffer(
     wl_resource_set_implementation(buffer, &buffer_impl, NULL, NULL);
 }
 
-static void shm_pool_resize(struct wl_client *client, struct wl_resource *resource, int32_t size) {
-    /* ignored */
-}
+static void shm_pool_resize(struct wl_client *client, struct wl_resource *resource, int32_t size) {}
 
 static const struct wl_shm_pool_interface shm_pool_impl = {
     .destroy = shm_pool_destroy,
@@ -72,7 +70,7 @@ static const struct wl_shm_pool_interface shm_pool_impl = {
 };
 
 /* ------------------------------------------------ */
-/* wl_shm */
+/* wl_shm implementation */
 
 static void shm_create_pool(
     struct wl_client *client,
@@ -96,11 +94,11 @@ static const struct wl_shm_interface shm_impl = {
 };
 
 /* ------------------------------------------------ */
-/* wl_surface */
+/* wl_surface implementation */
 
-struct surface {
-    struct wl_resource *resource;
-};
+static void surface_destroy(struct wl_client *client, struct wl_resource *resource) {
+    wl_resource_destroy(resource);
+}
 
 static void surface_attach(
     struct wl_client *client,
@@ -133,14 +131,14 @@ static void surface_commit(struct wl_client *client, struct wl_resource *resourc
 }
 
 static const struct wl_surface_interface surface_impl = {
-    // .destroy = wl_resource_destroy, // opcode 0
+    .destroy = surface_destroy, // opcode 0
     .attach = surface_attach, // opcode 1
     .damage = surface_damage, // opcode 2
     .commit = surface_commit,
 };
 
 /* ------------------------------------------------ */
-/* wl_compositor */
+/* wl_compositor implementation */
 
 static void compositor_create_surface(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
     struct wl_resource *surface = wl_resource_create(client, &wl_surface_interface, 4, id);
@@ -153,11 +151,19 @@ static const struct wl_compositor_interface compositor_impl = {
 };
 
 /* ------------------------------------------------ */
-/* xdg_surface / xdg_toplevel */
+/* xdg_surface and xdg_toplevel implementations */
+
+static void xdg_toplevel_destroy(struct wl_client *client, struct wl_resource *resource) {
+    wl_resource_destroy(resource);
+}
+
+static const struct xdg_toplevel_interface xdg_toplevel_impl = {
+    .destroy = xdg_toplevel_destroy,
+};
 
 static void xdg_surface_get_toplevel(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
-    // struct wl_resource *toplevel = wl_resource_create(client, &xdg_toplevel_interface, 1, id);
-    // wl_resource_set_implementation(toplevel, &xdg_toplevel_impl, NULL, NULL);
+    struct wl_resource *toplevel = wl_resource_create(client, &xdg_toplevel_interface, 1, id);
+    wl_resource_set_implementation(toplevel, &xdg_toplevel_impl, NULL, NULL);
 }
 
 static void xdg_surface_destroy(struct wl_client *client, struct wl_resource *resource) {
@@ -176,16 +182,8 @@ static const struct xdg_surface_interface xdg_surface_impl = {
     .ack_configure = xdg_surface_ack_configure, // opcode 4
 };
 
-static void xdg_toplevel_destroy(struct wl_client *client, struct wl_resource *resource) {
-    wl_resource_destroy(resource);
-}
-
-static const struct xdg_toplevel_interface xdg_toplevel_impl = {
-    .destroy = xdg_toplevel_destroy,
-};
-
 /* ------------------------------------------------ */
-/* xdg_wm_base */
+/* xdg_wm_base implementation */
 
 static void xdg_wm_base_destroy(struct wl_client *client, struct wl_resource *resource) {
     wl_resource_destroy(resource);
@@ -219,7 +217,7 @@ static const struct xdg_wm_base_interface xdg_wm_base_impl = {
 };
 
 /* ------------------------------------------------ */
-/* Registry */
+/* Registry binders */
 
 static void bind_compositor(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
     struct wl_resource *res = wl_resource_create(client, &wl_compositor_interface, 4, id);
