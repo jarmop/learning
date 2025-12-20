@@ -116,14 +116,26 @@ static void surface_attach(
     (void)y;
 }
 
+static void surface_damage(
+    struct wl_client *client,
+    struct wl_resource *resource,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height
+) {
+
+}
+
 static void surface_commit(struct wl_client *client, struct wl_resource *resource) {
     (void)client;
     (void)resource;
 }
 
 static const struct wl_surface_interface surface_impl = {
-    // .destroy = wl_resource_destroy,
-    .attach = surface_attach,
+    // .destroy = wl_resource_destroy, // opcode 0
+    .attach = surface_attach, // opcode 1
+    .damage = surface_damage, // opcode 2
     .commit = surface_commit,
 };
 
@@ -143,6 +155,11 @@ static const struct wl_compositor_interface compositor_impl = {
 /* ------------------------------------------------ */
 /* xdg_surface / xdg_toplevel */
 
+static void xdg_surface_get_toplevel(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
+    // struct wl_resource *toplevel = wl_resource_create(client, &xdg_toplevel_interface, 1, id);
+    // wl_resource_set_implementation(toplevel, &xdg_toplevel_impl, NULL, NULL);
+}
+
 static void xdg_surface_destroy(struct wl_client *client, struct wl_resource *resource) {
     wl_resource_destroy(resource);
 }
@@ -154,8 +171,9 @@ static void xdg_surface_ack_configure(struct wl_client *client, struct wl_resour
 }
 
 static const struct xdg_surface_interface xdg_surface_impl = {
-    .destroy = xdg_surface_destroy,
-    .ack_configure = xdg_surface_ack_configure,
+    .destroy = xdg_surface_destroy, // opcode 0
+    .get_toplevel = xdg_surface_get_toplevel, // opcode 1
+    .ack_configure = xdg_surface_ack_configure, // opcode 4
 };
 
 static void xdg_toplevel_destroy(struct wl_client *client, struct wl_resource *resource) {
