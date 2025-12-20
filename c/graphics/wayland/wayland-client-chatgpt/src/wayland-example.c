@@ -26,10 +26,17 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
     .ping = xdg_wm_base_ping,
 };
 
+// Configuration state
+static int configured = 0;
+static int win_width = 400;
+static int win_height = 300;
+static uint32_t configure_serial;
+
 static void __registry_handler(
     void *data,
     struct wl_registry *registry,
-    uint32_t id, const char *interface,
+    uint32_t id, 
+    const char *interface,
     uint32_t version
 ) {
     if (strcmp(interface, wl_compositor_interface.name) == 0) {
@@ -47,6 +54,38 @@ static void __registry_remove(void *data, struct wl_registry *registry, uint32_t
 static const struct wl_registry_listener registry_listener = {
     .global = __registry_handler,
     .global_remove = __registry_remove
+};
+
+static void xdg_surface_configure(
+    void *data, 
+    struct xdg_surface *xdg_surface, 
+    uint32_t serial
+) {
+    configure_serial = serial;
+    xdg_surface_ack_configure(xdg_surface, serial);
+    configured = 1;
+}
+
+static const struct xdg_surface_listener xdg_surface_listener = {
+    .configure = xdg_surface_configure,
+};
+
+static void xdg_toplevel_configure(
+    void *data, 
+    struct xdg_toplevel *toplevel, 
+    int32_t width, 
+    int32_t height, 
+    struct wl_array *states
+) {
+    if (width > 0)
+        win_width = width;
+    if (height > 0)
+        win_height = height;
+}
+
+static const struct xdg_toplevel_listener xdg_toplevel_listener = {
+    .configure = xdg_toplevel_configure,
+    .close = NULL,
 };
 
 static struct wl_buffer *__create_buffer(int width, int height) {
@@ -77,7 +116,7 @@ static struct wl_buffer *__create_buffer(int width, int height) {
 }
 
 int main() {
-    struct wl_display *display = my_wl_display_connect(NULL);
+    struct wl_display *display = wl_display_connect(NULL);
     if (!display) {
         fprintf(stderr, "No Wayland display\n");
         return 1;
@@ -87,7 +126,7 @@ int main() {
      * Initialize the global "compositor", "shm" and "wm_base" variables.
      * Registry_listener uses wl_compositor and wl_registry protocols
      */ 
-    struct wl_registry *registry = my_wl_display_get_registry(display);
+    struct wl_registry *registry = wl_display_get_registry(display);
     wl_registry_add_listener(registry, &registry_listener, NULL);
     wl_display_roundtrip(display);
     if (!compositor || !shm || !wm_base) {
@@ -98,17 +137,21 @@ int main() {
     // Create surfaces
     struct wl_surface *surface = wl_compositor_create_surface(compositor);
     struct xdg_surface *xdg_surface = xdg_wm_base_get_xdg_surface(wm_base, surface);
+    xdg_surface_add_listener(xdg_surface, &xdg_surface_listener, NULL);
     struct xdg_toplevel *toplevel = xdg_surface_get_toplevel(xdg_surface);
-    // xdg_toplevel_set_title(toplevel, "Wayland Hello");
-    // wl_surface_commit(surface);
+    xdg_toplevel_add_listener(toplevel, &xdg_toplevel_listener, NULL);
+    xdg_toplevel_set_title(toplevel, "Wayland Hello");
+    wl_surface_commit(surface);
+
+    while (!configured) {
+        wl_display_dispatch(display);
+    }
 
     struct wl_buffer *buffer = __create_buffer(400, 300);
-
     wl_surface_attach(surface, buffer, 0, 0);
     wl_surface_commit(surface);
 
-    while (1) {
-        wl_display_dispatch(display);
+    while (wl_display_dispatch(display)) {
     }
 
     return 0;
