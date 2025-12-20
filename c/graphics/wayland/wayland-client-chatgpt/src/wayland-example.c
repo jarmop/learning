@@ -14,6 +14,18 @@ static struct wl_compositor *compositor; // For wl_surface
 static struct wl_shm *shm; // For allocating shared memory buffers
 static struct xdg_wm_base *wm_base; // For creating xdg-shell surfaces
 
+static void xdg_wm_base_ping(
+    void *data, 
+    struct xdg_wm_base *xdg_wm_base, 
+    uint32_t serial
+) {
+    xdg_wm_base_pong(xdg_wm_base, serial);
+}
+
+static const struct xdg_wm_base_listener xdg_wm_base_listener = {
+    .ping = xdg_wm_base_ping,
+};
+
 static void __registry_handler(
     void *data,
     struct wl_registry *registry,
@@ -26,6 +38,7 @@ static void __registry_handler(
         shm = wl_registry_bind(registry, id, &wl_shm_interface, 1);
     } else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
         wm_base = wl_registry_bind(registry, id, &xdg_wm_base_interface, 1);
+        xdg_wm_base_add_listener(wm_base, &xdg_wm_base_listener, data);
     }
 }
 
