@@ -5,3 +5,6 @@ build:
 
 run: build
 	@./client
+
+build-stub-compositor:
+	gcc src/stub-compositor.c src/xdg-shell-protocol.c $(shell pkg-config --cflags --libs wayland-server) -o stub-compositor

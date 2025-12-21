@@ -13,12 +13,13 @@
 /* ------------------------------------------------ */
 /* Globals */
 
-struct compositor {
+struct state {
     struct wl_display *display;
     struct wl_event_loop *loop;
+    struct shm_pool *pool;
 };
 
-static struct compositor comp;
+static struct state state;
 
 /* ------------------------------------------------ */
 /* wl_buffer implementation */
@@ -87,6 +88,7 @@ static void shm_create_pool(
     struct shm_pool *pool = calloc(1, sizeof *pool);
     pool->size = size;
     pool->data = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+    state.pool = pool;
 
     struct wl_resource *res =
         wl_resource_create(client, &wl_shm_pool_interface, 1, id);
@@ -116,7 +118,7 @@ static void surface_attach(
     fprintf(stderr, "surface_attach\n");
     (void)client;
     (void)resource;
-    (void)buffer;
+    // (void)buffer;
     (void)x;
     (void)y;
 }
@@ -134,6 +136,9 @@ static void surface_damage(
 
 static void surface_commit(struct wl_client *client, struct wl_resource *resource) {
     fprintf(stderr, "surface_commit\n");
+    struct shm_pool *pool = state.pool;
+    uint32_t *pool_data = pool->data;
+    fprintf(stderr, "pool data: %x\n", pool_data[0]);
     (void)client;
     (void)resource;
 }
@@ -213,7 +218,7 @@ static void xdg_wm_base_get_xdg_surface(
 
     wl_resource_set_implementation(xdg_surface, &xdg_surface_impl, surface, NULL);
 
-    uint32_t serial = wl_display_next_serial(comp.display);
+    uint32_t serial = wl_display_next_serial(state.display);
     xdg_surface_send_configure(xdg_surface, serial);
 }
 
@@ -257,22 +262,22 @@ static void bind_xdg_wm_base(struct wl_client *client, void *data, uint32_t vers
 /* Main */
 
 int main(void) {
-    comp.display = wl_display_create();
-    comp.loop = wl_display_get_event_loop(comp.display);
+    state.display = wl_display_create();
+    state.loop = wl_display_get_event_loop(state.display);
 
-    wl_global_create(comp.display, &wl_compositor_interface, 4, NULL, bind_compositor);
-    wl_global_create(comp.display, &wl_shm_interface, 1, NULL, bind_shm);
-    wl_global_create(comp.display, &xdg_wm_base_interface, 1, NULL, bind_xdg_wm_base);
+    wl_global_create(state.display, &wl_compositor_interface, 4, NULL, bind_compositor);
+    wl_global_create(state.display, &wl_shm_interface, 1, NULL, bind_shm);
+    wl_global_create(state.display, &xdg_wm_base_interface, 1, NULL, bind_xdg_wm_base);
 
-    const char *socket = wl_display_add_socket_auto(comp.display);
+    const char *socket = wl_display_add_socket_auto(state.display);
     if (!socket) {
         fprintf(stderr, "Failed to create socket\n");
         return 1;
     }
 
     fprintf(stderr, "Wayland compositor running on %s\n", socket);
-    wl_display_run(comp.display);
+    wl_display_run(state.display);
 
-    wl_display_destroy(comp.display);
+    wl_display_destroy(state.display);
     return 0;
 }

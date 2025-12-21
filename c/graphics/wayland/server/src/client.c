@@ -72,7 +72,7 @@ static struct wl_buffer* draw_frame(
     const int shm_pool_size = height * stride * 2;
 
     int fd = allocate_shm_file(shm_pool_size);
-    uint8_t *pool_data = mmap(
+    uint32_t *pool_data = mmap(
         NULL, shm_pool_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0
     );
 
@@ -83,22 +83,20 @@ static struct wl_buffer* draw_frame(
         pool, offset, width, height, stride, WL_SHM_FORMAT_XRGB8888
     );
 
-    // uint32_t *pixels = (uint32_t *)&pool_data[offset];
-    // memset(pixels, 0, width * height * 4);
-
-    uint32_t *pixels = (uint32_t *)&pool_data[offset];
+    /* Draw checkerboxed background */
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            if ((x + y / 8 * 8) % 16 < 8) {
-                pixels[y * width + x] = 0xFF666666;
-            } else {
-                pixels[y * width + x] = 0xFFEEEEEE;
-            }
+            if ((x + y / 8 * 8) % 16 < 8)
+                pool_data[y * width + x] = 0xFFFF0000;
+            else
+                pool_data[y * width + x] = 0xFF00FF00;
         }
     }
 
+    // fprintf(stderr, "pool_data --> %x\n", pool_data[0]);
+
     wl_surface_attach(surface, buffer, 0, 0);
-    wl_surface_damage(surface, 0, 0, UINT32_MAX, UINT32_MAX);
+    // wl_surface_damage(surface, 0, 0, UINT32_MAX, UINT32_MAX);
     wl_surface_commit(surface);
 }
 
@@ -167,7 +165,7 @@ int main(int argc, char *argv[]) {
 
     draw_frame(&state, surface);
 
-    wl_surface_commit(surface);
+    // wl_surface_commit(surface);
 
     while(wl_display_dispatch(display)) {
 
