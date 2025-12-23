@@ -42,7 +42,9 @@ qemu-system-x86_64 \
   -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
   -drive if=pflash,format=raw,file=./OVMF_VARS.fd \
   -drive file=ubuntu.img,format=qcow2,if=virtio \
-  -nic user,hostfwd=tcp::2223-:22 \
+  -nic user,hostfwd=tcp::2223-:22 
+
+  # -device virtio-vga-gl \
   # -netdev user,id=n0,hostfwd=tcp::2222-:22 \
   # -device virtio-net,netdev=n0 \
     # -device qxl \

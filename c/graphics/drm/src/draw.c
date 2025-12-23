@@ -51,7 +51,7 @@ void drawCheckers(uint16_t width, uint16_t height, uint8_t *map, uint32_t pitch)
 }
 
 void drawPlain(uint16_t width, uint16_t height, uint8_t *map, uint32_t pitch) {
-    uint8_t r = 0; uint8_t g = 0; uint8_t b = 0;
+    uint8_t r = 0; uint8_t g = 0; uint8_t b = 100;
     // Combine rgb values into one 3 byte value by shifting r bitwise to the 
     // left by 2 bytes, and g by 1 byte, and then doing bitwise or for each
     uint32_t pixel = (r << 16) | (g <<  8) | b;
