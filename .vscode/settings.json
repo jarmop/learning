@@ -16,5 +16,8 @@
     "rust-analyzer.inlayHints.closingBraceHints.enable": false,
     "rust-analyzer.inlayHints.expressionAdjustmentHints.disableReborrows": false,
     "rust-analyzer.inlayHints.parameterHints.enable": false,
-    "cmake.sourceDirectory": "/home/jarmo/development/git-remote/learning/c"
+    "cmake.sourceDirectory": "/home/jarmo/development/git-remote/learning/c",
+    "[markdown]": {
+        "editor.formatOnSave": false
+    }
 }
