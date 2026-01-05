@@ -1,4 +1,4 @@
-    mov al, 0x65     ; character to print
+    mov al, 0x41     ; character to print (A)
 	mov ah, 0x0e     ; 0x0e function number for displaying character 
     int 0x10         ; Raise interrupt 0x10 (17th interrupt vector), BIOS video service(?)
                      ; calls function in ah register placed above (0x0e)

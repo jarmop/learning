@@ -1,5 +1,13 @@
 # x86 64-bit assembly
 
+## How to run
+
+```sh
+./run.sh print.asm
+```
+
+## Some explanations
+
 To run pure assembly programs, you need to run the program from the boot sector.
 
 Simplest test program, the endless loop:
