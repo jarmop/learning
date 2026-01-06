@@ -4,3 +4,9 @@ main
 target
 a.out
 *.qcow2
+*.o
+*.so
+*.efi
+*.EFI
+*.fd
+*.elf
