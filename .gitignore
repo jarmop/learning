@@ -10,3 +10,4 @@ a.out
 *.EFI
 *.fd
 *.elf
+*.bin
