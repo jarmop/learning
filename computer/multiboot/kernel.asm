@@ -14,9 +14,14 @@ section .text           ; Section containing the actual x86 instructions
 global  _start          ; Ld expects there to be a global _start symbol
 
 _start:
-    mov edi, 0xB8000    ; VGA text buffer
-    mov eax, 0x1F41     ; 'A' with bright white on blue
-    mov [edi], eax      ; write character
+    mov edi, 0xB8000    ; store the VGA text buffer address into the destination index register
+    mov eax, 0x0F20     ; VGA encoding: 0 => black background, F => white text, 20 => space character
+    mov ecx, 80*25      ; Run the next loop once for each character spot on a VGA screen (80*25)
+
+.clear:
+    mov [edi], eax
+    add edi, 2
+    loop .clear
 
 .hang:
     hlt
