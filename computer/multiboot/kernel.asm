@@ -3,7 +3,7 @@ MB_FLAG_GRAPHICS    equ 0b100
 MB_FLAGS            equ MB_FLAG_GRAPHICS
 MB_CHECKSUM         equ -(MB_MAGIC + MB_FLAGS)
 
-; The boot loader creates a pointer to this structure when the graphics flag is set
+; When the graphics flag is set, the boot loader stores the address of this structure into the ebx register 
 struc multiboot_info
     .flags           resd 1
     .mem_lower       resd 1
@@ -54,21 +54,37 @@ align 4
     dd 32               ; depth (bits per pixel)
 
 section .bss
-framebuffer  resd 1
-fb_pitch     resd 1
+align 8
+boot_fb_addr   resq 1
+boot_fb_pitch  resd 1
+boot_fb_width  resd 1
+boot_fb_height resd 1
+boot_fb_bpp    resd 1
 
 section .text           ; Section containing the actual x86 instructions
 global  _start          ; Ld expects there to be a global _start symbol
 
 _start:
-    mov esi, ebx
-    mov eax, [esi + multiboot_info.fb_addr_low]
-    mov [framebuffer], eax
-    mov eax, [esi + multiboot_info.fb_pitch]
-    mov [fb_pitch], eax
+    mov esi, ebx                                ; ebx = multiboot_info
 
-    mov edi, [framebuffer]
-    mov eax, [fb_pitch]
+    mov eax, [esi + multiboot_info.fb_addr_low]
+    mov [boot_fb_addr], eax
+    mov dword [boot_fb_addr+4], 0
+
+    mov eax, [esi + multiboot_info.fb_pitch]
+    mov [boot_fb_pitch], eax
+
+    mov eax, [esi + multiboot_info.fb_width]
+    mov [boot_fb_width], eax
+
+    mov eax, [esi + multiboot_info.fb_height]
+    mov [boot_fb_height], eax
+
+    mov eax, [esi + multiboot_info.fb_bpp]
+    mov [boot_fb_bpp], eax
+
+    mov edi, [boot_fb_addr]
+    mov eax, [boot_fb_pitch]
     imul eax, 100
     add edi, eax
     add edi, 400
