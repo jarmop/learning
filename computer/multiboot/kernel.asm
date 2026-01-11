@@ -2,6 +2,11 @@ MB_MAGIC            equ 0x1BADB002
 MB_FLAG_GRAPHICS    equ 0b100
 MB_FLAGS            equ MB_FLAG_GRAPHICS
 MB_CHECKSUM         equ -(MB_MAGIC + MB_FLAGS)
+FB_WIDTH            equ 1024
+FB_HEIGHT           equ 768
+FB_BYTES_PER_PIXEL  equ 4
+FB_BITS_PER_PIXEL   equ FB_BYTES_PER_PIXEL * 8
+FB_PITCH            equ FB_BYTES_PER_PIXEL * FB_WIDTH
 
 ; When the graphics flag is set, the boot loader stores the address of this structure into the ebx register 
 struc multiboot_info
@@ -48,47 +53,38 @@ align 4
     dd 0                ; entry_addr
 
     ; graphics fields (offsets 32-44)
-    dd 0                ; mode_type (0 = linear framebuffer)
-    dd 1024             ; width
-    dd 768              ; height
-    dd 32               ; depth (bits per pixel)
+    dd 0                    ; mode_type (0 = linear framebuffer)
+    dd FB_WIDTH             ; width
+    dd FB_HEIGHT            ; height
+    dd FB_BITS_PER_PIXEL    ; depth (bits per pixel)
 
 section .bss
 align 8
 boot_fb_addr   resq 1
-boot_fb_pitch  resd 1
-boot_fb_width  resd 1
-boot_fb_height resd 1
-boot_fb_bpp    resd 1
 
 section .text           ; Section containing the actual x86 instructions
 global  _start          ; Ld expects there to be a global _start symbol
 
 _start:
-    mov esi, ebx                                ; ebx = multiboot_info
+    mov esi, ebx    ; ebx = multiboot_info
 
     mov eax, [esi + multiboot_info.fb_addr_low]
     mov [boot_fb_addr], eax
     mov dword [boot_fb_addr+4], 0
 
-    mov eax, [esi + multiboot_info.fb_pitch]
-    mov [boot_fb_pitch], eax
+    mov edi, [boot_fb_addr]     ; edi points to the beginning of the framebuffer (top-left corner)
 
-    mov eax, [esi + multiboot_info.fb_width]
-    mov [boot_fb_width], eax
+    ; Move edi 100 pixels along the y-axis
+    mov eax, FB_PITCH   ; eax holds bytes per row
+    imul eax, 100       ; eax holds bytes per 100 rows
+    add edi, eax        ; edi points to the beginning of the 100th row
 
-    mov eax, [esi + multiboot_info.fb_height]
-    mov [boot_fb_height], eax
+    ; Move edi 100 pixels along the x-axis
+    mov eax, FB_BYTES_PER_PIXEL ; eax holds bytes per pixel
+    imul eax, 100               ; eax holds bytes per 100 pixels
+    add edi, eax                ; edi points to the 100th pixel at the 100th row
 
-    mov eax, [esi + multiboot_info.fb_bpp]
-    mov [boot_fb_bpp], eax
-
-    mov edi, [boot_fb_addr]
-    mov eax, [boot_fb_pitch]
-    imul eax, 100
-    add edi, eax
-    add edi, 400
-    mov dword [edi], 0x00FF0000
+    mov dword [edi], 0x0000FF00 ; give green color to the pixel pointed by edi
 
 .hang:
     hlt
