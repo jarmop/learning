@@ -19,5 +19,8 @@
     "cmake.sourceDirectory": "/home/jarmo/development/git-remote/learning/c",
     "[markdown]": {
         "editor.formatOnSave": false
+    },
+    "[c]": {
+        "editor.formatOnSave": false
     }
 }
