@@ -12,3 +12,4 @@ a.out
 *.elf
 *.bin
 *.iso
+*.map
