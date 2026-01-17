@@ -1,3 +1,5 @@
+rm -f kernel.elf kernel.map
+
 riscv64-unknown-elf-gcc \
   -march=rv32i_zicsr -mabi=ilp32 \
   -ffreestanding -nostdlib -fno-builtin \
@@ -11,7 +13,12 @@ qemu-system-riscv32 \
   -M virt -m 16M \
   -bios none \
   -kernel kernel.elf \
-  -nographic 
+  -nographic
+
+# qemu-system-riscv32 \
+#   -M virt -m 16M \
+#   -bios none \
+#   -kernel kernel.elf \
 #   -nographic \
 #   -S -gdb tcp::1234
 

@@ -13,22 +13,26 @@ SECTIONS
 {
   . = ORIGIN(RAM);
 
+  /* Instructions */
   .text : ALIGN(4)
   {
     KEEP(*(.text.entry))
     *(.text .text.*)
   } > RAM
 
+  /* Constants */
   .rodata : ALIGN(4)
   {
     *(.rodata .rodata.*)
   } > RAM
 
+  /* Initialized variables */
   .data : ALIGN(4)
   {
     *(.data .data.*)
   } > RAM
 
+  /* Uninitialized variables */
   .bss : ALIGN(4)
   {
     __bss_start = .;
