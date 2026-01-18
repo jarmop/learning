@@ -1,6 +1,14 @@
     .section .text.entry
     .globl _start
 _start:
+    /** 
+     * According to RISC-V boot convention:
+     * a0 = hartid
+     * a1 = dtb (Device Tree Blob) pointer
+     */
+    mv      s0, a0          /* save hartid */
+    mv      s1, a1          /* save dtb pointer */
+
     la      sp, __stack_top
 
     /**
@@ -21,6 +29,9 @@ _start:
     addi    t0, t0, 4
     j       1b
 2:
+    /* Call C main(hartid, dtb) */
+    mv      a0, s0
+    mv      a1, s1
     call    main
 
 hang:
