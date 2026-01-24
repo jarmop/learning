@@ -3,6 +3,8 @@ bin
 main
 target
 a.out
+xdg-shell-client-protocol.h
+xdg-shell-protocol.c
 *.qcow2
 *.o
 *.so
