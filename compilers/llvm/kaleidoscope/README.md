@@ -1,6 +1,9 @@
 # Kaleidoscope: Implementing a Language with LLVM
 
-https://llvm.org/docs/tutorial/MyFirstLanguageFrontend
+<s>https://llvm.org/docs/tutorial/MyFirstLanguageFrontend</s>
+
+The default documentation on the website probably will not work with your Clang/LLVM version. Find the documentation appropriate for your version on the release page:
+https://releases.llvm.org/
 
 1. Kaleidoscope: Kaleidoscope Introduction and the Lexer
 2. Kaleidoscope: Implementing a Parser and AST
