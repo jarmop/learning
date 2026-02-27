@@ -2,4 +2,3 @@ xdg-shell-client-protocol.h
 xdg-shell-server-protocol.h
 xdg-shell-protocol.c
 passw
-client
