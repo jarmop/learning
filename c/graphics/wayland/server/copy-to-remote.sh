@@ -3,8 +3,8 @@
 PORT=2223
 USER="jarmovm"
 PASSFILE="passw"
-# SRCDIR="server"
-SRCDIR="client"
+SRCDIR="server"
+# SRCDIR="client"
 # SRCDIR="stub-compositor"
 # BIN="./wayland-client"
 # COMPILE="gcc ${SRCDIR}/*.c -o ${BIN} $(pkg-config --cflags --libs wayland-client)"

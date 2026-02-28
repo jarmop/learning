@@ -1,104 +1,18 @@
-#include <errno.h>
-#include <fcntl.h>
+#define _GNU_SOURCE
+
+#include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sys/mman.h>
-#include <time.h>
-#include <unistd.h>
-#include <wayland-client.h>
+
 #include "xdg-shell-client-protocol.h"
+#include <wayland-client.h>
 
-/* Shared memory support code */
-static void randname(char *buf) {
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    long r = ts.tv_nsec;
-    for (int i = 0; i < 6; ++i) {
-        buf[i] = 'A'+(r&15)+(r&16)*2;
-        r >>= 5;
-    }
-}
-
-static int create_shm_file(void) {
-    int retries = 100;
-    do {
-        char name[] = "/wl_shm-XXXXXX";
-        // Replace the X characters with a random character
-        randname(name + sizeof(name) - 7);
-        --retries;
-        int fd = shm_open(name, O_RDWR | O_CREAT | O_EXCL, 0600);
-        if (fd >= 0) {
-            shm_unlink(name);
-            return fd;
-        }
-    } while (retries > 0 && errno == EEXIST);
-    return -1;
-}
-
-static int allocate_shm_file(size_t size) {
-    int fd = create_shm_file();
-    if (fd < 0)
-        return -1;
-    int ret;
-    do {
-        ret = ftruncate(fd, size);
-    } while (ret < 0 && errno == EINTR);
-    if (ret < 0) {
-        close(fd);
-        return -1;
-    }
-    return fd;
-}
-
-struct client_state {
-    /* Globals */
-    struct wl_compositor *compositor;
-    struct wl_shm *shm;
-    struct xdg_wm_base *xdg_wm_base;
-    /* Objects */
-};
-
-static struct wl_buffer* draw_frame(
-    struct client_state *state, 
-    struct wl_surface *surface
-) {
-    const int width = 640, height = 480;
-    /**
-     * Stride specifies the number of bytes from the beginning of one row to 
-     * the beginning of the next. XRGB8888 format uses 4 bytes per pixel.
-     */
-    const int stride = width * 4;
-    // Two buffers for double buffering
-    const int shm_pool_size = height * stride * 2;
-
-    int fd = allocate_shm_file(shm_pool_size);
-    uint32_t *pool_data = mmap(
-        NULL, shm_pool_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0
-    );
-
-    struct wl_shm_pool *pool = wl_shm_create_pool(state->shm, fd, shm_pool_size);
-
-    int offset = 0;
-    struct wl_buffer *buffer = wl_shm_pool_create_buffer(
-        pool, offset, width, height, stride, WL_SHM_FORMAT_XRGB8888
-    );
-
-    /* Draw checkerboxed background */
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            if ((x + y / 8 * 8) % 16 < 8)
-                pool_data[y * width + x] = 0xFFFF0000;
-            else
-                pool_data[y * width + x] = 0xFF00FF00;
-        }
-    }
-
-    // fprintf(stderr, "pool_data --> %x\n", pool_data[0]);
-
-    wl_surface_attach(surface, buffer, 0, 0);
-    // wl_surface_damage(surface, 0, 0, UINT32_MAX, UINT32_MAX);
-    wl_surface_commit(surface);
-}
+static struct wl_compositor *compositor; // For wl_surface
+static struct wl_shm *shm; // For allocating shared memory buffers
+static struct xdg_wm_base *wm_base; // For creating xdg-shell surfaces
 
 static void xdg_wm_base_ping(
     void *data, 
@@ -112,67 +26,133 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
     .ping = xdg_wm_base_ping,
 };
 
-static void registry_global(
-    void *data, 
-    struct wl_registry *wl_registry,
-	uint32_t name, 
-    const char *interface, 
+// Configuration state
+static int configured = 0;
+static int win_width = 400;
+static int win_height = 300;
+static uint32_t configure_serial;
+
+static void __registry_handler(
+    void *data,
+    struct wl_registry *registry,
+    uint32_t id, 
+    const char *interface,
     uint32_t version
 ) {
-	// printf("interface: '%s', version: %d, name: %d\n", interface, version, name);
-
-    struct client_state *state = data;
     if (strcmp(interface, wl_compositor_interface.name) == 0) {
-        state->compositor = wl_registry_bind(wl_registry, name, &wl_compositor_interface, 4);
+        compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 4);
     } else if (strcmp(interface, wl_shm_interface.name) == 0) {
-        state->shm = wl_registry_bind(wl_registry, name, &wl_shm_interface, 1);
+        shm = wl_registry_bind(registry, id, &wl_shm_interface, 1);
     } else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
-        state->xdg_wm_base = wl_registry_bind(wl_registry, name, &xdg_wm_base_interface, 1);
-        xdg_wm_base_add_listener(state->xdg_wm_base, &xdg_wm_base_listener, state);
+        wm_base = wl_registry_bind(registry, id, &xdg_wm_base_interface, 1);
+        xdg_wm_base_add_listener(wm_base, &xdg_wm_base_listener, data);
     }
 }
 
-static void registry_global_remove(
-    void *data, 
-    struct wl_registry *registry,
-	uint32_t name
-) {
-	// This space deliberately left blank
-}
+static void __registry_remove(void *data, struct wl_registry *registry, uint32_t id) {}
 
 static const struct wl_registry_listener registry_listener = {
-	.global = registry_global,
-	.global_remove = registry_global_remove,
+    .global = __registry_handler,
+    .global_remove = __registry_remove
 };
 
-int main(int argc, char *argv[]) {
-    struct wl_display *display = wl_display_connect(NULL);
+static void xdg_surface_configure(
+    void *data, 
+    struct xdg_surface *xdg_surface, 
+    uint32_t serial
+) {
+    configure_serial = serial;
+    xdg_surface_ack_configure(xdg_surface, serial);
+    configured = 1;
+}
+
+static const struct xdg_surface_listener xdg_surface_listener = {
+    .configure = xdg_surface_configure,
+};
+
+static void xdg_toplevel_configure(
+    void *data, 
+    struct xdg_toplevel *toplevel, 
+    int32_t width, 
+    int32_t height, 
+    struct wl_array *states
+) {
+    if (width > 0)
+        win_width = width;
+    if (height > 0)
+        win_height = height;
+}
+
+static const struct xdg_toplevel_listener xdg_toplevel_listener = {
+    .configure = xdg_toplevel_configure,
+    .close = NULL,
+};
+
+static struct wl_buffer *__create_buffer(int width, int height) {
+    int stride = width * 4;
+    int size = stride * height;
+
+    int fd = memfd_create("shm-buffer", 0);
+    ftruncate(fd, size);
+
+    void *data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+
+    // A pool of pixel memory
+    struct wl_shm_pool *pool = wl_shm_create_pool(shm, fd, size);
+    // A single image inside the pool
+    struct wl_buffer *buffer = wl_shm_pool_create_buffer(
+        pool, 0, width, height, stride, WL_SHM_FORMAT_XRGB8888
+    );
+    // The buffer is still shared by the compositor when the shared pool is destroyed
+    wl_shm_pool_destroy(pool);
+
+    // Create the image
+    uint32_t *p = data;
+    for (int i = 0; i < width * height; i++) {
+        p[i] = 0xff404040;  // gray
+    }
+
+    return buffer;
+}
+
+int main() {
+    struct wl_display *display = wl_display_connect("wayland-1");
     if (!display) {
-        fprintf(stderr, "Failed to connect to Wayland display.\n");
+        fprintf(stderr, "No Wayland display\n");
         return 1;
     }
 
+    /**
+     * Initialize the global "compositor", "shm" and "wm_base" variables.
+     * Registry_listener uses wl_compositor and wl_registry protocols
+     */ 
     struct wl_registry *registry = wl_display_get_registry(display);
-
-    struct client_state state = {0};
-
-	wl_registry_add_listener(registry, &registry_listener, &state);
-	wl_display_roundtrip(display);
-
-    struct wl_surface *surface = wl_compositor_create_surface(state.compositor);
-    struct xdg_surface *xdg_surface = xdg_wm_base_get_xdg_surface(state.xdg_wm_base, surface);
-    struct xdg_toplevel *xdg_toplevel = xdg_surface_get_toplevel(xdg_surface);
-
-    draw_frame(&state, surface);
-
-    // wl_surface_commit(surface);
-
-    while(wl_display_dispatch(display)) {
-
+    wl_registry_add_listener(registry, &registry_listener, NULL);
+    wl_display_roundtrip(display);
+    if (!compositor || !shm || !wm_base) {
+        fprintf(stderr, "Wayland globals missing\n");
+        return 1;
     }
 
+    // Create surfaces
+    struct wl_surface *surface = wl_compositor_create_surface(compositor);
+    struct xdg_surface *xdg_surface = xdg_wm_base_get_xdg_surface(wm_base, surface);
+    xdg_surface_add_listener(xdg_surface, &xdg_surface_listener, NULL);
+    struct xdg_toplevel *toplevel = xdg_surface_get_toplevel(xdg_surface);
+    xdg_toplevel_add_listener(toplevel, &xdg_toplevel_listener, NULL);
+    xdg_toplevel_set_title(toplevel, "Wayland Hello");
+    wl_surface_commit(surface);
 
-    // wl_display_disconnect(display);
+    while (!configured) {
+        wl_display_dispatch(display);
+    }
+
+    struct wl_buffer *buffer = __create_buffer(400, 300);
+    wl_surface_attach(surface, buffer, 0, 0);
+    wl_surface_commit(surface);
+
+    while (wl_display_dispatch(display)) {
+    }
 
     return 0;
 }
