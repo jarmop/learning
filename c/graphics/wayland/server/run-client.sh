@@ -1,4 +1,4 @@
 #!/bin/bash
 
-gcc src/client.c src/xdg-shell-protocol.c $(pkg-config --cflags --libs wayland-client)
-./client
+gcc client/client.c client/xdg-shell-protocol.c $(pkg-config --cflags --libs wayland-client) -o client.elf
+./client.elf
