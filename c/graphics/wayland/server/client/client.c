@@ -7,8 +7,7 @@
 #include <string.h>
 #include <sys/mman.h>
 
-#include "xdg-shell-client-protocol.h"
-#include <wayland-client.h>
+#include "xdg-shell-client-protocol.h" // includes also wayland-client.h
 
 static struct wl_compositor *compositor; // For wl_surface
 static struct wl_shm *shm; // For allocating shared memory buffers
@@ -116,7 +115,7 @@ static struct wl_buffer *__create_buffer(int width, int height) {
 }
 
 int main() {
-    struct wl_display *display = wl_display_connect("wayland-1");
+    struct wl_display *display = wl_display_connect(NULL);
     if (!display) {
         fprintf(stderr, "No Wayland display\n");
         return 1;
