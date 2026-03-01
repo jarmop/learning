@@ -103,7 +103,7 @@ static struct wl_buffer *__create_buffer(int width, int height) {
         pool, 0, width, height, stride, WL_SHM_FORMAT_XRGB8888
     );
     // The buffer is still shared by the compositor when the shared pool is destroyed
-    wl_shm_pool_destroy(pool);
+    // wl_shm_pool_destroy(pool);
 
     // Create the image
     uint32_t *p = data;
@@ -136,15 +136,15 @@ int main() {
     // Create surfaces
     struct wl_surface *surface = wl_compositor_create_surface(compositor);
     struct xdg_surface *xdg_surface = xdg_wm_base_get_xdg_surface(wm_base, surface);
-    xdg_surface_add_listener(xdg_surface, &xdg_surface_listener, NULL);
+    // xdg_surface_add_listener(xdg_surface, &xdg_surface_listener, NULL);
     struct xdg_toplevel *toplevel = xdg_surface_get_toplevel(xdg_surface);
-    xdg_toplevel_add_listener(toplevel, &xdg_toplevel_listener, NULL);
-    xdg_toplevel_set_title(toplevel, "Wayland Hello");
-    wl_surface_commit(surface);
+    // xdg_toplevel_add_listener(toplevel, &xdg_toplevel_listener, NULL);
+    // xdg_toplevel_set_title(toplevel, "Wayland Hello");
+    // wl_surface_commit(surface);
 
-    while (!configured) {
-        wl_display_dispatch(display);
-    }
+    // while (!configured) {
+    //     wl_display_dispatch(display);
+    // }
 
     struct wl_buffer *buffer = __create_buffer(400, 300);
     wl_surface_attach(surface, buffer, 0, 0);
