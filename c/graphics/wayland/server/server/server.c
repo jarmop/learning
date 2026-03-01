@@ -116,11 +116,11 @@ static void surface_attach(
     int32_t y
 ) {
     fprintf(stderr, "surface_attach\n");
-    (void)client;
-    (void)resource;
+    // (void)client;
+    // (void)resource;
     // (void)buffer;
-    (void)x;
-    (void)y;
+    // (void)x;
+    // (void)y;
 }
 
 static void surface_damage(
@@ -137,10 +137,12 @@ static void surface_damage(
 static void surface_commit(struct wl_client *client, struct wl_resource *resource) {
     fprintf(stderr, "surface_commit\n");
     struct shm_pool *pool = state.pool;
+
     uint32_t *pool_data = pool->data;
+
     fprintf(stderr, "pool data: %x\n", pool_data[0]);
-    (void)client;
-    (void)resource;
+    // (void)client;
+    // (void)resource;
 }
 
 static const struct wl_surface_interface surface_impl = {
@@ -189,9 +191,9 @@ static void xdg_surface_destroy(struct wl_client *client, struct wl_resource *re
 
 static void xdg_surface_ack_configure(struct wl_client *client, struct wl_resource *resource, uint32_t serial) {
     fprintf(stderr, "xdg_surface_ack_configure\n");
-    (void)client;
-    (void)resource;
-    (void)serial;
+    // (void)client;
+    // (void)resource;
+    // (void)serial;
 }
 
 static const struct xdg_surface_interface xdg_surface_impl = {
@@ -224,9 +226,9 @@ static void xdg_wm_base_get_xdg_surface(
 
 static void xdg_wm_base_pong(struct wl_client *client, struct wl_resource *resource, uint32_t serial) {
     fprintf(stderr, "xdg_wm_base_pong\n");
-    (void)client;
-    (void)resource;
-    (void)serial;
+    // (void)client;
+    // (void)resource;
+    // (void)serial;
 }
 
 static const struct xdg_wm_base_interface xdg_wm_base_impl = {

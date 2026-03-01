@@ -95,9 +95,11 @@ static struct wl_buffer* draw_frame(
 
     // fprintf(stderr, "pool_data --> %x\n", pool_data[0]);
 
-    wl_surface_attach(surface, buffer, 0, 0);
-    // wl_surface_damage(surface, 0, 0, UINT32_MAX, UINT32_MAX);
-    wl_surface_commit(surface);
+    // wl_surface_attach(surface, buffer, 0, 0);
+    // // wl_surface_damage(surface, 0, 0, UINT32_MAX, UINT32_MAX);
+    // wl_surface_commit(surface);
+
+    return buffer;
 }
 
 static void xdg_wm_base_ping(
@@ -146,7 +148,7 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 int main(int argc, char *argv[]) {
-    struct wl_display *display = wl_display_connect("wayland-1");
+    struct wl_display *display = wl_display_connect(NULL);
     if (!display) {
         fprintf(stderr, "Failed to connect to Wayland display.\n");
         return 1;
@@ -163,7 +165,10 @@ int main(int argc, char *argv[]) {
     struct xdg_surface *xdg_surface = xdg_wm_base_get_xdg_surface(state.xdg_wm_base, surface);
     struct xdg_toplevel *xdg_toplevel = xdg_surface_get_toplevel(xdg_surface);
 
-    draw_frame(&state, surface);
+    struct wl_buffer *buffer = draw_frame(&state, surface);
+    wl_surface_attach(surface, buffer, 0, 0);
+    // wl_surface_damage(surface, 0, 0, UINT32_MAX, UINT32_MAX);
+    wl_surface_commit(surface);
 
     // wl_surface_commit(surface);
 
