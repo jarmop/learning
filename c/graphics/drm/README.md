@@ -17,3 +17,10 @@ List input devices:
 ```sh
 cat /proc/bus/input/devices
 ```
+
+## Troubleshooting
+
+Accessing input events requires root privileges or adding user to the "input" group
+```sh
+sudo adduser jarmovm input
+```

@@ -78,6 +78,11 @@ int main() {
     uint32_t crtc_id = enc->crtc_id;
     drmModeFreeEncoder(enc);
 
+
+    // Save the original CRTC before painting so we can restore it when the program exits
+    drmModeCrtc *orig_crtc = drmModeGetCrtc(fd, crtc_id);
+    if (!orig_crtc) { perror("drmModeGetCrtc"); return 1; }
+
     // Create a dumb buffer
     struct drm_mode_create_dumb cdumb = {0};
     cdumb.width  = mode.hdisplay;
@@ -177,6 +182,20 @@ int main() {
     // mouse();
 
     // sleep(5);
+
+
+    // Restore the original CRTC
+    drmModeSetCrtc(
+        fd,
+        orig_crtc->crtc_id,
+        orig_crtc->buffer_id,
+        orig_crtc->x,
+        orig_crtc->y,
+        &conn_id,
+        1,
+        &orig_crtc->mode
+    );
+    drmModeFreeCrtc(orig_crtc);
 
     // Cleanup: unmap, rmfb, destroy dumb buffer
     munmap(map, cdumb.size);
