@@ -1,19 +1,14 @@
 #!/bin/bash
 
-#Ubuntu
-PORT=2223
-USER="jarmovm"
-WORKDIR="/home/jarmovm/drm-demo"
+# alpine
+PORT=2222
+USER="root"
+WORKDIR="/home/drm-demo"
+PASSFILE="passw-alpine"
 
-#alpine
-#PORT=2222
-#USER="root"
-#WORKDIR="/home"
-
-PASSFILE="foo"
 SRCDIR="src"
 BIN="drm-demo"
-COMPILE="gcc ${WORKDIR}/${SRCDIR}/*.c -o ${WORKDIR}/${BIN} $(pkg-config --cflags --libs libdrm) -std=gnu11"
+COMPILE="gcc ${WORKDIR}/*.c -o ${WORKDIR}/${BIN} $(pkg-config --cflags --libs libdrm) -std=gnu11"
 RUN="${WORKDIR}/${BIN}"
 SCRIPT="${COMPILE};${RUN}"
 

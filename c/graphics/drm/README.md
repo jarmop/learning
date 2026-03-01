@@ -17,3 +17,7 @@ List input devices:
 ```sh
 cat /proc/bus/input/devices
 ```
+
+## Troubleshooting
+
+Run as root to handle input events
