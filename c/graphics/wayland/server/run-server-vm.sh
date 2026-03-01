@@ -1,20 +1,19 @@
 #!/bin/bash
 
 # Compile
-# gcc client/client.c client/xdg-shell-protocol.c $(pkg-config --cflags --libs wayland-client) -o client.elf
 
 WAYLAND=/home/jarmo/development/git-external/wayland
 export PKG_CONFIG_PATH="$WAYLAND/_install/lib/x86_64-linux-gnu/pkgconfig:$WAYLAND/_install/lib/pkgconfig"
 gcc -g -O0 \
-  $(pkg-config --cflags wayland-client) \
-  -o client.elf client/client.c client/xdg-shell-protocol.c \
-  $(pkg-config --libs --static wayland-client)
+  $(pkg-config --cflags wayland-server) \
+  -o server.elf server/server.c server/xdg-shell-protocol.c \
+  $(pkg-config --libs --static wayland-server)
 
 # Copy to vm
 PORT=2223
 USER="jarmovm"
 PASSFILE="passw"
-ELF="client.elf"
+ELF="server.elf"
 
 sshpass -f ${PASSFILE} scp -P ${PORT} ${ELF} ${USER}@localhost:
 
