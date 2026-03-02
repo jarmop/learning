@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-// #include <stdint.h>
+#include <stdint.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/mman.h>
@@ -39,7 +39,7 @@ int main() {
 
     // Open the file representing the DRM device
     // CLOEXEC = close on exec
-    char drm_device_path[] = "/dev/dri/card0";
+    char drm_device_path[] = "/dev/dri/card1";
     int fd = open(drm_device_path, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
         char error_header[50];

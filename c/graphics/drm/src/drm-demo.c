@@ -23,14 +23,17 @@ int main() {
     // ubuntu
     char *mouse_event = "/dev/input/event2";
     int mode_i = 0;
-    int screen_width = 1280; int screen_height = 800;
+    // int screen_width = 925; int screen_height = 791;
+    // int screen_width = 925; int screen_height = 1105;
     int max_abs_x = 65482; int max_abs_y = 65452;
+
+    char *drm_device = "/dev/dri/card1";
 
     // Open the file representing the DRM device
     // CLOEXEC = close on exec
-    int fd = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
+    int fd = open(drm_device, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
-        perror("open /dev/dri/card0");
+        perror(drm_device);
         return 1;
     }
 
@@ -147,11 +150,11 @@ int main() {
 
         if (ev.type == EV_ABS) {
             if (ev.code == REL_X) {
-                mouse_x = ev.value * screen_width / max_abs_x;
+                mouse_x = ev.value * cdumb.width / max_abs_x;
                 // fprintf(stderr, "ev.value x: %d\n", ev.value);
             }
             if (ev.code == REL_Y) { 
-                mouse_y = ev.value * screen_height / max_abs_y; 
+                mouse_y = ev.value * cdumb.height / max_abs_y; 
                 // fprintf(stderr, "ev.value y: %d\n", ev.value);
             }
             // fprintf(stderr, "mouse x: %d, y: %d\n", mouse_x, mouse_y);
