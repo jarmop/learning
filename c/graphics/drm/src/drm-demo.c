@@ -13,6 +13,9 @@
 
 #include "drm-demo.h"
 
+// #include <time.h>
+// #include <sys/time.h>
+
 int main() {
     // alpine
     // char *mouse_event = "/dev/input/event3";
@@ -63,13 +66,16 @@ int main() {
         return 1;
     }
 
-
-    drmModeModeInfo mode = conn->modes[mode_i];  // choose first mode (usually preferred)
+    drmModeModeInfo mode = conn->modes[mode_i];  // choose the first mode (usually preferred)
     // fprintf(stderr, "Available modes:\n");
     // for (int i = 0; i < conn->count_modes; i++) {
     //     fprintf(stderr, "  %d: %s\n", i, conn->modes[i].name);
     // }
     // fprintf(stderr, "Using mode %d: %s\n", mode_i, mode.name);
+    // fprintf(stderr, "total – h: %d, v: %d\n", mode.htotal, mode.vtotal);
+    // fprintf(stderr, "sync – h: %d-%d, v: %d-%d\n", mode.hsync_start, mode.hsync_end, mode.vsync_start, mode.vsync_end);
+    // fprintf(stderr, "hskew: %d, vscan: %d\n", mode.hskew, mode.vscan);
+    // fprintf(stderr, "clock: %d, flags: %x, type: %x\n", mode.clock, mode.flags, mode.type);
 
     // Find an encoder + CRTC
     drmModeEncoder *enc = drmModeGetEncoder(fd, conn->encoder_id);
@@ -138,9 +144,19 @@ int main() {
     struct input_event ev;
     int mouse_x = -1; int mouse_y = -1;
 
+    // struct timespec t1;
+    // uint32_t tms1 = 0;
+    // uint32_t tms2 = 0;
+
+
     int track_mouse = 1;
     while (track_mouse) {
         read(mouse_fd, &ev, sizeof(ev));
+
+        // clock_gettime(CLOCK_MONOTONIC, &t1);
+        // uint32_t tms2 = t1.tv_sec * 1000 + t1.tv_nsec / 1000000;
+        // fprintf(stderr, "time diff: %u\n", tms2 - tms1);
+        // tms1 = tms2;
 
         if (ev.type == EV_REL) {
             if (ev.code == REL_X) mouse_x += ev.value;

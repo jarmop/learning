@@ -4,11 +4,18 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <linux/input.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <time.h>
+#include <sys/time.h>
 
 #include <wayland-server-core.h>
 #include <wayland-server-protocol.h>
 
 #include "xdg-shell-server-protocol.h"
+
+#include "display.h"
 
 /* ------------------------------------------------ */
 /* Globals */
@@ -260,6 +267,54 @@ static void bind_xdg_wm_base(struct wl_client *client, void *data, uint32_t vers
     wl_resource_set_implementation(res, &xdg_wm_base_impl, NULL, NULL);
 }
 
+// struct timespec t1;
+// uint32_t tms1 = 0;
+// uint32_t tms2 = 0;
+
+struct input_event ev;
+
+/**
+ * event_mask   Bit mask telling which event occurred
+ *              Possible events: WL_EVENT_READABLE, WL_EVENT_WRITABLE, WL_EVENT_HANGUP, WL_EVENT_ERROR
+ */
+static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
+{
+    int needs_redraw = 0;
+    if (!(event_mask & WL_EVENT_READABLE)) return 0;
+
+
+    for (;;) {
+        ssize_t n = read(fd, &ev, sizeof ev);
+
+        // clock_gettime(CLOCK_MONOTONIC, &t1);
+        // uint32_t tms2 = t1.tv_sec * 1000 + t1.tv_nsec / 1000000;
+        // fprintf(stderr, "time diff: %u\n", tms2 - tms1);
+        // tms1 = tms2;
+
+        if (n == (ssize_t)sizeof ev) {
+            if (ev.type == EV_ABS) {
+                show_mouse_move(ev);
+            }
+            if (ev.type == EV_KEY && ev.code == BTN_LEFT) {
+                // if (ev.value == 1) printf("Left button pressed\n");
+                if (ev.value == 0) {
+                    // printf("Left button released\n");
+                    close_display();
+                    wl_event_loop_destroy(state.loop);
+                }
+            }
+            
+            continue;
+        }
+        if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) break;
+        if (n == 0) break; // EOF
+        if (n < 0) perror("read(mouse)");
+        break;
+    }
+
+    return 0;
+}
+
 /* ------------------------------------------------ */
 /* Main */
 
@@ -277,9 +332,22 @@ int main(void) {
         return 1;
     }
 
+    initialize_display();
+
+    char *mouse_event = "/dev/input/event2";
+    // int mouse_fd = open(mouse_event, O_RDONLY | O_CLOEXEC);
+    int mouse_fd = open(mouse_event, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
+
+    int nop = 0;
+    wl_event_loop_add_fd(state.loop, mouse_fd, WL_EVENT_READABLE, on_mouse_fd, &nop);
+
+    // draw();
+    // restore_screen();
+
     fprintf(stderr, "Wayland compositor running on %s\n", socket);
     wl_display_run(state.display);
 
-    wl_display_destroy(state.display);
+    // wl_display_destroy(state.display);
+
     return 0;
 }
