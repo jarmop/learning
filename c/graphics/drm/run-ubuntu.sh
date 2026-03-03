@@ -7,7 +7,7 @@ PASSFILE="passw-ubuntu"
 
 SRC="src/*"
 BIN="drm-demo"
-COMPILE="gcc ${WORKDIR}/*.c -o ${WORKDIR}/${BIN} $(pkg-config --cflags --libs libdrm) -std=gnu11"
+COMPILE="gcc ${WORKDIR}/*.c -o ${WORKDIR}/${BIN} $(pkg-config --cflags --libs libdrm)"
 RUN="${WORKDIR}/${BIN}"
 SCRIPT="${COMPILE};${RUN}"
 
