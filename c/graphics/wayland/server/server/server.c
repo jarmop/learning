@@ -17,22 +17,23 @@
 
 #include "display.h"
 
-/* ------------------------------------------------ */
-/* Globals */
-
-struct state {
-    struct wl_display *display;
-    struct wl_event_loop *loop;
-    struct shm_pool *pool;
+struct surface_data {
+    void *pixels;
+    size_t size;
+    uint32_t stride;
+    int x;
+    int y;
 };
 
-static struct state state;
+struct wl_display *display;
+struct wl_event_loop *loop;
+struct surface_data *surface_data;
 
 /* ------------------------------------------------ */
 /* wl_buffer implementation */
 
 static void buffer_destroy(struct wl_client *client, struct wl_resource *resource) {
-    fprintf(stderr, "buffer_destroy\n");
+    // fprintf(stderr, "buffer_destroy\n");
     wl_resource_destroy(resource);
 }
 
@@ -43,15 +44,10 @@ static const struct wl_buffer_interface buffer_impl = {
 /* ------------------------------------------------ */
 /* wl_shm_pool implementation */
 
-struct shm_pool {
-    void *data;
-    size_t size;
-};
-
 static void shm_pool_destroy(struct wl_client *client, struct wl_resource *resource) {
-    fprintf(stderr, "shm_pool_destroy\n");
-    struct shm_pool *pool = wl_resource_get_user_data(resource);
-    munmap(pool->data, pool->size);
+    // fprintf(stderr, "shm_pool_destroy\n");
+    struct surface_data *pool = wl_resource_get_user_data(resource);
+    munmap(pool->pixels, pool->size);
     free(pool);
     wl_resource_destroy(resource);
 }
@@ -66,13 +62,16 @@ static void shm_pool_create_buffer(
     int32_t stride,
     uint32_t format
 ) {
-    fprintf(stderr, "shm_pool_create_buffer\n");
+    // fprintf(stderr, "shm_pool_create_buffer: object id %d\n", resource->object.id);
     struct wl_resource *buffer = wl_resource_create(client, &wl_buffer_interface, 1, id);
     wl_resource_set_implementation(buffer, &buffer_impl, NULL, NULL);
+
+    // Store the stride to the surface_data like a boss. Let's see when this causes problems
+    surface_data->stride = stride;
 }
 
 static void shm_pool_resize(struct wl_client *client, struct wl_resource *resource, int32_t size) {
-    fprintf(stderr, "shm_pool_resize\n");
+    // fprintf(stderr, "shm_pool_resize\n");
 }
 
 static const struct wl_shm_pool_interface shm_pool_impl = {
@@ -91,16 +90,15 @@ static void shm_create_pool(
     int fd,
     int32_t size
 ) {
-    fprintf(stderr, "shm_create_pool\n");
-    struct shm_pool *pool = calloc(1, sizeof *pool);
-    pool->size = size;
-    pool->data = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
-    state.pool = pool;
+    // fprintf(stderr, "shm_create_pool: %d\n", id);
+    surface_data = calloc(1, sizeof *surface_data);
+    surface_data->size = size;
+    surface_data->pixels = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
 
     struct wl_resource *res =
         wl_resource_create(client, &wl_shm_pool_interface, 1, id);
 
-    wl_resource_set_implementation(res, &shm_pool_impl, pool, NULL);
+    wl_resource_set_implementation(res, &shm_pool_impl, surface_data, NULL);
 }
 
 static const struct wl_shm_interface shm_impl = {
@@ -111,7 +109,7 @@ static const struct wl_shm_interface shm_impl = {
 /* wl_surface implementation */
 
 static void surface_destroy(struct wl_client *client, struct wl_resource *resource) {
-    fprintf(stderr, "surface_destroy\n");
+    // fprintf(stderr, "surface_destroy\n");
     wl_resource_destroy(resource);
 }
 
@@ -122,7 +120,9 @@ static void surface_attach(
     int32_t x,
     int32_t y
 ) {
-    fprintf(stderr, "surface_attach\n");
+    // fprintf(stderr, "surface_attach – resource->object.id: %d\n", resource->object.id);
+    surface_data->x = x;
+    surface_data->y = y;
     // (void)client;
     // (void)resource;
     // (void)buffer;
@@ -142,12 +142,17 @@ static void surface_damage(
 }
 
 static void surface_commit(struct wl_client *client, struct wl_resource *resource) {
-    fprintf(stderr, "surface_commit\n");
-    struct shm_pool *pool = state.pool;
+    // fprintf(stderr, "surface_commit, resource->object.id: %d\n", resource->object.id);
+    // fprintf(stderr, "surface_commit, resource->object.interface: %s\n", resource->object.interface->name);
 
-    uint32_t *pool_data = pool->data;
+    show_surface(surface_data->pixels, surface_data->size, surface_data->stride, surface_data->x, surface_data->y);
 
-    fprintf(stderr, "pool data: %x\n", pool_data[0]);
+    // uint32_t *pool_data = surface_data->pixels;
+
+    // fprintf(stderr, "pool data: %x\n", pool_data[0]);
+
+    // show_surface((uint32_t *)&surface_data->pixels, surface_data->size);
+
     // (void)client;
     // (void)resource;
 }
@@ -163,7 +168,7 @@ static const struct wl_surface_interface surface_impl = {
 /* wl_compositor implementation */
 
 static void compositor_create_surface(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
-    fprintf(stderr, "compositor_create_surface\n");
+    // fprintf(stderr, "compositor_create_surface\n");
     struct wl_resource *surface = wl_resource_create(client, &wl_surface_interface, 4, id);
     wl_resource_set_implementation(surface, &surface_impl, NULL, NULL);
 }
@@ -173,11 +178,10 @@ static const struct wl_compositor_interface compositor_impl = {
     .create_region = NULL,
 };
 
-/* ------------------------------------------------ */
-/* xdg_surface and xdg_toplevel implementations */
+/* ------------------------ XDG ------------------------ */
 
 static void xdg_toplevel_destroy(struct wl_client *client, struct wl_resource *resource) {
-    fprintf(stderr, "xdg_toplevel_destroy\n");
+    // fprintf(stderr, "xdg_toplevel_destroy\n");
     wl_resource_destroy(resource);
 }
 
@@ -186,18 +190,18 @@ static const struct xdg_toplevel_interface xdg_toplevel_impl = {
 };
 
 static void xdg_surface_get_toplevel(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
-    fprintf(stderr, "xdg_surface_get_toplevel\n");
+    // fprintf(stderr, "xdg_surface_get_toplevel\n");
     struct wl_resource *toplevel = wl_resource_create(client, &xdg_toplevel_interface, 1, id);
     wl_resource_set_implementation(toplevel, &xdg_toplevel_impl, NULL, NULL);
 }
 
 static void xdg_surface_destroy(struct wl_client *client, struct wl_resource *resource) {
-    fprintf(stderr, "xdg_surface_destroy\n");
+    // fprintf(stderr, "xdg_surface_destroy\n");
     wl_resource_destroy(resource);
 }
 
 static void xdg_surface_ack_configure(struct wl_client *client, struct wl_resource *resource, uint32_t serial) {
-    fprintf(stderr, "xdg_surface_ack_configure\n");
+    // fprintf(stderr, "xdg_surface_ack_configure\n");
     // (void)client;
     // (void)resource;
     // (void)serial;
@@ -209,11 +213,8 @@ static const struct xdg_surface_interface xdg_surface_impl = {
     .ack_configure = xdg_surface_ack_configure, // opcode 4
 };
 
-/* ------------------------------------------------ */
-/* xdg_wm_base implementation */
-
 static void xdg_wm_base_destroy(struct wl_client *client, struct wl_resource *resource) {
-    fprintf(stderr, "xdg_wm_base_destroy\n");
+    // fprintf(stderr, "xdg_wm_base_destroy\n");
     wl_resource_destroy(resource);
 }
 
@@ -227,12 +228,12 @@ static void xdg_wm_base_get_xdg_surface(
 
     wl_resource_set_implementation(xdg_surface, &xdg_surface_impl, surface, NULL);
 
-    uint32_t serial = wl_display_next_serial(state.display);
+    uint32_t serial = wl_display_next_serial(display);
     xdg_surface_send_configure(xdg_surface, serial);
 }
 
 static void xdg_wm_base_pong(struct wl_client *client, struct wl_resource *resource, uint32_t serial) {
-    fprintf(stderr, "xdg_wm_base_pong\n");
+    // fprintf(stderr, "xdg_wm_base_pong\n");
     // (void)client;
     // (void)resource;
     // (void)serial;
@@ -249,20 +250,20 @@ static const struct xdg_wm_base_interface xdg_wm_base_impl = {
 /* Registry binders */
 
 static void bind_compositor(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
-    fprintf(stderr, "bind_compositor\n");
+    // fprintf(stderr, "bind_compositor\n");
     struct wl_resource *res = wl_resource_create(client, &wl_compositor_interface, 4, id);
     wl_resource_set_implementation(res, &compositor_impl, NULL, NULL);
 }
 
 static void bind_shm(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
-    fprintf(stderr, "bind_shm\n");
+    // fprintf(stderr, "bind_shm\n");
     struct wl_resource *res = wl_resource_create(client, &wl_shm_interface, 1, id);
     wl_resource_set_implementation(res, &shm_impl, NULL, NULL);
     wl_shm_send_format(res, WL_SHM_FORMAT_XRGB8888);
 }
 
 static void bind_xdg_wm_base(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
-    fprintf(stderr, "bind_xdg_wm_base\n");
+    // fprintf(stderr, "bind_xdg_wm_base\n");
     struct wl_resource *res = wl_resource_create(client, &xdg_wm_base_interface, 1, id);
     wl_resource_set_implementation(res, &xdg_wm_base_impl, NULL, NULL);
 }
@@ -300,7 +301,7 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
                 if (ev.value == 0) {
                     // printf("Left button released\n");
                     close_display();
-                    wl_event_loop_destroy(state.loop);
+                    wl_event_loop_destroy(loop);
                 }
             }
             
@@ -319,14 +320,14 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
 /* Main */
 
 int main(void) {
-    state.display = wl_display_create();
-    state.loop = wl_display_get_event_loop(state.display);
+    display = wl_display_create();
+    loop = wl_display_get_event_loop(display);
 
-    wl_global_create(state.display, &wl_compositor_interface, 4, NULL, bind_compositor);
-    wl_global_create(state.display, &wl_shm_interface, 1, NULL, bind_shm);
-    wl_global_create(state.display, &xdg_wm_base_interface, 1, NULL, bind_xdg_wm_base);
+    wl_global_create(display, &wl_compositor_interface, 4, NULL, bind_compositor);
+    wl_global_create(display, &wl_shm_interface, 1, NULL, bind_shm);
+    wl_global_create(display, &xdg_wm_base_interface, 1, NULL, bind_xdg_wm_base);
 
-    const char *socket = wl_display_add_socket_auto(state.display);
+    const char *socket = wl_display_add_socket_auto(display);
     if (!socket) {
         fprintf(stderr, "Failed to create socket\n");
         return 1;
@@ -339,15 +340,15 @@ int main(void) {
     int mouse_fd = open(mouse_event, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
 
     int nop = 0;
-    wl_event_loop_add_fd(state.loop, mouse_fd, WL_EVENT_READABLE, on_mouse_fd, &nop);
+    wl_event_loop_add_fd(loop, mouse_fd, WL_EVENT_READABLE, on_mouse_fd, &nop);
 
     // draw();
     // restore_screen();
 
     fprintf(stderr, "Wayland compositor running on %s\n", socket);
-    wl_display_run(state.display);
+    wl_display_run(display);
 
-    // wl_display_destroy(state.display);
+    // wl_display_destroy(display);
 
     return 0;
 }

@@ -19,7 +19,7 @@ uint32_t crtc_id;
 uint8_t *bitmap;
 uint32_t fb_id;
 
-void drawPlain(uint16_t width, uint16_t height, uint8_t *map, uint32_t pitch) {
+static void draw_plain(uint16_t width, uint16_t height, uint8_t *map, uint32_t pitch) {
     uint8_t r = 0; uint8_t g = 0; uint8_t b = 100;
     // Combine rgb values into one 3 byte value by shifting r bitwise to the 
     // left by 2 bytes, and g by 1 byte, and then doing bitwise or for each
@@ -31,7 +31,7 @@ void drawPlain(uint16_t width, uint16_t height, uint8_t *map, uint32_t pitch) {
     }
 }
 
-void drawMouse(uint16_t mouse_x, uint16_t mouse_y, uint8_t *map, uint32_t pitch) {
+static void draw_mouse(uint16_t mouse_x, uint16_t mouse_y, uint8_t *map, uint32_t pitch) {
     uint16_t mouse_width = 10; uint16_t mouse_height = 10;
     uint8_t r = 255; uint8_t g = 255; uint8_t b = 255;
     // Combine rgb values into one 3 byte value by shifting r bitwise to the 
@@ -70,8 +70,8 @@ void close_display() {
     // close(fd);
 }
 
-int max_abs_x = 65482; int max_abs_y = 65452;
-int mouse_x = -1; int mouse_y = -1;
+static int max_abs_x = 65482; int max_abs_y = 65452;
+static int mouse_x = -1; int mouse_y = -1;
 
 int show_mouse_move(struct input_event ev) {
     if (ev.code == REL_X) {
@@ -84,8 +84,29 @@ int show_mouse_move(struct input_event ev) {
 
     if (mouse_x > 0 && mouse_x < cdumb.width - 10 && mouse_y > 0 && mouse_y < cdumb.height - 10) {
         // fprintf(stderr, "Draw mouse\n");
-        drawPlain(mode.hdisplay, mode.vdisplay, bitmap, cdumb.pitch);
-        drawMouse(mouse_x, mouse_y, bitmap, cdumb.pitch);
+        draw_plain(mode.hdisplay, mode.vdisplay, bitmap, cdumb.pitch);
+        draw_mouse(mouse_x, mouse_y, bitmap, cdumb.pitch);
+    }
+
+    drmModeDirtyFB(fd, fb_id, NULL, 0);
+
+    return 0;
+}
+
+int show_surface(uint32_t *pixels, size_t size_b, uint32_t width_b, int surface_start_x, int surface_start_y) {
+    int surface_width_px = width_b / 4;
+    int surface_height = size_b / width_b;
+    // fprintf(stderr, "x: %d, y: %d, height: %d, width: %d", surface_start_x, surface_start_y, surface_height, surface_width_px);
+
+    int bitmap_width_b = cdumb.pitch;
+
+    for (int y = 0; y < surface_height; y++) {
+        for (int x = 0; x < surface_width_px; x++) {
+            uint32_t *pixel = pixels + y * surface_width_px + x;
+            int by = y + surface_start_y;
+            int bx = x + surface_start_x;
+            memcpy(bitmap + by * bitmap_width_b + bx * 4, pixel, 4);
+        }
     }
 
     drmModeDirtyFB(fd, fb_id, NULL, 0);
@@ -203,7 +224,7 @@ int initialize_display() {
 
     // drawGradient(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
     // drawCheckers(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
-    drawPlain(mode.hdisplay, mode.vdisplay, bitmap, cdumb.pitch);
+    draw_plain(mode.hdisplay, mode.vdisplay, bitmap, cdumb.pitch);
     error = drmModeSetCrtc(fd, crtc_id, fb_id, 0, 0, &conn_id, 1, &mode);
     if (error) {
         perror("drmModeSetCrtc");
