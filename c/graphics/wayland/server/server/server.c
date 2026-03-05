@@ -17,17 +17,30 @@
 
 #include "display.h"
 
-struct surface_data {
-    void *pixels;
-    size_t size;
-    uint32_t stride;
-    int x;
-    int y;
-};
+/**
+ * Need to store the surface data for the mouse cursor as well. So there we have
+ * our other client: the desktop environment. Or rather, the desktop environment 
+ * provides multiple clients like the mouse cursor, and the menu bar, and such. 
+ * Would it make sense to redraw each surface whenever one of the changes, or 
+ * should we try to erase the old version of the surface and then just draw the 
+ * new version and keep the rest of the surfaces as is? Probably best, to first 
+ * go with the immediate mode and change to retained mode only when needed.
+ */
+// struct surface_data {
+//     void *pixels;
+//     size_t size;
+//     uint32_t stride;
+//     int x;
+//     int y;
+// };
+
+struct wl_shm_buffer *surface_buffer;
+int surface_x = 0;
+int surface_y = 0;
 
 struct wl_display *display;
 struct wl_event_loop *loop;
-struct surface_data *surface_data;
+// struct surface_data *surface_data;
 
 /* ------------------------------------------------ */
 /* wl_buffer implementation */
@@ -44,66 +57,66 @@ static const struct wl_buffer_interface buffer_impl = {
 /* ------------------------------------------------ */
 /* wl_shm_pool implementation */
 
-static void shm_pool_destroy(struct wl_client *client, struct wl_resource *resource) {
-    // fprintf(stderr, "shm_pool_destroy\n");
-    struct surface_data *pool = wl_resource_get_user_data(resource);
-    munmap(pool->pixels, pool->size);
-    free(pool);
-    wl_resource_destroy(resource);
-}
+// static void shm_pool_destroy(struct wl_client *client, struct wl_resource *resource) {
+//     // fprintf(stderr, "shm_pool_destroy\n");
+//     struct surface_data *pool = wl_resource_get_user_data(resource);
+//     munmap(pool->pixels, pool->size);
+//     free(pool);
+//     wl_resource_destroy(resource);
+// }
 
-static void shm_pool_create_buffer(
-    struct wl_client *client,
-    struct wl_resource *resource,
-    uint32_t id,
-    int32_t offset,
-    int32_t width,
-    int32_t height,
-    int32_t stride,
-    uint32_t format
-) {
-    // fprintf(stderr, "shm_pool_create_buffer: object id %d\n", resource->object.id);
-    struct wl_resource *buffer = wl_resource_create(client, &wl_buffer_interface, 1, id);
-    wl_resource_set_implementation(buffer, &buffer_impl, NULL, NULL);
+// static void shm_pool_create_buffer(
+//     struct wl_client *client,
+//     struct wl_resource *resource,
+//     uint32_t id,
+//     int32_t offset,
+//     int32_t width,
+//     int32_t height,
+//     int32_t stride,
+//     uint32_t format
+// ) {
+//     fprintf(stderr, "shm_pool_create_buffer: object id %d\n", resource->object.id);
+//     struct wl_resource *buffer = wl_resource_create(client, &wl_buffer_interface, 1, id);
+//     wl_resource_set_implementation(buffer, &buffer_impl, NULL, NULL);
 
-    // Store the stride to the surface_data like a boss. Let's see when this causes problems
-    surface_data->stride = stride;
-}
+//     // Store the stride to the surface_data like a boss. Let's see when this causes problems
+//     surface_data->stride = stride;
+// }
 
-static void shm_pool_resize(struct wl_client *client, struct wl_resource *resource, int32_t size) {
-    // fprintf(stderr, "shm_pool_resize\n");
-}
+// static void shm_pool_resize(struct wl_client *client, struct wl_resource *resource, int32_t size) {
+//     // fprintf(stderr, "shm_pool_resize\n");
+// }
 
-static const struct wl_shm_pool_interface shm_pool_impl = {
-    .destroy = shm_pool_destroy,
-    .create_buffer = shm_pool_create_buffer,
-    .resize = shm_pool_resize,
-};
+// static const struct wl_shm_pool_interface shm_pool_impl = {
+//     .destroy = shm_pool_destroy,
+//     .create_buffer = shm_pool_create_buffer,
+//     .resize = shm_pool_resize,
+// };
 
-/* ------------------------------------------------ */
-/* wl_shm implementation */
+// /* ------------------------------------------------ */
+// /* wl_shm implementation */
 
-static void shm_create_pool(
-    struct wl_client *client,
-    struct wl_resource *resource,
-    uint32_t id,
-    int fd,
-    int32_t size
-) {
-    // fprintf(stderr, "shm_create_pool: %d\n", id);
-    surface_data = calloc(1, sizeof *surface_data);
-    surface_data->size = size;
-    surface_data->pixels = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+// static void shm_create_pool(
+//     struct wl_client *client,
+//     struct wl_resource *resource,
+//     uint32_t id,
+//     int fd,
+//     int32_t size
+// ) {
+//     fprintf(stderr, "shm_create_pool: id: %d, fd: %d, size: %d\n", id, fd, size);
+//     surface_data = calloc(1, sizeof *surface_data);
+//     surface_data->size = size;
+//     surface_data->pixels = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
 
-    struct wl_resource *res =
-        wl_resource_create(client, &wl_shm_pool_interface, 1, id);
+//     struct wl_resource *res =
+//         wl_resource_create(client, &wl_shm_pool_interface, 1, id);
 
-    wl_resource_set_implementation(res, &shm_pool_impl, surface_data, NULL);
-}
+//     wl_resource_set_implementation(res, &shm_pool_impl, surface_data, NULL);
+// }
 
-static const struct wl_shm_interface shm_impl = {
-    .create_pool = shm_create_pool,
-};
+// static const struct wl_shm_interface shm_impl = {
+//     .create_pool = shm_create_pool,
+// };
 
 /* ------------------------------------------------ */
 /* wl_surface implementation */
@@ -120,9 +133,13 @@ static void surface_attach(
     int32_t x,
     int32_t y
 ) {
+    fprintf(stderr, "surface_attach\n");
+    surface_buffer = wl_shm_buffer_get(buffer);
+    surface_x = x;
+    surface_y = y;
     // fprintf(stderr, "surface_attach – resource->object.id: %d\n", resource->object.id);
-    surface_data->x = x;
-    surface_data->y = y;
+    // surface_data->x = x;
+    // surface_data->y = y;
     // (void)client;
     // (void)resource;
     // (void)buffer;
@@ -142,10 +159,17 @@ static void surface_damage(
 }
 
 static void surface_commit(struct wl_client *client, struct wl_resource *resource) {
-    // fprintf(stderr, "surface_commit, resource->object.id: %d\n", resource->object.id);
+    fprintf(stderr, "surface_commit, resource->object.id: %d\n", resource->object.id);
     // fprintf(stderr, "surface_commit, resource->object.interface: %s\n", resource->object.interface->name);
 
-    show_surface(surface_data->pixels, surface_data->size, surface_data->stride, surface_data->x, surface_data->y);
+    uint32_t *pixels = wl_shm_buffer_get_data(surface_buffer);
+    uint32_t stride = wl_shm_buffer_get_stride(surface_buffer);
+    uint32_t width = wl_shm_buffer_get_width(surface_buffer);
+    uint32_t height = wl_shm_buffer_get_height(surface_buffer);
+    fprintf(stderr, "data: %x, stride: %d, width: %d, height: %d\n", pixels[0], stride, width, height);
+
+    // show_surface(surface_data->pixels, surface_data->size, surface_data->stride, surface_data->x, surface_data->y);
+    show_surface(pixels, width, height, surface_x, surface_y);
 
     // uint32_t *pool_data = surface_data->pixels;
 
@@ -255,12 +279,12 @@ static void bind_compositor(struct wl_client *client, void *data, uint32_t versi
     wl_resource_set_implementation(res, &compositor_impl, NULL, NULL);
 }
 
-static void bind_shm(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
-    // fprintf(stderr, "bind_shm\n");
-    struct wl_resource *res = wl_resource_create(client, &wl_shm_interface, 1, id);
-    wl_resource_set_implementation(res, &shm_impl, NULL, NULL);
-    wl_shm_send_format(res, WL_SHM_FORMAT_XRGB8888);
-}
+// static void bind_shm(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
+//     // fprintf(stderr, "bind_shm\n");
+//     struct wl_resource *res = wl_resource_create(client, &wl_shm_interface, 1, id);
+//     wl_resource_set_implementation(res, &shm_impl, NULL, NULL);
+//     wl_shm_send_format(res, WL_SHM_FORMAT_XRGB8888);
+// }
 
 static void bind_xdg_wm_base(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
     // fprintf(stderr, "bind_xdg_wm_base\n");
@@ -324,7 +348,11 @@ int main(void) {
     loop = wl_display_get_event_loop(display);
 
     wl_global_create(display, &wl_compositor_interface, 4, NULL, bind_compositor);
-    wl_global_create(display, &wl_shm_interface, 1, NULL, bind_shm);
+    
+    // wl_global_create(display, &wl_shm_interface, 1, NULL, bind_shm);
+    wl_display_init_shm(display);
+    wl_display_add_shm_format(display, WL_SHM_FORMAT_XRGB8888);
+
     wl_global_create(display, &xdg_wm_base_interface, 1, NULL, bind_xdg_wm_base);
 
     const char *socket = wl_display_add_socket_auto(display);
