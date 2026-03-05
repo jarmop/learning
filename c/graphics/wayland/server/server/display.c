@@ -20,10 +20,10 @@ uint8_t *bitmap;
 uint32_t fb_id;
 
 static void draw_plain(uint16_t width, uint16_t height, uint8_t *map, uint32_t pitch) {
-    uint8_t r = 0; uint8_t g = 0; uint8_t b = 100;
+    uint32_t r = 0; uint32_t g = 0; uint32_t b = 100;
     // Combine rgb values into one 3 byte value by shifting r bitwise to the 
     // left by 2 bytes, and g by 1 byte, and then doing bitwise or for each
-    uint32_t pixel = (r << 16) | (g <<  8) | b;
+    uint32_t pixel = (r << 16) | (g << 8) | b;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             memcpy(map + y * pitch + x * 4, &pixel, 4);
@@ -93,9 +93,9 @@ int show_mouse_move(struct input_event ev) {
     return 0;
 }
 
-int show_surface(uint32_t *pixels, size_t size_b, uint32_t width_b, int surface_start_x, int surface_start_y) {
-    int surface_width_px = width_b / 4;
-    int surface_height = size_b / width_b;
+int show_surface(uint32_t *pixels, uint32_t surface_width_px, uint32_t surface_height, int surface_start_x, int surface_start_y) {
+    // int surface_width_px = width_b / 4;
+    // int surface_height = size_b / width_b;
     // fprintf(stderr, "x: %d, y: %d, height: %d, width: %d", surface_start_x, surface_start_y, surface_height, surface_width_px);
 
     int bitmap_width_b = cdumb.pitch;

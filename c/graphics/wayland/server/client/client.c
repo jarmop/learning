@@ -47,7 +47,7 @@ static void __registry_handler(
         xdg_wm_base_add_listener(wm_base, &xdg_wm_base_listener, data);
     }
 }
-
+// xdg_surface#7: error 3: xdg_surface has never been configured
 static void __registry_remove(void *data, struct wl_registry *registry, uint32_t id) {}
 
 static const struct wl_registry_listener registry_listener = {
@@ -133,6 +133,11 @@ int main() {
         return 1;
     }
 
+    /**
+     * So, gnome doesn't care about the xdg stuff. But is there something else 
+     * that we are skipping in the custom wayland client, that causes gnome to give error?
+     */
+
     // Create surfaces
     struct wl_surface *surface = wl_compositor_create_surface(compositor);
     struct xdg_surface *xdg_surface = xdg_wm_base_get_xdg_surface(wm_base, surface);
@@ -150,7 +155,8 @@ int main() {
     wl_surface_attach(surface, buffer, 0, 0);
     wl_surface_commit(surface);
 
-    while (wl_display_dispatch(display)) {
+    while (wl_display_dispatch(display) > 0) {
+        sleep(1);
     }
 
     return 0;
