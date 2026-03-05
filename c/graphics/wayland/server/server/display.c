@@ -11,40 +11,60 @@
 #include <xf86drmMode.h>
 
 int fd;
-uint32_t conn_id;
-drmModeCrtc *orig_crtc;
-struct drm_mode_create_dumb cdumb = {0};
-drmModeModeInfo mode;
-uint32_t crtc_id;
-uint8_t *bitmap;
 uint32_t fb_id;
 
-static void draw_plain(uint16_t width, uint16_t height, uint8_t *map, uint32_t pitch) {
+// For restoring the old display
+uint32_t conn_id;
+drmModeCrtc *orig_crtc;
+
+uint16_t display_width = 0;
+uint16_t display_height = 0;
+
+uint32_t *bitmap;
+uint32_t *background;
+uint32_t *mouse;
+
+static void render_plain(uint32_t *pixels, uint16_t width, uint16_t height, uint32_t pixel) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            memcpy(pixels + y * width + x, &pixel, 4);
+        }
+    }
+} 
+
+static void render_background() {
     uint32_t r = 0; uint32_t g = 0; uint32_t b = 100;
     // Combine rgb values into one 3 byte value by shifting r bitwise to the 
     // left by 2 bytes, and g by 1 byte, and then doing bitwise or for each
     uint32_t pixel = (r << 16) | (g << 8) | b;
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            memcpy(map + y * pitch + x * 4, &pixel, 4);
-        }
-    }
+    render_plain(background, display_width, display_height, pixel);
 }
 
-static void draw_mouse(uint16_t mouse_x, uint16_t mouse_y, uint8_t *map, uint32_t pitch) {
+static void render_mouse() {
     uint16_t mouse_width = 10; uint16_t mouse_height = 10;
-    uint8_t r = 255; uint8_t g = 255; uint8_t b = 255;
+    uint32_t r = 255; uint32_t g = 255; uint32_t b = 255;
     // Combine rgb values into one 3 byte value by shifting r bitwise to the 
     // left by 2 bytes, and g by 1 byte, and then doing bitwise or for each
     uint32_t pixel = (r << 16) | (g <<  8) | b;
-    for (int y = mouse_y; y < mouse_y + mouse_height; y++) {
-        for (int x = mouse_x; x < mouse_x + mouse_width; x++) {
-            memcpy(map + y * pitch + x * 4, &pixel, 4);
-        }
-    }
+    render_plain(mouse, mouse_width, mouse_height, pixel);
 }
 
-void close_display() {
+int display_add_pixels(uint32_t *pixels, uint32_t width, uint32_t height, int start_x, int start_y) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            uint32_t *pixel = pixels + y * width + x;
+            int by = y + start_y;
+            int bx = x + start_x;
+            memcpy(bitmap + by * display_width + bx, pixel, 4);
+        }
+    }
+
+    drmModeDirtyFB(fd, fb_id, NULL, 0);
+
+    return 0;
+}
+
+void display_close() {
     // Restore the original CRTC
     drmModeSetCrtc(
         fd,
@@ -73,19 +93,16 @@ void close_display() {
 static int max_abs_x = 65482; int max_abs_y = 65452;
 static int mouse_x = -1; int mouse_y = -1;
 
-int show_mouse_move(struct input_event ev) {
+int display_move_mouse(struct input_event ev) {
     if (ev.code == REL_X) {
-        mouse_x = ev.value * cdumb.width / max_abs_x;
+        mouse_x = ev.value * display_width / max_abs_x;
     } else if (ev.code == REL_Y) {
-        mouse_y = ev.value * cdumb.height / max_abs_y;
+        mouse_y = ev.value * display_height / max_abs_y;
     }
-    // fprintf(stderr, "draw: %d\n", mouse_x > 0 && mouse_x < cdumb.width - 10 && mouse_y > 0 && mouse_y < cdumb.height - 10);
-    // fprintf(stderr, "mouse_x:%d, cdumb_width: %d, mouse_y: %d, cdumb_height: %d\n", mouse_x, cdumb.width - 10, mouse_y, cdumb.height - 10);
 
-    if (mouse_x > 0 && mouse_x < cdumb.width - 10 && mouse_y > 0 && mouse_y < cdumb.height - 10) {
-        // fprintf(stderr, "Draw mouse\n");
-        draw_plain(mode.hdisplay, mode.vdisplay, bitmap, cdumb.pitch);
-        draw_mouse(mouse_x, mouse_y, bitmap, cdumb.pitch);
+    if (mouse_x > 0 && mouse_x < display_width - 10 && mouse_y > 0 && mouse_y < display_height - 10) {
+        display_add_pixels(background, display_width, display_height, 0, 0);
+        display_add_pixels(mouse, 10, 10, mouse_x, mouse_y);
     }
 
     drmModeDirtyFB(fd, fb_id, NULL, 0);
@@ -93,32 +110,7 @@ int show_mouse_move(struct input_event ev) {
     return 0;
 }
 
-int show_surface(uint32_t *pixels, uint32_t surface_width_px, uint32_t surface_height, int surface_start_x, int surface_start_y) {
-    // int surface_width_px = width_b / 4;
-    // int surface_height = size_b / width_b;
-    // fprintf(stderr, "x: %d, y: %d, height: %d, width: %d", surface_start_x, surface_start_y, surface_height, surface_width_px);
-
-    int bitmap_width_b = cdumb.pitch;
-
-    for (int y = 0; y < surface_height; y++) {
-        for (int x = 0; x < surface_width_px; x++) {
-            uint32_t *pixel = pixels + y * surface_width_px + x;
-            int by = y + surface_start_y;
-            int bx = x + surface_start_x;
-            memcpy(bitmap + by * bitmap_width_b + bx * 4, pixel, 4);
-        }
-    }
-
-    drmModeDirtyFB(fd, fb_id, NULL, 0);
-
-    return 0;
-}
-
-int initialize_display() {
-    int mode_i = 0;
-    // int screen_width = 925; int screen_height = 791;
-    // int screen_width = 925; int screen_height = 1105;
-
+int display_init() {
     char *drm_device = "/dev/dri/card1";
 
     // Open the file representing the DRM device
@@ -155,12 +147,14 @@ int initialize_display() {
         return 1;
     }
 
-    mode = conn->modes[mode_i];  // choose the first mode (usually preferred)
+    drmModeModeInfo mode = conn->modes[0];  // choose the first mode (usually preferred)
+    display_width = mode.hdisplay;
+    display_height = mode.vdisplay;
     // fprintf(stderr, "Available modes:\n");
     // for (int i = 0; i < conn->count_modes; i++) {
     //     fprintf(stderr, "  %d: %s\n", i, conn->modes[i].name);
     // }
-    // fprintf(stderr, "Using mode %d: %s\n", mode_i, mode.name);
+    // fprintf(stderr, "Using mode %s\n", mode.name);
     // fprintf(stderr, "total – h: %d, v: %d\n", mode.htotal, mode.vtotal);
     // fprintf(stderr, "sync – h: %d-%d, v: %d-%d\n", mode.hsync_start, mode.hsync_end, mode.vsync_start, mode.vsync_end);
     // fprintf(stderr, "hskew: %d, vscan: %d\n", mode.hskew, mode.vscan);
@@ -174,7 +168,7 @@ int initialize_display() {
         return 1;
     }
 
-    crtc_id = enc->crtc_id;
+    uint32_t crtc_id = enc->crtc_id;
     drmModeFreeEncoder(enc);
 
 
@@ -183,9 +177,9 @@ int initialize_display() {
     if (!orig_crtc) { perror("drmModeGetCrtc"); return 1; }
 
     // Create a dumb buffer
-    // cdumb = {0};
-    cdumb.width  = mode.hdisplay;
-    cdumb.height = mode.vdisplay;
+    struct drm_mode_create_dumb cdumb = {0};
+    cdumb.width  = display_width;
+    cdumb.height = display_height;
     cdumb.bpp    = 32; // ARGB8888
 
     int error = drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &cdumb) < 0;
@@ -193,12 +187,6 @@ int initialize_display() {
         perror("CREATE_DUMB");
         return 1;
     }
-
-    // fprintf(stderr, "Screen width in pixels: %d \n", cdumb.width);
-    // fprintf(stderr, "Screen height in pixels: %d \n", cdumb.height);
-    // fprintf(stderr, "Bytes per pixel: %d \n", cdumb.bpp / 8);
-    // fprintf(stderr, "Screen size in bytes: %lld \n", cdumb.size);
-    // fprintf(stderr, "Pitch: %d \n", cdumb.pitch);
 
     // Register the dumb buffer as a framebuffer object.    
     error = drmModeAddFB(fd, cdumb.width, cdumb.height, 24, 32, cdumb.pitch, cdumb.handle, &fb_id);
@@ -222,9 +210,12 @@ int initialize_display() {
         return 1;
     }
 
-    // drawGradient(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
-    // drawCheckers(mode.hdisplay, mode.vdisplay, map, cdumb.pitch);
-    draw_plain(mode.hdisplay, mode.vdisplay, bitmap, cdumb.pitch);
+    background = malloc(display_width * display_height * 4);
+    mouse = malloc(10 * 10 * 4);
+    render_background();
+    render_mouse();
+    display_add_pixels(background, display_width, display_height, 0, 0);
+
     error = drmModeSetCrtc(fd, crtc_id, fb_id, 0, 0, &conn_id, 1, &mode);
     if (error) {
         perror("drmModeSetCrtc");

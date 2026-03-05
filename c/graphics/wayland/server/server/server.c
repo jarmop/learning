@@ -140,11 +140,6 @@ static void surface_attach(
     // fprintf(stderr, "surface_attach – resource->object.id: %d\n", resource->object.id);
     // surface_data->x = x;
     // surface_data->y = y;
-    // (void)client;
-    // (void)resource;
-    // (void)buffer;
-    // (void)x;
-    // (void)y;
 }
 
 static void surface_damage(
@@ -160,7 +155,6 @@ static void surface_damage(
 
 static void surface_commit(struct wl_client *client, struct wl_resource *resource) {
     fprintf(stderr, "surface_commit, resource->object.id: %d\n", resource->object.id);
-    // fprintf(stderr, "surface_commit, resource->object.interface: %s\n", resource->object.interface->name);
 
     uint32_t *pixels = wl_shm_buffer_get_data(surface_buffer);
     uint32_t stride = wl_shm_buffer_get_stride(surface_buffer);
@@ -168,17 +162,8 @@ static void surface_commit(struct wl_client *client, struct wl_resource *resourc
     uint32_t height = wl_shm_buffer_get_height(surface_buffer);
     fprintf(stderr, "data: %x, stride: %d, width: %d, height: %d\n", pixels[0], stride, width, height);
 
-    // show_surface(surface_data->pixels, surface_data->size, surface_data->stride, surface_data->x, surface_data->y);
-    show_surface(pixels, width, height, surface_x, surface_y);
-
-    // uint32_t *pool_data = surface_data->pixels;
-
-    // fprintf(stderr, "pool data: %x\n", pool_data[0]);
-
-    // show_surface((uint32_t *)&surface_data->pixels, surface_data->size);
-
-    // (void)client;
-    // (void)resource;
+    // display_add_pixels(surface_data->pixels, surface_data->size, surface_data->stride, surface_data->x, surface_data->y);
+    display_add_pixels(pixels, width, height, surface_x, surface_y);
 }
 
 static const struct wl_surface_interface surface_impl = {
@@ -226,9 +211,6 @@ static void xdg_surface_destroy(struct wl_client *client, struct wl_resource *re
 
 static void xdg_surface_ack_configure(struct wl_client *client, struct wl_resource *resource, uint32_t serial) {
     // fprintf(stderr, "xdg_surface_ack_configure\n");
-    // (void)client;
-    // (void)resource;
-    // (void)serial;
 }
 
 static const struct xdg_surface_interface xdg_surface_impl = {
@@ -258,9 +240,6 @@ static void xdg_wm_base_get_xdg_surface(
 
 static void xdg_wm_base_pong(struct wl_client *client, struct wl_resource *resource, uint32_t serial) {
     // fprintf(stderr, "xdg_wm_base_pong\n");
-    // (void)client;
-    // (void)resource;
-    // (void)serial;
 }
 
 static const struct xdg_wm_base_interface xdg_wm_base_impl = {
@@ -318,13 +297,13 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
 
         if (n == (ssize_t)sizeof ev) {
             if (ev.type == EV_ABS) {
-                show_mouse_move(ev);
+                display_move_mouse(ev);
             }
             if (ev.type == EV_KEY && ev.code == BTN_LEFT) {
                 // if (ev.value == 1) printf("Left button pressed\n");
                 if (ev.value == 0) {
                     // printf("Left button released\n");
-                    close_display();
+                    display_close();
                     wl_event_loop_destroy(loop);
                 }
             }
@@ -339,9 +318,6 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
 
     return 0;
 }
-
-/* ------------------------------------------------ */
-/* Main */
 
 int main(void) {
     display = wl_display_create();
@@ -361,7 +337,7 @@ int main(void) {
         return 1;
     }
 
-    initialize_display();
+    display_init();
 
     char *mouse_event = "/dev/input/event2";
     // int mouse_fd = open(mouse_event, O_RDONLY | O_CLOEXEC);
