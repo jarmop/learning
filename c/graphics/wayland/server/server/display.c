@@ -13,10 +13,16 @@
 #include "types.h"
 
 int fd;
-uint32_t fb_id;
+uint32_t fb_ids[2] = {0};
+uint32_t *fbs[2] = {0};
+uint32_t active_fb = 0;
+uint32_t inactive_fb = 1;
+
+uint32_t crtc_id;
+uint32_t conn_id;
+drmModeModeInfo mode;
 
 // For restoring the old display
-uint32_t conn_id;
 drmModeCrtc *orig_crtc;
 
 void drm_close() {
@@ -45,8 +51,54 @@ void drm_close() {
     // close(fd);
 }
 
-void drm_refresh() {
-    drmModeDirtyFB(fd, fb_id, NULL, 0);
+uint32_t *drm_refresh() {
+    // Flip buffers
+    active_fb = active_fb ^ 1;
+    inactive_fb = inactive_fb ^ 1;
+
+    // Display the activated buffer
+    drmModeSetCrtc(fd, crtc_id, fb_ids[active_fb], 0, 0, &conn_id, 1, &mode);
+
+    // Return the inactivated buffer for the compositor to work on.
+    return fbs[inactive_fb];
+}
+
+int create_buffer(uint32_t fb_index, uint32_t width, uint32_t height) {
+    // FB #1
+    // Create a dumb buffer
+    struct drm_mode_create_dumb cdumb = {0};
+    cdumb.width  = width;
+    cdumb.height = height;
+    cdumb.bpp    = 32; // ARGB8888
+
+    int error = drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &cdumb) < 0;
+    if (error) {
+        perror("CREATE_DUMB");
+        return 1;
+    }
+
+    // Register the dumb buffer as a framebuffer object.    
+    error = drmModeAddFB(fd, cdumb.width, cdumb.height, 24, 32, cdumb.pitch, cdumb.handle, &fb_ids[fb_index]);
+    if (error) {
+        perror("drmModeAddFB");
+        return 1;
+    }
+
+    // Map the buffer so we can draw into it
+    struct drm_mode_map_dumb mdumb = {0};
+    mdumb.handle = cdumb.handle;
+    error = drmIoctl(fd, DRM_IOCTL_MODE_MAP_DUMB, &mdumb);
+    if (error) {
+        perror("MAP_DUMB");
+        return 1;
+    }
+
+    // return (uint32_t *)mmap(NULL, cdumb.size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, mdumb.offset);
+    fbs[fb_index] = mmap(NULL, cdumb.size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, mdumb.offset);
+    if (fbs[0] == MAP_FAILED) {
+        perror("mmap");
+        return 1;
+    }
 }
 
 int drm_init(struct pxgrid *pxgrid) {
@@ -86,7 +138,7 @@ int drm_init(struct pxgrid *pxgrid) {
         return 1;
     }
 
-    drmModeModeInfo mode = conn->modes[0];  // choose the first mode (usually preferred)
+    mode = conn->modes[0];  // choose the first mode (usually preferred)
     pxgrid->width = mode.hdisplay;
     pxgrid->height = mode.vdisplay;
 
@@ -108,7 +160,7 @@ int drm_init(struct pxgrid *pxgrid) {
         return 1;
     }
 
-    uint32_t crtc_id = enc->crtc_id;
+    crtc_id = enc->crtc_id;
     drmModeFreeEncoder(enc);
 
 
@@ -116,45 +168,16 @@ int drm_init(struct pxgrid *pxgrid) {
     orig_crtc = drmModeGetCrtc(fd, crtc_id);
     if (!orig_crtc) { perror("drmModeGetCrtc"); return 1; }
 
-    // Create a dumb buffer
-    struct drm_mode_create_dumb cdumb = {0};
-    cdumb.width  = pxgrid->width;
-    cdumb.height = pxgrid->height;
-    cdumb.bpp    = 32; // ARGB8888
+    create_buffer(active_fb, pxgrid->width, pxgrid->height);
+    create_buffer(inactive_fb, pxgrid->width, pxgrid->height);
 
-    int error = drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &cdumb) < 0;
-    if (error) {
-        perror("CREATE_DUMB");
-        return 1;
-    }
-
-    // Register the dumb buffer as a framebuffer object.    
-    error = drmModeAddFB(fd, cdumb.width, cdumb.height, 24, 32, cdumb.pitch, cdumb.handle, &fb_id);
-    if (error) {
-        perror("drmModeAddFB");
-        return 1;
-    }
-
-    // Map the buffer so we can draw into it
-    struct drm_mode_map_dumb mdumb = {0};
-    mdumb.handle = cdumb.handle;
-    error = drmIoctl(fd, DRM_IOCTL_MODE_MAP_DUMB, &mdumb);
-    if (error) {
-        perror("MAP_DUMB");
-        return 1;
-    }
-
-    pxgrid->pixels = mmap(NULL, cdumb.size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, mdumb.offset);
-    if (pxgrid->pixels == MAP_FAILED) {
-        perror("mmap");
-        return 1;
-    }
-
-    error = drmModeSetCrtc(fd, crtc_id, fb_id, 0, 0, &conn_id, 1, &mode);
+    int error = drmModeSetCrtc(fd, crtc_id, fb_ids[active_fb], 0, 0, &conn_id, 1, &mode);
     if (error) {
         perror("drmModeSetCrtc");
         return 1;
     }
+
+    pxgrid->pixels = fbs[inactive_fb];
 
     return 0;
 }
