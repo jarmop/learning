@@ -185,7 +185,9 @@ static void surface_commit(struct wl_client *client, struct wl_resource *resourc
     // surface.width = width;
     // surface.height = height;
 
+    rd_blend(&drm, &background);
     rd_blend(&drm, &surface);
+    rd_blend(&drm, &mouse);
     drm_refresh();
 }
 
@@ -330,6 +332,7 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
 
                 if (mouse.x > 0 && mouse.x < drm.width - 10 && mouse.y > 0 && mouse.y < drm.height - 10) {
                     rd_blend(&drm, &background);
+                    rd_blend(&drm, &surface);
                     rd_blend(&drm, &mouse);
                     drm_refresh();                    
                 }
