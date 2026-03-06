@@ -16,6 +16,8 @@
 #include "xdg-shell-server-protocol.h"
 
 #include "display.h"
+#include "renderer.h"
+#include "types.h"
 
 /**
  * Need to store the surface data for the mouse cursor as well. So there we have
@@ -38,9 +40,14 @@ struct wl_shm_buffer *surface_buffer;
 int surface_x = 0;
 int surface_y = 0;
 
-struct wl_display *display;
+struct wl_display *wl_display;
 struct wl_event_loop *loop;
 // struct surface_data *surface_data;
+
+struct pxgrid drm = {0};
+struct pxgrid background = {0};
+struct pxgrid mouse = {0};
+struct pxgrid surface = {0};
 
 /* ------------------------------------------------ */
 /* wl_buffer implementation */
@@ -135,8 +142,19 @@ static void surface_attach(
 ) {
     fprintf(stderr, "surface_attach\n");
     surface_buffer = wl_shm_buffer_get(buffer);
+    uint32_t *pixels = wl_shm_buffer_get_data(surface_buffer);
+    uint32_t stride = wl_shm_buffer_get_stride(surface_buffer);
+    uint32_t width = wl_shm_buffer_get_width(surface_buffer);
+    uint32_t height = wl_shm_buffer_get_height(surface_buffer);
     surface_x = x;
     surface_y = y;
+
+    surface.pixels = pixels;
+    surface.width = width;
+    surface.height = height;
+    surface.x = x;
+    surface.y = y;
+
     // fprintf(stderr, "surface_attach – resource->object.id: %d\n", resource->object.id);
     // surface_data->x = x;
     // surface_data->y = y;
@@ -156,14 +174,19 @@ static void surface_damage(
 static void surface_commit(struct wl_client *client, struct wl_resource *resource) {
     fprintf(stderr, "surface_commit, resource->object.id: %d\n", resource->object.id);
 
-    uint32_t *pixels = wl_shm_buffer_get_data(surface_buffer);
-    uint32_t stride = wl_shm_buffer_get_stride(surface_buffer);
-    uint32_t width = wl_shm_buffer_get_width(surface_buffer);
-    uint32_t height = wl_shm_buffer_get_height(surface_buffer);
-    fprintf(stderr, "data: %x, stride: %d, width: %d, height: %d\n", pixels[0], stride, width, height);
+    // uint32_t *pixels = wl_shm_buffer_get_data(surface_buffer);
+    // uint32_t stride = wl_shm_buffer_get_stride(surface_buffer);
+    // uint32_t width = wl_shm_buffer_get_width(surface_buffer);
+    // uint32_t height = wl_shm_buffer_get_height(surface_buffer);
+    // fprintf(stderr, "data: %x, stride: %d, width: %d, height: %d\n", pixels[0], stride, width, height);
 
-    // display_add_pixels(surface_data->pixels, surface_data->size, surface_data->stride, surface_data->x, surface_data->y);
-    display_add_pixels(pixels, width, height, surface_x, surface_y);
+    // struct pxgrid surface = {0};
+    // surface.pixels = pixels;
+    // surface.width = width;
+    // surface.height = height;
+
+    rd_blend(&drm, &surface);
+    drm_refresh();
 }
 
 static const struct wl_surface_interface surface_impl = {
@@ -234,7 +257,7 @@ static void xdg_wm_base_get_xdg_surface(
 
     wl_resource_set_implementation(xdg_surface, &xdg_surface_impl, surface, NULL);
 
-    uint32_t serial = wl_display_next_serial(display);
+    uint32_t serial = wl_display_next_serial(wl_display);
     xdg_surface_send_configure(xdg_surface, serial);
 }
 
@@ -276,6 +299,8 @@ static void bind_xdg_wm_base(struct wl_client *client, void *data, uint32_t vers
 // uint32_t tms2 = 0;
 
 struct input_event ev;
+static int max_abs_x = 65482; int max_abs_y = 65452;
+// static int mouse_x = -1; int mouse_y = -1;
 
 /**
  * event_mask   Bit mask telling which event occurred
@@ -297,13 +322,23 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
 
         if (n == (ssize_t)sizeof ev) {
             if (ev.type == EV_ABS) {
-                display_move_mouse(ev);
+                if (ev.code == REL_X) {
+                    mouse.x = ev.value * drm.width / max_abs_x;
+                } else if (ev.code == REL_Y) {
+                    mouse.y = ev.value * drm.height / max_abs_y;
+                }
+
+                if (mouse.x > 0 && mouse.x < drm.width - 10 && mouse.y > 0 && mouse.y < drm.height - 10) {
+                    rd_blend(&drm, &background);
+                    rd_blend(&drm, &mouse);
+                    drm_refresh();                    
+                }
             }
             if (ev.type == EV_KEY && ev.code == BTN_LEFT) {
                 // if (ev.value == 1) printf("Left button pressed\n");
                 if (ev.value == 0) {
                     // printf("Left button released\n");
-                    display_close();
+                    drm_close();
                     wl_event_loop_destroy(loop);
                 }
             }
@@ -320,39 +355,45 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
 }
 
 int main(void) {
-    display = wl_display_create();
-    loop = wl_display_get_event_loop(display);
+    wl_display = wl_display_create();
+    loop = wl_display_get_event_loop(wl_display);
 
-    wl_global_create(display, &wl_compositor_interface, 4, NULL, bind_compositor);
+    wl_global_create(wl_display, &wl_compositor_interface, 4, NULL, bind_compositor);
     
     // wl_global_create(display, &wl_shm_interface, 1, NULL, bind_shm);
-    wl_display_init_shm(display);
-    wl_display_add_shm_format(display, WL_SHM_FORMAT_XRGB8888);
+    wl_display_init_shm(wl_display);
+    wl_display_add_shm_format(wl_display, WL_SHM_FORMAT_XRGB8888);
 
-    wl_global_create(display, &xdg_wm_base_interface, 1, NULL, bind_xdg_wm_base);
+    wl_global_create(wl_display, &xdg_wm_base_interface, 1, NULL, bind_xdg_wm_base);
 
-    const char *socket = wl_display_add_socket_auto(display);
+    const char *socket = wl_display_add_socket_auto(wl_display);
     if (!socket) {
         fprintf(stderr, "Failed to create socket\n");
         return 1;
     }
 
-    display_init();
+    drm_init(&drm);
+
+    background.pixels = malloc(drm.width * drm.height * 4);
+    background.width = drm.width;
+    background.height = drm.height;
+    rd_paint(&background, 0xff000064);
+    rd_blend(&drm, &background);
+    drm_refresh();
+
+    mouse.pixels = malloc(10 * 10 * 4);
+    mouse.width = 10;
+    mouse.height = 10;
+    rd_paint(&mouse, 0xffffffff);
 
     char *mouse_event = "/dev/input/event2";
-    // int mouse_fd = open(mouse_event, O_RDONLY | O_CLOEXEC);
     int mouse_fd = open(mouse_event, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
 
     int nop = 0;
     wl_event_loop_add_fd(loop, mouse_fd, WL_EVENT_READABLE, on_mouse_fd, &nop);
 
-    // draw();
-    // restore_screen();
-
     fprintf(stderr, "Wayland compositor running on %s\n", socket);
-    wl_display_run(display);
-
-    // wl_display_destroy(display);
+    wl_display_run(wl_display);
 
     return 0;
 }
