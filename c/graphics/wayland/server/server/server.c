@@ -188,7 +188,7 @@ static void surface_commit(struct wl_client *client, struct wl_resource *resourc
     rd_blend(&drm, &background);
     rd_blend(&drm, &surface);
     rd_blend(&drm, &mouse);
-    drm_refresh();
+    drm.pixels = drm_refresh();
 }
 
 static const struct wl_surface_interface surface_impl = {
@@ -334,7 +334,7 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
                     rd_blend(&drm, &background);
                     rd_blend(&drm, &surface);
                     rd_blend(&drm, &mouse);
-                    drm_refresh();                    
+                    drm.pixels = drm_refresh();                    
                 }
             }
             if (ev.type == EV_KEY && ev.code == BTN_LEFT) {
@@ -382,11 +382,13 @@ int main(void) {
     background.height = drm.height;
     rd_paint(&background, 0xff000064);
     rd_blend(&drm, &background);
-    drm_refresh();
+    drm.pixels = drm_refresh();
 
     mouse.pixels = malloc(10 * 10 * 4);
     mouse.width = 10;
     mouse.height = 10;
+    mouse.x = -mouse.width;
+    mouse.y = -mouse.height;
     rd_paint(&mouse, 0xffffffff);
 
     char *mouse_event = "/dev/input/event2";
