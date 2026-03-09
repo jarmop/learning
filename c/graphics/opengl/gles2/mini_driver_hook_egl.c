@@ -70,17 +70,6 @@ static int egl_init_driver(struct mini_display *dpy) {
         return MINI_ERR_BAD_STATE;
     }
 
-    /*
-     * Let the hook refine the backend's chosen format if EGL requires a different
-     * native visual. This keeps the custom policy layer small but working.
-     */
-    EGLint visual_id = 0;
-    if (eglGetConfigAttrib(dd->egl_display, dd->egl_config, EGL_NATIVE_VISUAL_ID, &visual_id)) {
-        dpy->default_config.gbm_format = (uint32_t)visual_id;
-        dpy->default_config.has_alpha =
-            (visual_id == GBM_FORMAT_ARGB8888 || visual_id == GBM_FORMAT_ABGR8888) ? 1 : 0;
-    }
-
     dpy->driver_data = dd;
     return MINI_OK;
 }
@@ -97,6 +86,22 @@ static void egl_shutdown_driver(struct mini_display *dpy) {
 
     free(dd);
     dpy->driver_data = NULL;
+}
+
+static int egl_query_native_format(struct mini_display *dpy, uint32_t *out_format) {
+    if (!dpy || !dpy->driver_data || !out_format) {
+        return MINI_ERR_BAD_ARG;
+    }
+
+    struct egl_driver_data *dd = dpy->driver_data;
+
+    EGLint visual_id = 0;
+    if (!eglGetConfigAttrib(dd->egl_display, dd->egl_config, EGL_NATIVE_VISUAL_ID, &visual_id)) {
+        return MINI_ERR_BAD_STATE;
+    }
+
+    *out_format = (uint32_t)visual_id;
+    return MINI_OK;
 }
 
 static int egl_create_context(struct mini_context *ctx) {
@@ -241,7 +246,18 @@ static int egl_unbind_current(struct mini_display *dpy) {
     return MINI_OK;
 }
 
-static int egl_flush_and_publish(struct mini_display *dpy, struct mini_surface *surf) {
+static int egl_flush_rendering(struct mini_display *dpy, struct mini_surface *surf) {
+    (void)dpy;
+    (void)surf;
+
+    /*
+     * For the EGL backend, we currently let eglSwapBuffers() handle the real
+     * flush/publish boundary. So this is just a placeholder split.
+     */
+    return MINI_OK;
+}
+
+static int egl_publish_surface(struct mini_display *dpy, struct mini_surface *surf) {
     if (!dpy || !surf || !dpy->driver_data || !surf->driver_data) {
         return MINI_ERR_BAD_ARG;
     }
@@ -256,16 +272,42 @@ static int egl_flush_and_publish(struct mini_display *dpy, struct mini_surface *
     return MINI_OK;
 }
 
+static int egl_acquire_front_buffer(struct mini_surface *surf, struct gbm_bo **out_bo) {
+    if (!surf || !surf->gbm_surface || !out_bo) {
+        return MINI_ERR_BAD_ARG;
+    }
+
+    struct gbm_bo *bo = gbm_surface_lock_front_buffer(surf->gbm_surface);
+    if (!bo) {
+        return MINI_ERR_BAD_STATE;
+    }
+
+    *out_bo = bo;
+    return MINI_OK;
+}
+
+static void egl_release_front_buffer(struct mini_surface *surf, struct gbm_bo *bo) {
+    if (!surf || !surf->gbm_surface || !bo) {
+        return;
+    }
+
+    gbm_surface_release_buffer(surf->gbm_surface, bo);
+}
+
 static const struct mini_driver_hook_vtbl egl_hook_vtbl = {
     .init_driver = egl_init_driver,
     .shutdown_driver = egl_shutdown_driver,
+    .query_native_format = egl_query_native_format,
     .create_context = egl_create_context,
     .destroy_context = egl_destroy_context,
     .create_drawable = egl_create_drawable,
     .destroy_drawable = egl_destroy_drawable,
     .bind_current = egl_bind_current,
     .unbind_current = egl_unbind_current,
-    .flush_and_publish = egl_flush_and_publish,
+    .flush_rendering = egl_flush_rendering,
+    .publish_surface = egl_publish_surface,
+    .acquire_front_buffer = egl_acquire_front_buffer,
+    .release_front_buffer = egl_release_front_buffer,
 };
 
 const struct mini_driver_hook mini_driver_hook_egl = {

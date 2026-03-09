@@ -40,18 +40,9 @@ int main()
 
     const struct mini_config *cfg = miniChooseConfig(dpy);
 
-    struct gbm_surface *gsurf = gbm_surface_create(
-        gbm,
-        mode.hdisplay,
-        mode.vdisplay,
-        cfg->gbm_format,
-        GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING
-    );
-
     struct mini_context *ctx = miniCreateContext(dpy, cfg);
 
-    struct mini_surface *surf =
-        miniCreateWindowSurface(dpy, cfg, gsurf, mode.hdisplay, mode.vdisplay);
+    struct mini_surface *surf = miniCreateWindowSurface(dpy, cfg, mode.hdisplay, mode.vdisplay);
 
     miniMakeCurrent(dpy, surf, surf, ctx);
 
@@ -62,9 +53,15 @@ int main()
     miniSwapBuffers(dpy, surf);
 
     struct gbm_bo *bo = miniLockFrontBuffer(surf);
+    if (!bo) {
+        fprintf(stderr, "No front buffer available\n");
+        return 1;
+    }
 
     uint32_t fb;
+
     uint32_t handle = gbm_bo_get_handle(bo).u32;
+
     uint32_t stride = gbm_bo_get_stride(bo);
 
     drmModeAddFB(

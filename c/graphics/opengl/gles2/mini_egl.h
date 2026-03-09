@@ -44,7 +44,6 @@ void miniDestroyContext(struct mini_context *ctx);
 struct mini_surface *miniCreateWindowSurface(
     struct mini_display *dpy,
     const struct mini_config *cfg,
-    struct gbm_surface *gbm_surface,
     int width,
     int height
 );
