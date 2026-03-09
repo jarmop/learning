@@ -16,13 +16,9 @@ struct mini_display *miniGetDisplay(struct gbm_device *gbm, int drm_fd) {
 
     dpy->gbm = gbm;
     dpy->drm_fd = drm_fd;
-    dpy->backend = &mini_backend_egl;
 
-    dpy->default_config.gbm_format   = GBM_FORMAT_XRGB8888;
-    dpy->default_config.gles_version = 2;
-    dpy->default_config.depth_bits   = 0;
-    dpy->default_config.stencil_bits = 0;
-    dpy->default_config.has_alpha    = 0;
+    dpy->backend = &mini_backend_custom;
+    dpy->driver_hook = &mini_driver_hook_egl;
 
     return dpy;
 }
@@ -182,6 +178,7 @@ int miniMakeCurrent(
     g_mini_current.ctx = ctx;
     g_mini_current.draw = draw;
     g_mini_current.read = read;
+
     return MINI_OK;
 }
 

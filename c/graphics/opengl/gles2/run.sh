@@ -1,4 +1,4 @@
-gcc -Wall -Wextra -O2 main.c mini_egl.c mini_backend_egl.c $(pkg-config --cflags --libs libdrm gbm egl glesv2)
+gcc -Wall -Wextra -O2 main.c mini_egl.c mini_backend_custom.c mini_driver_hook_egl.c $(pkg-config --cflags --libs libdrm gbm egl glesv2)
 
 sshpass -f passw scp -P 2223 a.out jarmovm@localhost:
 
