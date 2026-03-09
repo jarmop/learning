@@ -112,11 +112,10 @@ void miniDestroyContext(struct mini_context *ctx) {
 struct mini_surface *miniCreateWindowSurface(
     struct mini_display *dpy,
     const struct mini_config *cfg,
-    struct gbm_surface *gbm_surface,
     int width,
     int height
 ) {
-    if (!dpy || !cfg || !gbm_surface || width <= 0 || height <= 0 || !dpy->initialized) {
+    if (!dpy || !cfg || width <= 0 || height <= 0 || !dpy->initialized) {
         return NULL;
     }
 
@@ -127,10 +126,10 @@ struct mini_surface *miniCreateWindowSurface(
 
     surf->dpy = dpy;
     surf->cfg = *cfg;
-    surf->gbm_surface = gbm_surface;
     surf->width = width;
     surf->height = height;
     surf->format = cfg->gbm_format;
+    surf->gbm_surface = NULL;
 
     if (dpy->backend->vtbl->create_surface(surf) != MINI_OK) {
         free(surf);
@@ -190,12 +189,7 @@ int miniSwapBuffers(struct mini_display *dpy, struct mini_surface *surf) {
 }
 
 struct gbm_bo *miniLockFrontBuffer(struct mini_surface *surf) {
-    if (!surf || !surf->swapped || surf->front_bo) {
-        return NULL;
-    }
-
-    surf->front_bo = gbm_surface_lock_front_buffer(surf->gbm_surface);
-    if (!surf->front_bo) {
+    if (!surf || !surf->swapped || !surf->front_bo) {
         return NULL;
     }
 
@@ -204,11 +198,12 @@ struct gbm_bo *miniLockFrontBuffer(struct mini_surface *surf) {
 }
 
 void miniReleaseBuffer(struct mini_surface *surf, struct gbm_bo *bo) {
-    if (!surf || !bo) {
+    if (!surf || !bo || !surf->dpy || !surf->dpy->driver_hook) {
         return;
     }
 
-    gbm_surface_release_buffer(surf->gbm_surface, bo);
+    surf->dpy->driver_hook->vtbl->release_front_buffer(surf, bo);
+
     if (surf->front_bo == bo) {
         surf->front_bo = NULL;
     }
