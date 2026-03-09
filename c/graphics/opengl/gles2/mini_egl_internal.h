@@ -2,6 +2,7 @@
 #define MINI_EGL_INTERNAL_H
 
 #include "mini_backend.h"
+#include "mini_driver_hook.h"
 #include <gbm.h>
 
 struct mini_display {
@@ -10,7 +11,10 @@ struct mini_display {
     int initialized;
 
     const struct mini_backend *backend;
+    const struct mini_driver_hook *driver_hook;
+
     void *backend_data;
+    void *driver_data;
 
     struct mini_config default_config;
 };
@@ -19,6 +23,7 @@ struct mini_context {
     struct mini_display *dpy;
     struct mini_config cfg;
     void *backend_data;
+    void *driver_data;
 };
 
 struct mini_surface {
@@ -34,6 +39,7 @@ struct mini_surface {
     int swapped;
 
     void *backend_data;
+    void *driver_data;
 };
 
 struct mini_current {

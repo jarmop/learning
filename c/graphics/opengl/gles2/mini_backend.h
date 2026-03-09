@@ -33,7 +33,7 @@ struct mini_backend {
     const struct mini_backend_vtbl *vtbl;
 };
 
-extern const struct mini_backend mini_backend_stub;
+extern const struct mini_backend mini_backend_custom;
 extern const struct mini_backend mini_backend_egl;
 
 #endif
