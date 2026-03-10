@@ -8,4 +8,4 @@ Configure:
 
 Generate and download.
 
-Download → extract → put glad.c + include/ next to your file.
+Extract and place the extracted directory next to your file.
