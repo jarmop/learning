@@ -33,13 +33,31 @@ GLuint compile_shader(GLenum type, const char *src) {
     return s;
 }
 
+static void glfw_error_cb(int code, const char *desc) {
+    fprintf(stderr, "GLFW error %d: %s\n", code, desc);
+}
+
 int main() {
-    glfwInit();
+    glfwSetErrorCallback(glfw_error_cb);
+
+    glfwInitHint(GLFW_WAYLAND_LIBDECOR, GLFW_WAYLAND_DISABLE_LIBDECOR);
+
+    if (!glfwInit()) {
+        fprintf(stderr, "glfwInit failed\n");
+        return 1;
+    }
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *win = glfwCreateWindow(800, 600, "OpenGL Hello", NULL, NULL);
+    GLFWwindow *win = glfwCreateWindow(600, 400, "OpenGL Hello", NULL, NULL);
+    if (!win) {
+        fprintf(stderr, "glfwCreateWindow failed\n");
+        glfwTerminate();
+        return 1;
+    }
+
     glfwMakeContextCurrent(win);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
