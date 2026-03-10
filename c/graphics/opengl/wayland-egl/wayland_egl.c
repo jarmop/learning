@@ -160,7 +160,7 @@ static void create_window_and_surface(struct app *a) {
     xdg_surface_add_listener(a->xdg_surface, &xdg_surface_listener, a);
 
     a->toplevel = xdg_surface_get_toplevel(a->xdg_surface);
-    xdg_toplevel_set_title(a->toplevel, "Wayland + EGL Hello");
+    // xdg_toplevel_set_title(a->toplevel, "Wayland + EGL Hello");
     xdg_toplevel_add_listener(a->toplevel, &toplevel_listener, a);
 
     wl_surface_commit(a->surface);
@@ -198,8 +198,8 @@ static void draw_frame(struct app *a, float t) {
 
 int main(void) {
     struct app a = {
-        .width = 800,
-        .height = 600,
+        .width = 600,
+        .height = 400,
         .running = true,
         .configured = false,
     };
