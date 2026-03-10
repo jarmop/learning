@@ -1,13 +1,42 @@
 #include "mini_egl_internal.h"
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <dlfcn.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
 struct egl_driver_data {
+    void *libegl;
+
     EGLDisplay egl_display;
     EGLConfig egl_config;
+
+    /* function pointers */
+    EGLDisplay (*p_eglGetDisplay)(EGLNativeDisplayType display_id);
+    EGLBoolean (*p_eglInitialize)(EGLDisplay dpy, EGLint *major, EGLint *minor);
+    EGLBoolean (*p_eglBindAPI)(EGLenum api);
+    EGLBoolean (*p_eglChooseConfig)(EGLDisplay dpy, const EGLint *attrib_list,
+                                    EGLConfig *configs, EGLint config_size, EGLint *num_config);
+    EGLBoolean (*p_eglGetConfigAttrib)(EGLDisplay dpy, EGLConfig config,
+                                       EGLint attribute, EGLint *value);
+    EGLContext (*p_eglCreateContext)(EGLDisplay dpy, EGLConfig config,
+                                     EGLContext share_context, const EGLint *attrib_list);
+    EGLSurface (*p_eglCreateWindowSurface)(EGLDisplay dpy, EGLConfig config,
+                                           EGLNativeWindowType win, const EGLint *attrib_list);
+    EGLBoolean (*p_eglDestroyContext)(EGLDisplay dpy, EGLContext ctx);
+    EGLBoolean (*p_eglDestroySurface)(EGLDisplay dpy, EGLSurface surface);
+    EGLBoolean (*p_eglMakeCurrent)(EGLDisplay dpy, EGLSurface draw,
+                                   EGLSurface read, EGLContext ctx);
+    EGLBoolean (*p_eglSwapBuffers)(EGLDisplay dpy, EGLSurface surface);
+    EGLBoolean (*p_eglTerminate)(EGLDisplay dpy);
+    EGLint (*p_eglGetError)(void);
+    __eglMustCastToProperFunctionPointerType (*p_eglGetProcAddress)(const char *procname);
+
+    PFNEGLGETPLATFORMDISPLAYPROC p_eglGetPlatformDisplay;
+    PFNEGLCREATEPLATFORMWINDOWSURFACEPROC p_eglCreatePlatformWindowSurface;
 };
 
 struct egl_context_data {
@@ -17,6 +46,46 @@ struct egl_context_data {
 struct egl_surface_data {
     EGLSurface egl_surface;
 };
+
+static int load_required_symbol(void *lib, const char *name, void **out)
+{
+    *out = dlsym(lib, name);
+    return *out ? MINI_OK : MINI_ERR_BAD_STATE;
+}
+
+static int egl_load_symbols(struct egl_driver_data *dd)
+{
+    dd->libegl = dlopen("libEGL.so.1", RTLD_NOW | RTLD_LOCAL);
+    if (!dd->libegl) {
+        return MINI_ERR_BAD_STATE;
+    }
+
+    if (load_required_symbol(dd->libegl, "eglGetDisplay", (void **)&dd->p_eglGetDisplay) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglInitialize", (void **)&dd->p_eglInitialize) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglBindAPI", (void **)&dd->p_eglBindAPI) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglChooseConfig", (void **)&dd->p_eglChooseConfig) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglGetConfigAttrib", (void **)&dd->p_eglGetConfigAttrib) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglCreateContext", (void **)&dd->p_eglCreateContext) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglCreateWindowSurface", (void **)&dd->p_eglCreateWindowSurface) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglDestroyContext", (void **)&dd->p_eglDestroyContext) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglDestroySurface", (void **)&dd->p_eglDestroySurface) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglMakeCurrent", (void **)&dd->p_eglMakeCurrent) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglSwapBuffers", (void **)&dd->p_eglSwapBuffers) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglTerminate", (void **)&dd->p_eglTerminate) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglGetError", (void **)&dd->p_eglGetError) != MINI_OK ||
+        load_required_symbol(dd->libegl, "eglGetProcAddress", (void **)&dd->p_eglGetProcAddress) != MINI_OK) {
+        dlclose(dd->libegl);
+        dd->libegl = NULL;
+        return MINI_ERR_BAD_STATE;
+    }
+
+    dd->p_eglGetPlatformDisplay =
+        (PFNEGLGETPLATFORMDISPLAYPROC)dd->p_eglGetProcAddress("eglGetPlatformDisplay");
+    dd->p_eglCreatePlatformWindowSurface =
+        (PFNEGLCREATEPLATFORMWINDOWSURFACEPROC)dd->p_eglGetProcAddress("eglCreatePlatformWindowSurface");
+
+    return MINI_OK;
+}
 
 static int egl_init_driver(struct mini_display *dpy) {
     if (!dpy || !dpy->gbm) {
@@ -28,27 +97,34 @@ static int egl_init_driver(struct mini_display *dpy) {
         return MINI_ERR_NOMEM;
     }
 
-    PFNEGLGETPLATFORMDISPLAYPROC get_platform_display =
-        (PFNEGLGETPLATFORMDISPLAYPROC)eglGetProcAddress("eglGetPlatformDisplay");
+    int rc = egl_load_symbols(dd);
+    if (rc != MINI_OK) {
+        free(dd);
+        return rc;
+    }
 
-    if (get_platform_display) {
-        dd->egl_display = get_platform_display(EGL_PLATFORM_GBM_KHR, dpy->gbm, NULL);
+    if (dd->p_eglGetPlatformDisplay) {
+        dd->egl_display = dd->p_eglGetPlatformDisplay(EGL_PLATFORM_GBM_KHR, dpy->gbm, NULL);
     } else {
-        dd->egl_display = eglGetDisplay((EGLNativeDisplayType)dpy->gbm);
+        dd->egl_display = dd->p_eglGetDisplay((EGLNativeDisplayType)dpy->gbm);
     }
 
     if (dd->egl_display == EGL_NO_DISPLAY) {
+        dlclose(dd->libegl);
         free(dd);
         return MINI_ERR_BAD_STATE;
     }
 
-    if (!eglInitialize(dd->egl_display, NULL, NULL)) {
+    if (!dd->p_eglInitialize(dd->egl_display, NULL, NULL)) {
+        dd->p_eglTerminate(dd->egl_display);
+        dlclose(dd->libegl);
         free(dd);
         return MINI_ERR_BAD_STATE;
     }
 
-    if (!eglBindAPI(EGL_OPENGL_ES_API)) {
-        eglTerminate(dd->egl_display);
+    if (!dd->p_eglBindAPI(EGL_OPENGL_ES_API)) {
+        dd->p_eglTerminate(dd->egl_display);
+        dlclose(dd->libegl);
         free(dd);
         return MINI_ERR_BAD_STATE;
     }
@@ -63,9 +139,10 @@ static int egl_init_driver(struct mini_display *dpy) {
     };
 
     EGLint num_configs = 0;
-    if (!eglChooseConfig(dd->egl_display, cfg_attribs, &dd->egl_config, 1, &num_configs) ||
+    if (!dd->p_eglChooseConfig(dd->egl_display, cfg_attribs, &dd->egl_config, 1, &num_configs) ||
         num_configs < 1) {
-        eglTerminate(dd->egl_display);
+        dd->p_eglTerminate(dd->egl_display);
+        dlclose(dd->libegl);
         free(dd);
         return MINI_ERR_BAD_STATE;
     }
@@ -81,8 +158,11 @@ static void egl_shutdown_driver(struct mini_display *dpy) {
 
     struct egl_driver_data *dd = dpy->driver_data;
 
-    eglMakeCurrent(dd->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    eglTerminate(dd->egl_display);
+    dd->p_eglMakeCurrent(dd->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    dd->p_eglTerminate(dd->egl_display);
+    if (dd->libegl) {
+        dlclose(dd->libegl);
+    }
 
     free(dd);
     dpy->driver_data = NULL;
@@ -96,7 +176,7 @@ static int egl_query_native_format(struct mini_display *dpy, uint32_t *out_forma
     struct egl_driver_data *dd = dpy->driver_data;
 
     EGLint visual_id = 0;
-    if (!eglGetConfigAttrib(dd->egl_display, dd->egl_config, EGL_NATIVE_VISUAL_ID, &visual_id)) {
+    if (!dd->p_eglGetConfigAttrib(dd->egl_display, dd->egl_config, EGL_NATIVE_VISUAL_ID, &visual_id)) {
         return MINI_ERR_BAD_STATE;
     }
 
@@ -120,7 +200,7 @@ static int egl_create_context(struct mini_context *ctx) {
         EGL_NONE
     };
 
-    cd->egl_context = eglCreateContext(
+    cd->egl_context = dd->p_eglCreateContext(
         dd->egl_display,
         dd->egl_config,
         EGL_NO_CONTEXT,
@@ -144,7 +224,7 @@ static void egl_destroy_context(struct mini_context *ctx) {
     struct egl_driver_data *dd = ctx->dpy->driver_data;
     struct egl_context_data *cd = ctx->driver_data;
 
-    eglDestroyContext(dd->egl_display, cd->egl_context);
+    dd->p_eglDestroyContext(dd->egl_display, cd->egl_context);
     free(cd);
     ctx->driver_data = NULL;
 }
@@ -160,19 +240,15 @@ static int egl_create_drawable(struct mini_surface *surf) {
         return MINI_ERR_NOMEM;
     }
 
-    PFNEGLCREATEPLATFORMWINDOWSURFACEPROC create_platform_window_surface =
-        (PFNEGLCREATEPLATFORMWINDOWSURFACEPROC)
-            eglGetProcAddress("eglCreatePlatformWindowSurface");
-
-    if (create_platform_window_surface) {
-        sd->egl_surface = create_platform_window_surface(
+    if (dd->p_eglCreatePlatformWindowSurface) {
+        sd->egl_surface = dd->p_eglCreatePlatformWindowSurface(
             dd->egl_display,
             dd->egl_config,
             (void *)surf->gbm_surface,
             NULL
         );
     } else {
-        sd->egl_surface = eglCreateWindowSurface(
+        sd->egl_surface = dd->p_eglCreateWindowSurface(
             dd->egl_display,
             dd->egl_config,
             (EGLNativeWindowType)surf->gbm_surface,
@@ -181,6 +257,7 @@ static int egl_create_drawable(struct mini_surface *surf) {
     }
 
     if (sd->egl_surface == EGL_NO_SURFACE) {
+        fprintf(stderr, "egl_create_drawable failed: EGL error 0x%x\n", dd->p_eglGetError());
         free(sd);
         return MINI_ERR_BAD_STATE;
     }
@@ -197,7 +274,7 @@ static void egl_destroy_drawable(struct mini_surface *surf) {
     struct egl_driver_data *dd = surf->dpy->driver_data;
     struct egl_surface_data *sd = surf->driver_data;
 
-    eglDestroySurface(dd->egl_display, sd->egl_surface);
+    dd->p_eglDestroySurface(dd->egl_display, sd->egl_surface);
     free(sd);
     surf->driver_data = NULL;
 }
@@ -221,7 +298,7 @@ static int egl_bind_current(
     struct egl_surface_data *read_sd = read->driver_data;
     struct egl_context_data *cd = ctx->driver_data;
 
-    if (!eglMakeCurrent(
+    if (!dd->p_eglMakeCurrent(
             dd->egl_display,
             draw_sd->egl_surface,
             read_sd->egl_surface,
@@ -239,7 +316,7 @@ static int egl_unbind_current(struct mini_display *dpy) {
 
     struct egl_driver_data *dd = dpy->driver_data;
 
-    if (!eglMakeCurrent(dd->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT)) {
+    if (!dd->p_eglMakeCurrent(dd->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT)) {
         return MINI_ERR_BAD_STATE;
     }
 
@@ -249,11 +326,6 @@ static int egl_unbind_current(struct mini_display *dpy) {
 static int egl_flush_rendering(struct mini_display *dpy, struct mini_surface *surf) {
     (void)dpy;
     (void)surf;
-
-    /*
-     * For the EGL backend, we currently let eglSwapBuffers() handle the real
-     * flush/publish boundary. So this is just a placeholder split.
-     */
     return MINI_OK;
 }
 
@@ -265,7 +337,8 @@ static int egl_publish_surface(struct mini_display *dpy, struct mini_surface *su
     struct egl_driver_data *dd = dpy->driver_data;
     struct egl_surface_data *sd = surf->driver_data;
 
-    if (!eglSwapBuffers(dd->egl_display, sd->egl_surface)) {
+    if (!dd->p_eglSwapBuffers(dd->egl_display, sd->egl_surface)) {
+        fprintf(stderr, "egl_publish_surface failed: EGL error 0x%x\n", dd->p_eglGetError());
         return MINI_ERR_BAD_STATE;
     }
 
@@ -311,6 +384,6 @@ static const struct mini_driver_hook_vtbl egl_hook_vtbl = {
 };
 
 const struct mini_driver_hook mini_driver_hook_egl = {
-    .name = "egl-hook",
+    .name = "egl-hook-dlopen",
     .vtbl = &egl_hook_vtbl,
 };
