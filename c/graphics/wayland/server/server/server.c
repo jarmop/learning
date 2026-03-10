@@ -171,6 +171,14 @@ static void surface_damage(
     fprintf(stderr, "surface_damage\n");
 }
 
+static void surface_frame(
+    struct wl_client *client,
+    struct wl_resource *resource,
+    uint32_t wl_callback_id
+) {
+    fprintf(stderr, "surface_frame %d\n", wl_callback_id);
+}
+
 static void surface_commit(struct wl_client *client, struct wl_resource *resource) {
     fprintf(stderr, "surface_commit, resource->object.id: %d\n", resource->object.id);
 
@@ -195,6 +203,7 @@ static const struct wl_surface_interface surface_impl = {
     .destroy = surface_destroy, // opcode 0
     .attach = surface_attach, // opcode 1
     .damage = surface_damage, // opcode 2
+    .frame = surface_frame, // opcode 3
     .commit = surface_commit,
 };
 
