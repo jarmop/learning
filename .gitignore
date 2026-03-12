@@ -17,3 +17,6 @@ xdg-shell-protocol.c
 *.map
 *.spv
 passw
+vmlinuz
+bzImage
+*.gz
