@@ -71,7 +71,7 @@ qemu-system-x86_64 \
   -kernel vmlinuz \
   -initrd initramfs.cpio.gz \
   -append "console=ttyS0 rdinit=/init" \
-  -nographic
+  -nographic \
   -netdev user,id=net0 \
   -device virtio-net,netdev=net0
 ```

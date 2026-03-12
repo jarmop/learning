@@ -1,0 +1,12 @@
+#!/bin/busybox sh
+# Mount the file system
+# mount -t proc proc /proc # this is needed to run busybox commands without busybox prefix
+busybox mount -t proc proc /proc # this is needed to run busybox commands without busybox prefix
+# mount -t sysfs sys /sys
+# mount -t devtmpfs dev /dev
+# Add network support
+# ifconfig eth0 up
+# udhcpc -i eth0
+# Enter the shell
+# exec /bin/sh
+busybox sh
