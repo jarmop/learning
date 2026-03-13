@@ -1,0 +1,15 @@
+#!/bin/busybox sh
+
+# This is needed for
+# - running busybox commands without "busybox" prefix
+# - remounting the root filesystem (as it will read proc/mounts)
+busybox mount -t proc proc /proc
+
+# busybox mount -t sysfs sysfs /sys
+# busybox mount -t devtmpfs devtmpfs /dev
+
+# Remount root as read-write
+busybox mount -o remount,rw /
+
+# exec /bin/busybox sh
+busybox sh

@@ -11,7 +11,7 @@ cd initramfs/bin
 
 # Copy busybox
 cp /bin/busybox .
-chmod +x busybox
+# chmod +x busybox
 
 # Create symlinks for the required binaries
 # ln -s busybox sh
@@ -23,8 +23,8 @@ chmod +x busybox
 cd ..
 
 # Add the init script
-cp ../init .
-chmod +x init
+cp ../init-initramfs .
+# chmod +x init
 
 # Create console node
 # mkdir -p dev
