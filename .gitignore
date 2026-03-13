@@ -20,3 +20,4 @@ passw
 vmlinuz
 bzImage
 *.gz
+*.img
