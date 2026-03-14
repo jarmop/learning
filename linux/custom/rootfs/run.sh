@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# ./create-rootfs.sh
+./create-rootfs.sh
+# ./create-rootfs-apk.sh
 
 qemu-system-x86_64 \
   -kernel bzImage \

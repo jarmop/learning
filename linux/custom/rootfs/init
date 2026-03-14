@@ -4,12 +4,14 @@
 # - running busybox commands without "busybox" prefix
 # - remounting the root filesystem (as it will read proc/mounts)
 # busybox mount -t proc proc /proc
+
+# Mount based on /etc/fstab
 busybox mount -a
 
 # busybox mount -t sysfs sysfs /sys
 # busybox mount -t devtmpfs devtmpfs /dev
 
-# Remount root as read-write
+# Remount root as read-write (Linux had automatically mounted it as readonly)
 busybox mount -o remount,rw /
 
 # exec /bin/busybox sh
