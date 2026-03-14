@@ -29,7 +29,7 @@ time make -j$(nproc)
 Go to this directory and copy the newly created kernel image here:
 
 ```sh
-cd $HOME/development/git-remote/learning/linux/custom/custom-kernel
+cd $HOME/development/git-remote/learning/linux/custom/rootfs
 
 cp $HOME/development/git-external/linux/arch/x86/boot/bzImage .
 ```
@@ -37,12 +37,6 @@ cp $HOME/development/git-external/linux/arch/x86/boot/bzImage .
 Install busybox:
 ```sh
 sudo apt install busybox-static
-```
-
-Create initramfs:
-
-```sh
-./create-initramfs.sh
 ```
 
 Run with QEMU:
