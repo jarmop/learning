@@ -23,7 +23,7 @@ cp /bin/busybox .
 cd ..
 
 # Add the init script
-cp ../init-initramfs .
+cp ../init .
 # chmod +x init
 
 # Create console node

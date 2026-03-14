@@ -11,7 +11,7 @@ mkdir -p bin proc
 cp /bin/busybox bin/
 
 # cp ../init-rootfs bin/
-cp ../init-rootfs bin/init
+cp ../init bin/
 
 cd ..
 
