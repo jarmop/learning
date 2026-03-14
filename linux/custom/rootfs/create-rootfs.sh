@@ -6,10 +6,15 @@ mkdir -p rootfs
 cd rootfs
 
 # mkdir -p bin dev etc proc sys tmp usr/bin usr/lib var/lib/pkg
-mkdir -p bin proc etc
+mkdir -p bin proc etc usr lib
 
 cp /bin/busybox bin
 cp ../init bin
+
+# add apk and its dependencies
+cp ../apkdeps/apk bin
+cp -r ../apkdeps/usr .
+cp -r ../apkdeps/lib .
 
 cp ../fstab etc
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ./create-rootfs.sh
+./create-rootfs.sh
 
 qemu-system-x86_64 \
   -kernel bzImage \

@@ -39,6 +39,16 @@ Install busybox:
 sudo apt install busybox-static
 ```
 
+Copy apk binary and its dependencie, e.g. from an Alpine vm:
+
+```sh
+# List dependencies:
+ldd /sbin/apk | awk '{print $3}'
+
+# Package with tar (h = follow symlinks)
+tar -chf apkdeps.tar /sbin/apk dep1 dep2 dep3
+```
+
 Run with QEMU:
 
 ```sh
