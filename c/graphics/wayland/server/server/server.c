@@ -305,9 +305,9 @@ static void bind_xdg_wm_base(struct wl_client *client, void *data, uint32_t vers
     wl_resource_set_implementation(res, &xdg_wm_base_impl, NULL, NULL);
 }
 
-// struct timespec t1;
-// uint32_t tms1 = 0;
-// uint32_t tms2 = 0;
+struct timespec t1;
+uint32_t tms1 = 0;
+uint32_t tms2 = 0;
 
 struct input_event ev;
 static int max_abs_x = 65482; int max_abs_y = 65452;
@@ -322,14 +322,8 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
     int needs_redraw = 0;
     if (!(event_mask & WL_EVENT_READABLE)) return 0;
 
-
     for (;;) {
         ssize_t n = read(fd, &ev, sizeof ev);
-
-        // clock_gettime(CLOCK_MONOTONIC, &t1);
-        // uint32_t tms2 = t1.tv_sec * 1000 + t1.tv_nsec / 1000000;
-        // fprintf(stderr, "time diff: %u\n", tms2 - tms1);
-        // tms1 = tms2;
 
         if (n == (ssize_t)sizeof ev) {
             if (ev.type == EV_ABS) {
@@ -340,10 +334,17 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
                 }
 
                 if (mouse.x > 0 && mouse.x < drm.width - 10 && mouse.y > 0 && mouse.y < drm.height - 10) {
-                    rd_blend(&drm, &background);
-                    rd_blend(&drm, &surface);
-                    rd_blend(&drm, &mouse);
-                    drm.pixels = drm_refresh();                    
+                    clock_gettime(CLOCK_MONOTONIC, &t1);
+                    uint32_t tms2 = t1.tv_sec * 1000 + t1.tv_nsec / 1000000;
+                    // fprintf(stderr, "time diff: %u\n", tms2 - tms1);
+                    if (tms2 - tms1 > 10) {
+                        // fprintf(stderr, "time diff: %u\n", tms2 - tms1);
+                        rd_blend(&drm, &background);
+                        rd_blend(&drm, &surface);
+                        rd_blend(&drm, &mouse);
+                        drm.pixels = drm_refresh();
+                        tms1 = tms2;
+                    }
                 }
             }
             if (ev.type == EV_KEY && ev.code == BTN_LEFT) {
@@ -357,6 +358,7 @@ static int on_mouse_fd(int fd, uint32_t event_mask, void *_)
             
             continue;
         }
+        
         if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) break;
         if (n == 0) break; // EOF
         if (n < 0) perror("read(mouse)");
@@ -390,6 +392,7 @@ int main(void) {
     background.width = drm.width;
     background.height = drm.height;
     rd_paint(&background, 0xff000064);
+    // rd_paint(&background, 0xff000000);
     rd_blend(&drm, &background);
     drm.pixels = drm_refresh();
 
