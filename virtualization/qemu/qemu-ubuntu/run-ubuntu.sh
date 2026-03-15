@@ -44,6 +44,8 @@ qemu-system-x86_64 \
   -drive file=ubuntu.img,format=qcow2,if=virtio \
   -nic user,hostfwd=tcp::2223-:22 \
   -vga virtio
+  
+  # -display sdl,gl=on
 
   # -device virtio-vga-gl \
   # -netdev user,id=n0,hostfwd=tcp::2222-:22 \
