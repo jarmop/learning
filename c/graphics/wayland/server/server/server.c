@@ -179,6 +179,22 @@ static void surface_frame(
     fprintf(stderr, "surface_frame %d\n", wl_callback_id);
 }
 
+static void surface_set_opaque_region(
+    struct wl_client *client,
+    struct wl_resource *resource, 
+    struct wl_resource *region
+) {
+    fprintf(stderr, "surface_set_opaque_region\n");
+}
+
+static void surface_set_input_region(
+    struct wl_client *client,
+    struct wl_resource *resource, 
+    struct wl_resource *region
+) {
+    fprintf(stderr, "surface_set_input_region\n");
+}
+
 static void surface_commit(struct wl_client *client, struct wl_resource *resource) {
     fprintf(stderr, "surface_commit, resource->object.id: %d\n", resource->object.id);
 
@@ -199,12 +215,53 @@ static void surface_commit(struct wl_client *client, struct wl_resource *resourc
     drm.pixels = drm_refresh();
 }
 
+static void surface_damage_buffer(
+    struct wl_client *client, 
+    struct wl_resource *resource, 
+    int32_t x, 
+    int32_t y, 
+    int32_t width, 
+    int32_t height
+) {
+    fprintf(stderr, "surface_damage_buffer\n");
+}
+
 static const struct wl_surface_interface surface_impl = {
     .destroy = surface_destroy, // opcode 0
     .attach = surface_attach, // opcode 1
     .damage = surface_damage, // opcode 2
     .frame = surface_frame, // opcode 3
-    .commit = surface_commit,
+    .set_opaque_region = surface_set_opaque_region, // 4
+    .set_input_region = surface_set_input_region, // 5
+    .commit = surface_commit, // 6
+    .damage_buffer = surface_damage_buffer, // 9
+};
+
+/* ------------------------------------------------ */
+/* wl_region implementation */
+
+static void region_destroy(
+    struct wl_client *client, 
+    struct wl_resource *resource
+) {
+    fprintf(stderr, "region_destroy\n");
+}
+
+static void region_interface_add(
+    struct wl_client *client, 
+    struct wl_resource *resource, 
+    int32_t x, 
+    int32_t y, 
+    int32_t width, 
+    int32_t height
+) {
+    fprintf(stderr, "region_interface_add\n");
+}
+
+static const struct wl_region_interface region_impl = {
+    .destroy = region_destroy,
+    .add = region_interface_add,
+    .subtract = NULL,
 };
 
 /* ------------------------------------------------ */
@@ -216,9 +273,29 @@ static void compositor_create_surface(struct wl_client *client, struct wl_resour
     wl_resource_set_implementation(surface, &surface_impl, NULL, NULL);
 }
 
+static void compositor_create_region(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
+    fprintf(stderr, "compositor_create_region\n");
+    struct wl_resource *region = wl_resource_create(client, &wl_region_interface, 4, id);
+    wl_resource_set_implementation(region, &region_impl, NULL, NULL);
+}
+
 static const struct wl_compositor_interface compositor_impl = {
     .create_surface = compositor_create_surface,
-    .create_region = NULL,
+    .create_region = compositor_create_region,
+};
+
+/* ------------------------------------------------ */
+/* wl_data_device_manager implementation */
+
+static void data_device_manager_create_data_source(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
+    fprintf(stderr, "data_device_manager_create_data_source\n");
+    // struct wl_resource *surface = wl_resource_create(client, &wl_surface_interface, 4, id);
+    // wl_resource_set_implementation(surface, &surface_impl, NULL, NULL);
+}
+
+static const struct wl_data_device_manager_interface data_device_manager_impl = {
+    .create_data_source = data_device_manager_create_data_source,
+    .get_data_device = NULL
 };
 
 /* ------------------------ XDG ------------------------ */
@@ -228,8 +305,43 @@ static void xdg_toplevel_destroy(struct wl_client *client, struct wl_resource *r
     wl_resource_destroy(resource);
 }
 
+static void xdg_toplevel_set_parent(struct wl_client *client, struct wl_resource *resource, struct wl_resource *parent) {
+    fprintf(stderr, "xdg_toplevel_set_parent\n");
+}
+
+static void xdg_toplevel_set_title(struct wl_client *client, struct wl_resource *resource, const char *title) {
+    fprintf(stderr, "xdg_toplevel_set_title\n");
+}
+
+static void xdg_toplevel_set_app_id(struct wl_client *client, struct wl_resource *resource, const char *app_id) {
+    fprintf(stderr, "xdg_toplevel_set_app_id\n");
+}
+
+static void xdg_toplevel_set_max_size(struct wl_client *client, struct wl_resource *resource, int32_t width, int32_t height) {
+    fprintf(stderr, "xdg_toplevel_set_max_size\n");
+}
+
+static void xdg_toplevel_set_min_size(struct wl_client *client, struct wl_resource *resource, int32_t width, int32_t height) {
+    fprintf(stderr, "xdg_toplevel_set_min_size\n");
+}
+
+static void xdg_toplevel_unset_maximized(struct wl_client *client, struct wl_resource *resource) {
+    fprintf(stderr, "xdg_toplevel_unset_maximized\n");
+}
+
+static void xdg_toplevel_unset_fullscreen(struct wl_client *client, struct wl_resource *resource) {
+    fprintf(stderr, "xdg_toplevel_unset_fullscreen\n");
+}
+
 static const struct xdg_toplevel_interface xdg_toplevel_impl = {
-    .destroy = xdg_toplevel_destroy,
+    .destroy = xdg_toplevel_destroy, // 0
+    .set_parent = xdg_toplevel_set_parent, // 1
+    .set_title = xdg_toplevel_set_title, // 2
+    .set_app_id = xdg_toplevel_set_app_id, // 3
+    .set_max_size = xdg_toplevel_set_max_size, // 7
+    .set_min_size = xdg_toplevel_set_min_size, // 8
+    .unset_maximized = xdg_toplevel_unset_maximized, // 10
+    .unset_fullscreen = xdg_toplevel_unset_fullscreen, // 12
 };
 
 static void xdg_surface_get_toplevel(struct wl_client *client, struct wl_resource *resource, uint32_t id) {
@@ -243,6 +355,10 @@ static void xdg_surface_destroy(struct wl_client *client, struct wl_resource *re
     wl_resource_destroy(resource);
 }
 
+static void xdg_surface_set_window_geometry(struct wl_client *client, struct wl_resource *resource, int32_t x, int32_t y, int32_t width, int32_t height) {
+    fprintf(stderr, "xdg_surface_set_window_geometry\n");
+}
+
 static void xdg_surface_ack_configure(struct wl_client *client, struct wl_resource *resource, uint32_t serial) {
     // fprintf(stderr, "xdg_surface_ack_configure\n");
 }
@@ -250,6 +366,7 @@ static void xdg_surface_ack_configure(struct wl_client *client, struct wl_resour
 static const struct xdg_surface_interface xdg_surface_impl = {
     .destroy = xdg_surface_destroy, // opcode 0
     .get_toplevel = xdg_surface_get_toplevel, // opcode 1
+    .set_window_geometry = xdg_surface_set_window_geometry, // opcode 4
     .ack_configure = xdg_surface_ack_configure, // opcode 4
 };
 
@@ -291,6 +408,13 @@ static void bind_compositor(struct wl_client *client, void *data, uint32_t versi
     struct wl_resource *res = wl_resource_create(client, &wl_compositor_interface, 4, id);
     wl_resource_set_implementation(res, &compositor_impl, NULL, NULL);
 }
+
+static void bind_data_device_manager(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
+    fprintf(stderr, "bind_data_device_manager\n");
+    struct wl_resource *res = wl_resource_create(client, &wl_data_device_manager_interface, 4, id);
+    wl_resource_set_implementation(res, &data_device_manager_impl, NULL, NULL);
+}
+
 
 // static void bind_shm(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
 //     // fprintf(stderr, "bind_shm\n");
@@ -377,6 +501,8 @@ int main(void) {
     // wl_global_create(display, &wl_shm_interface, 1, NULL, bind_shm);
     wl_display_init_shm(wl_display);
     wl_display_add_shm_format(wl_display, WL_SHM_FORMAT_XRGB8888);
+
+    wl_global_create(wl_display, &wl_data_device_manager_interface, 4, NULL, bind_data_device_manager);
 
     wl_global_create(wl_display, &xdg_wm_base_interface, 1, NULL, bind_xdg_wm_base);
 
