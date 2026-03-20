@@ -1,1 +1,1 @@
-gcc hello-raylib.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+gcc hello-raylib.c -lraylib -lGL -lm -lpthread -ldl -lrt
