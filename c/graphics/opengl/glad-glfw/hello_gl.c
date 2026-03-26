@@ -40,7 +40,8 @@ static void glfw_error_cb(int code, const char *desc) {
 int main() {
     glfwSetErrorCallback(glfw_error_cb);
 
-    glfwInitHint(GLFW_WAYLAND_LIBDECOR, GLFW_WAYLAND_DISABLE_LIBDECOR);
+    // Tried this to get glfw working with custom wayland compositor (didn't help)
+    // glfwInitHint(GLFW_WAYLAND_LIBDECOR, GLFW_WAYLAND_DISABLE_LIBDECOR);
 
     if (!glfwInit()) {
         fprintf(stderr, "glfwInit failed\n");
