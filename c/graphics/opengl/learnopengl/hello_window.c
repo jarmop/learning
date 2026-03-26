@@ -8,7 +8,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void handleInput(GLFWwindow *window) {
+void handle_input(GLFWwindow *window) {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
@@ -52,7 +52,7 @@ int main() {
         // Check input events and trigger the appropriate callback functions
         glfwPollEvents();
 
-        handleInput(window);
+        handle_input(window);
     }
 
     return 0;
