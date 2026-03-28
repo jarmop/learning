@@ -63,11 +63,13 @@ int main() {
     const char *vertShdrSrc[] = {
         "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;\n"
-        // "out vec4 vertexColor;\n"
+        "layout (location = 1) in vec3 aColor;\n"
+        "out vec4 vertexColor;\n"
         "void main()\n"
         "{\n"
         "   gl_Position = vec4(aPos, 1.0);\n"
         // "   vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
+        "   vertexColor = vec4(aColor, 1.0);\n"
         "}\0"
     };
     GLuint vertShdr = compile_shader(GL_VERTEX_SHADER, vertShdrSrcLen, vertShdrSrc);
@@ -76,14 +78,14 @@ int main() {
     const int fragShdrSrcLen = 1;
     const char *fragShdrSrc[] = {
         "#version 330 core\n"
-        // "in vec4 vertexColor;\n"
-        "uniform vec4 uniformColor;\n"
+        "in vec4 vertexColor;\n"
+        // "uniform vec4 uniformColor;\n"
         "out vec4 FragColor;\n"
         "void main()\n"
         "{\n"
         // "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-        // "   FragColor = vertexColor;\n"
-        "   FragColor = uniformColor;\n"
+        "   FragColor = vertexColor;\n"
+        // "   FragColor = uniformColor;\n"
         "}\0"
     };
     GLuint fragShdr = compile_shader(GL_FRAGMENT_SHADER, fragShdrSrcLen, fragShdrSrc);
@@ -116,30 +118,33 @@ int main() {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f
+        // positions         // colors
+         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    // Specify the array to store vertex buffers in (in other words, how OpenGL 
-    // should interpret the vertex data)
+    // Specify the array to store the vertex attribute arrays in 
+    // (in other words, how OpenGL should interpret the vertex data)
     glVertexAttribPointer(
         // index – identifies the generic vertex attribute array being described.
         // We specified "location = 0" in the vertex shader.
         0,
-        3, // the number of values per vertex as well as their component ordering
+        3, // the number of values per attribute as well as their component ordering
         GL_FLOAT, // the data type of the values stored in the array
         // Specifies whether the data type should be normalized when converting 
         // to float. Our data is already in floats so this is irrelevant. 
         GL_FALSE,
-        // stride - the distance in bytes from the start of one vertex buffer to 
+        // stride - the distance in bytes from the start of one attribute to 
         // the start of the next
-        3 * sizeof(float),
+        6 * sizeof(float),
         // pointer - specifies the offset within a buffer of the first value 
         // of the first element of the array being specified.
         (void*)0
     );
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // It's possible to unbind vbo and vao at this point but that's seems to be 
     // unnecessary, because you always bind the new objects before altering them.
@@ -155,13 +160,15 @@ int main() {
         glClearColor(0.53f, 0.18f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        int uniformColorLocation = glGetUniformLocation(shaderProgram, "uniformColor");
-        // Make the green value oscillate following the sin function that is
-        // transformed to [0,1] range from [-1,1]
-        float g = (sin(glfwGetTime()) + 1.0f) / 2.0f;
-        float r = 0.0f, b = 0.0f, a = 1.0f;
+        // int uniformColorLocation = glGetUniformLocation(shaderProgram, "uniformColor");
+        // // Make the green value oscillate following the sin function that is
+        // // transformed to [0,1] range from [-1,1]
+        // float g = (sin(glfwGetTime()) + 1.0f) / 2.0f;
+        // float r = 0.0f, b = 0.0f, a = 1.0f;
+        // glUseProgram(shaderProgram); // this needs to run before setting the uniform value
+        // glUniform4f(uniformColorLocation, r, g, b, a);
+
         glUseProgram(shaderProgram); // this needs to run before setting the uniform value
-        glUniform4f(uniformColorLocation, r, g, b, a);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
