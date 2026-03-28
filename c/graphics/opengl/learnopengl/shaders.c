@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     (void) window;
@@ -62,11 +63,11 @@ int main() {
     const char *vertShdrSrc[] = {
         "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;\n"
-        "out vec4 vertexColor;\n"
+        // "out vec4 vertexColor;\n"
         "void main()\n"
         "{\n"
         "   gl_Position = vec4(aPos, 1.0);\n"
-        "   vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
+        // "   vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
         "}\0"
     };
     GLuint vertShdr = compile_shader(GL_VERTEX_SHADER, vertShdrSrcLen, vertShdrSrc);
@@ -75,12 +76,14 @@ int main() {
     const int fragShdrSrcLen = 1;
     const char *fragShdrSrc[] = {
         "#version 330 core\n"
-        "in vec4 vertexColor;\n"
+        // "in vec4 vertexColor;\n"
+        "uniform vec4 uniformColor;\n"
         "out vec4 FragColor;\n"
         "void main()\n"
         "{\n"
         // "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-        "   FragColor = vertexColor;\n"
+        // "   FragColor = vertexColor;\n"
+        "   FragColor = uniformColor;\n"
         "}\0"
     };
     GLuint fragShdr = compile_shader(GL_FRAGMENT_SHADER, fragShdrSrcLen, fragShdrSrc);
@@ -152,10 +155,14 @@ int main() {
         glClearColor(0.53f, 0.18f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
-         // Seeing as we only have a single VAO there's no need to bind it 
-         // every time, but we'll do so to keep things a bit more organized
-        // glBindVertexArray(vao);
+        int uniformColorLocation = glGetUniformLocation(shaderProgram, "uniformColor");
+        // Make the green value oscillate following the sin function that is
+        // transformed to [0,1] range from [-1,1]
+        float g = (sin(glfwGetTime()) + 1.0f) / 2.0f;
+        float r = 0.0f, b = 0.0f, a = 1.0f;
+        glUseProgram(shaderProgram); // this needs to run before setting the uniform value
+        glUniform4f(uniformColorLocation, r, g, b, a);
+
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
