@@ -2,10 +2,10 @@
 #include <stdbool.h>
 #include <math.h>
 
-#include "glad/glad.h"
+#include "../lib/get_shader_program.h"
 #include <GLFW/glfw3.h>
 
-#include "get_shader_program.h"
+#include "../glad/glad.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     (void) window;
@@ -16,7 +16,6 @@ void handle_input(GLFWwindow *window) {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
-
 
 int main() {
     glfwInit();
@@ -43,7 +42,7 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // Compile the vertex shader
-    GLuint shaderProgram = get_shader_program();
+    GLuint shaderProgram = get_shader_program("shaders/shader.vs", "shaders/shader.fs");
 
     // Check shader program linking errors
     int success;

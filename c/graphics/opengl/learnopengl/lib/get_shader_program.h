@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "glad/glad.h"
+#include "../glad/glad.h"
 
 GLuint compile_shader(GLenum shaderType, int shdrSrcLen, const char *shdrSrc[]) {
     // Compile the vertex shader
@@ -42,16 +42,16 @@ char *read_file(const char *path) {
 }
 
 
-GLuint get_shader_program() {
+GLuint get_shader_program(const char *vertPath, const char *fragPath) {
     // Compile the vertex shader
     const int vertShdrSrcLen = 1;
-    const char *vertShdrSrc[1] = { read_file("shaders/shader.vs") };
+    const char *vertShdrSrc[1] = { read_file(vertPath) };
     GLuint vertShdr = compile_shader(GL_VERTEX_SHADER, vertShdrSrcLen, vertShdrSrc);
     free((void *)vertShdrSrc[0]);
 
     // Compile the fragment shader
     const int fragShdrSrcLen = 1;
-    const char *fragShdrSrc[1] = { read_file("shaders/shader.fs") };
+    const char *fragShdrSrc[1] = { read_file(fragPath) };
     GLuint fragShdr = compile_shader(GL_FRAGMENT_SHADER, fragShdrSrcLen, fragShdrSrc);
     free((void *)fragShdrSrc[0]);
 
@@ -62,6 +62,16 @@ GLuint get_shader_program() {
     glLinkProgram(shaderProgram);
     glDeleteShader(vertShdr);
     glDeleteShader(fragShdr);
+
+    // Check shader program linking errors
+    int success;
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        char infoLog[512];
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        fprintf(stderr, "Shader program linking failed\n%s\n", infoLog);
+        return 1;
+    }
 
     return shaderProgram;
 }
