@@ -147,6 +147,20 @@ int main() {
     int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection);
 
+    unsigned int cubeCount = 10;
+    vec3 cubePositions[] = {
+        { 0.0f,  0.0f,  0.0f},
+        { 2.0f,  5.0f, -15.0f},
+        {-1.5f, -2.2f, -2.5f},
+        {-3.8f, -2.0f, -12.3f},
+        { 2.4f, -0.4f, -3.5f},
+        {-1.7f,  3.0f, -7.5f},
+        { 1.3f, -2.0f, -2.5f},
+        { 1.5f,  2.0f, -2.5f},
+        { 1.5f,  0.2f, -1.5f},
+        {-1.3f,  1.0f, -1.5f}
+    };
+
     // Render loop. Each iteration renders a new frame.
     while(!glfwWindowShouldClose(window)) {
         glClearColor(0.53f, 0.18f, 0.08f, 1.0f);
@@ -155,18 +169,18 @@ int main() {
         // bind Texture
         glBindTexture(GL_TEXTURE_2D, texture);
 
-        mat4 model;
-        glm_mat4_identity(model);
-        // glm_translate(model, (vec3){0.5f, -0.5f, 0.0f});
-        glm_rotate(model, (float)glfwGetTime(), (vec3){0.5f, 1.0f, 0.0f});
-        // glm_rotate(model, glm_rad(-55.0f), (vec3){1.0f, 0.0f, 0.0f});
-        // glm_scale(model, (vec3){0.5f, 0.5f, 0.5f});
+        for (unsigned int i = 0; i < cubeCount; i++) {
+            mat4 model;
+            glm_mat4_identity(model);
+            glm_translate(model, cubePositions[i]);
+            glm_rotate(model, (float)glfwGetTime() + i * 20, (vec3){1.0f, 0.3f, 0.5f});
+            // glm_rotate(model, glm_rad(20.0f * i), (vec3){1.0f, 0.3f, 0.5f});
 
-        glUseProgram(shaderProgram);
-        int modelLoc = glGetUniformLocation(shaderProgram, "model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model);
+            int modelLoc = glGetUniformLocation(shaderProgram, "model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model);
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         glfwSwapBuffers(window);
 
