@@ -2,6 +2,7 @@
 
 ```
 sudo apt install libglfw3-dev
+sudo apt install libcglm-dev
 ```
 
 ## The GLAD loader
@@ -16,3 +17,6 @@ Configure:
 Generate and download the zip file.
 
 Extract the zip file and copy the "glad.c" and "glad.h" to the glad directory. Fix the "glad.h" include path in "glad.c".
+
+## OpenGL 3.3 reference
+https://registry.khronos.org/OpenGL/specs/gl/glspec33.core.pdf

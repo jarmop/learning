@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <math.h>
 
+#include <cglm/cglm.h>
+
 #include "../glad/glad.h"
 #include <GLFW/glfw3.h>
 
@@ -17,7 +19,6 @@ void handle_input(GLFWwindow *window) {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
-
 
 int main() {
     glfwInit();
@@ -35,7 +36,7 @@ int main() {
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    GLuint shaderProgram = get_shader_program("textures/shader.vs", "textures/shader.fs");
+    GLuint shaderProgram = get_shader_program("transformations/shader.vs", "transformations/shader.fs");
 
     // Vertex array object
     GLuint vao;
@@ -47,11 +48,11 @@ int main() {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     float vertices[] = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
+        // positions          // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
+         0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left 
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
@@ -67,16 +68,16 @@ int main() {
 
     // glVertexAttribPointer args --> index, size, type, normalized, stride, pointer
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
-    glEnableVertexAttribArray(1);
+    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
+    // glEnableVertexAttribArray(1);
     // texture coord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    GLuint texture;
+    GLuint texture;    
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0); // select texture unit 0 as the unit to bind to
     glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
@@ -102,18 +103,34 @@ int main() {
     }
     stbi_image_free(data);
 
+    // mat4 trans;
+    // glm_mat4_identity(trans);
+    // glm_rotate(trans, glm_rad(90.0f), (vec3){0.0f, 0.0f, 1.0f});
+    // glm_scale(trans, (vec3){0.5f, 0.5f, 0.5f});
+
+    // glUseProgram(shaderProgram);
+    // GLuint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+    // glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (GLfloat *)trans);
+
     // Render loop. Each iteration renders a new frame.
     while(!glfwWindowShouldClose(window)) {
-        // glClearColor(1.0f, 0.33f, 0.1f, 1.0f);
         glClearColor(0.53f, 0.18f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // bind Texture
         glBindTexture(GL_TEXTURE_2D, texture);
 
+        mat4 trans;
+        glm_mat4_identity(trans);
+        glm_translate(trans, (vec3){0.5f, -0.5f, 0.0f});
+        glm_rotate(trans, (float)glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
+        // glm_scale(trans, (vec3){0.5f, 0.5f, 0.5f});
+
         glUseProgram(shaderProgram);
 
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
+        GLuint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (GLfloat *)trans);
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);

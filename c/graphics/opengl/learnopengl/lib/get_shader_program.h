@@ -4,7 +4,7 @@
 #include "../glad/glad.h"
 
 GLuint compile_shader(GLenum shaderType, int shdrSrcLen, const char *shdrSrc[]) {
-    // Compile the vertex shader
+    // Compile the shader
     unsigned int shdr;
     shdr = glCreateShader(shaderType);
     glShaderSource(shdr, shdrSrcLen, shdrSrc, NULL);
