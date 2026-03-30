@@ -22,6 +22,7 @@ float lastFrame = 0.0f; // Time of last frame
 float yaw = -90.0;
 float pitch = 0.0;
 float lastX = 400, lastY = 300;
+float fov = 45.0;
 bool mouseRightPressed = false;
 bool firstMouse = true;
 
@@ -31,8 +32,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    (void) window;
-    (void) mods;
+    (void)window; (void)mods;
     if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         if (action == GLFW_PRESS) {
             mouseRightPressed = true;
@@ -88,6 +88,17 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     glm_vec3_copy(direction, cameraFront);
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    fprintf(stderr, "%d\n", (int)fov);
+
+    (void)window; (void)xoffset;
+    fov -= (float)yoffset;
+    if (fov < 1.0f)
+        fov = 1.0f;
+    if (fov > 45.0f)
+        fov = 45.0f; 
+}
+
 void handle_input(GLFWwindow *window) {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
@@ -134,11 +145,13 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetScrollCallback(window, scroll_callback); 
 
     // Render elements at the front over the ones in the back
     glEnable(GL_DEPTH_TEST);
 
     GLuint shaderProgram = get_shader_program("coordinate_systems/shader.vs", "coordinate_systems/shader.fs");
+    glUseProgram(shaderProgram);
 
     // Vertex array object
     GLuint vao;
@@ -229,13 +242,6 @@ int main() {
     }
     stbi_image_free(data);
 
-    mat4 projection;
-    // glm_mat4_identity(projection);
-    glm_perspective(glm_rad(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, projection);
-    glUseProgram(shaderProgram);
-    int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection);
-
     unsigned int cubeCount = 10;
     vec3 cubePositions[] = {
         { 0.0f,  0.0f,  0.0f},
@@ -250,13 +256,25 @@ int main() {
         {-1.3f,  1.0f, -1.5f}
     };
 
+    // bind Texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+
     // Render loop. Each iteration renders a new frame.
     while(!glfwWindowShouldClose(window)) {
         glClearColor(0.53f, 0.18f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // bind Texture
-        glBindTexture(GL_TEXTURE_2D, texture);
+        mat4 view;
+        vec3 cameraPosFront;
+        glm_vec3_add(cameraPos, cameraFront, cameraPosFront);
+        glm_lookat(cameraPos, cameraPosFront, cameraUp, view);
+        int viewLoc = glGetUniformLocation(shaderProgram, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)view);
+
+        mat4 projection;
+        glm_perspective(glm_rad(fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, projection);
+        int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection);
 
         for (unsigned int i = 0; i < cubeCount; i++) {
             mat4 model;
@@ -266,13 +284,6 @@ int main() {
             // glm_rotate(model, glm_rad(20.0f * i), (vec3){1.0f, 0.3f, 0.5f});
             int modelLoc = glGetUniformLocation(shaderProgram, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model);
-
-            mat4 view;
-            vec3 cameraPosFront;
-            glm_vec3_add(cameraPos, cameraFront, cameraPosFront);
-            glm_lookat(cameraPos, cameraPosFront, cameraUp, view);
-            int viewLoc = glGetUniformLocation(shaderProgram, "view");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)view);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
