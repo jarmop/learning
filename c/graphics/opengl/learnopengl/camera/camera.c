@@ -19,9 +19,39 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+vec3 cameraPos = {0.0, 0.0, 3.0};
+vec3 cameraFront = {0.0, 0.0, -1.0};
+vec3 cameraUp = {0.0, 1.0, 0.0};
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
+
 void handle_input(GLFWwindow *window) {
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
+
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+    const float cameraDelta = 2.5 * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        glm_vec3_muladds(cameraFront, cameraDelta, cameraPos);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        glm_vec3_mulsubs(cameraFront, cameraDelta, cameraPos);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        vec3 crossProd;
+        glm_cross(cameraFront, cameraUp, crossProd);
+        glm_normalize(crossProd);
+        glm_vec3_mulsubs(crossProd, cameraDelta, cameraPos);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        vec3 crossProd;
+        glm_cross(cameraFront, cameraUp, crossProd);
+        glm_normalize(crossProd);
+        glm_vec3_muladds(crossProd, cameraDelta, cameraPos);
+    }
 }
 
 int main() {
@@ -134,23 +164,9 @@ int main() {
     }
     stbi_image_free(data);
 
-    vec3 cameraPos = {0.0, 0.0, 3.0};
-    vec3 cameraTarget = {0.0, 0.0, 0.0};
-    vec3 cameraDirection;
-    // glm_vec3_sub(cameraPos, cameraTarget, cameraDirection);
-    glm_vec3_sub(cameraTarget, cameraPos, cameraDirection);
-    glm_normalize(cameraDirection);
-    vec3 up = {0.0, 1.0, 0.0};
-    vec3 cameraRight;
-    glm_cross(up, cameraDirection, cameraRight);
-    glm_normalize(cameraRight);
-    vec3 cameraUp;
-    glm_cross(cameraDirection, cameraRight, cameraUp);
-
     mat4 projection;
     // glm_mat4_identity(projection);
     glm_perspective(glm_rad(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, projection);
-
     glUseProgram(shaderProgram);
     int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection);
@@ -169,8 +185,6 @@ int main() {
         {-1.3f,  1.0f, -1.5f}
     };
 
-    // print_vec3(cameraDirection);
-
     // Render loop. Each iteration renders a new frame.
     while(!glfwWindowShouldClose(window)) {
         glClearColor(0.53f, 0.18f, 0.08f, 1.0f);
@@ -188,12 +202,10 @@ int main() {
             int modelLoc = glGetUniformLocation(shaderProgram, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model);
 
-            const float radius = 10.0;
-            float camX = sin(glfwGetTime()) * radius;
-            float camZ = cos(glfwGetTime()) * radius;
             mat4 view;
-            // glm_lookat(cameraPos, cameraTarget, up, view);
-            glm_lookat((vec3){camX, 0.0, camZ}, cameraTarget, up, view);
+            vec3 cameraPosFront;
+            glm_vec3_add(cameraPos, cameraFront, cameraPosFront);
+            glm_lookat(cameraPos, cameraPosFront, cameraUp, view);
             int viewLoc = glGetUniformLocation(shaderProgram, "view");
             glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)view);
 
