@@ -14,16 +14,79 @@
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    (void) window;
-    glViewport(0, 0, width, height);
-}
-
 vec3 cameraPos = {0.0, 0.0, 3.0};
 vec3 cameraFront = {0.0, 0.0, -1.0};
 vec3 cameraUp = {0.0, 1.0, 0.0};
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
+float yaw = -90.0;
+float pitch = 0.0;
+float lastX = 400, lastY = 300;
+bool mouseRightPressed = false;
+bool firstMouse = true;
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    (void) window;
+    glViewport(0, 0, width, height);
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    (void) window;
+    (void) mods;
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        if (action == GLFW_PRESS) {
+            mouseRightPressed = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else {
+            mouseRightPressed = false;
+            firstMouse = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    } 
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    // fprintf(stderr, "coords: %d - %d\n", (int)xpos, (int)ypos);
+    // fprintf(stderr, "orient: %d - %d\n", (int)yaw, (int)pitch);
+
+    if (!mouseRightPressed) {
+        return;
+    }
+
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    (void) window;
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0) {
+        pitch = 89.0;
+    } else if (pitch < -89.0) {
+        pitch = -89.0;
+    }
+
+    vec3 direction = {
+        cos(glm_rad(yaw) * cos(glm_rad(pitch))),
+        sin(glm_rad(pitch)),
+        sin(glm_rad(yaw) * cos(glm_rad(pitch)))        
+    };
+    glm_normalize(direction);
+    glm_vec3_copy(direction, cameraFront);
+}
 
 void handle_input(GLFWwindow *window) {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -69,6 +132,8 @@ int main() {
     }
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // Render elements at the front over the ones in the back
     glEnable(GL_DEPTH_TEST);
@@ -197,7 +262,7 @@ int main() {
             mat4 model;
             glm_mat4_identity(model);
             glm_translate(model, cubePositions[i]);
-            glm_rotate(model, (float)glfwGetTime() + i * 20, (vec3){1.0f, 0.3f, 0.5f});
+            // glm_rotate(model, (float)glfwGetTime() + i * 20, (vec3){1.0f, 0.3f, 0.5f});
             // glm_rotate(model, glm_rad(20.0f * i), (vec3){1.0f, 0.3f, 0.5f});
             int modelLoc = glGetUniformLocation(shaderProgram, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model);
