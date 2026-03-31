@@ -47,7 +47,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     // fprintf(stderr, "coords: %d - %d\n", (int)xpos, (int)ypos);
-    // fprintf(stderr, "yaw: %d, pitch: %d\n", (int)yaw, (int)pitch);
+    // fprintf(stderr, "orient: %d - %d\n", (int)yaw, (int)pitch);
 
     if (!mouseRightPressed) {
         return;
@@ -80,9 +80,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     }
 
     vec3 direction = {
-        cos(glm_rad(yaw)) * cos(glm_rad(pitch)),
+        cos(glm_rad(yaw) * cos(glm_rad(pitch))),
         sin(glm_rad(pitch)),
-        sin(glm_rad(yaw)) * cos(glm_rad(pitch))
+        sin(glm_rad(yaw) * cos(glm_rad(pitch)))        
     };
     glm_normalize(direction);
     glm_vec3_copy(direction, cameraFront);
