@@ -96,8 +96,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     // fprintf(stderr, "%d\n", (int)fov);
     (void)window; (void)xoffset;
     camera.fov -= (float)yoffset;
-    if (camera.fov < 1.0f)
-        camera.fov = 1.0f;
+    if (camera.fov < 1.0)
+        camera.fov = 1.0;
     if (camera.fov > MAX_FOV)
         camera.fov = MAX_FOV; 
 }
@@ -166,96 +166,125 @@ int main() {
     // Render elements at the front over the ones in the back
     glEnable(GL_DEPTH_TEST);
 
-    // Vertex array object
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
     // Vertex buffer object
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    GLuint cubeVBO;
+    glGenBuffers(1, &cubeVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
     float vertices[] = {
-        // vertices           // texture
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        // vertices           // surface normal vectors
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // Vertex array object
+    GLuint targetCubeVAO;
+    glGenVertexArrays(1, &targetCubeVAO);
+    glBindVertexArray(targetCubeVAO);
     // glVertexAttribPointer args --> index, size, type, normalized, stride, pointer
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    // aPos
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // color attribute
-    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
-    // glEnableVertexAttribArray(1);
+    // aNormal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    GLuint shaderProgram = get_shader_program("lighting/colors/shader.vs", "lighting/colors/shader.fs");
+    GLuint lightCubeVAO;
+    glGenVertexArrays(1, &lightCubeVAO);
+    glBindVertexArray(lightCubeVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
-    glUseProgram(shaderProgram);
+    vec3  lightCubePosition = {1.2, 1.0, 2.0};
+
+    GLuint targetCubeShader = get_shader_program("lighting/basic/target_cube.vs", "lighting/basic/target_cube.fs");
+    GLuint lightCubeShader = get_shader_program("lighting/basic/light_cube.vs", "lighting/basic/light_cube.fs");
 
     // Render loop. Each iteration renders a new frame.
     while(!glfwWindowShouldClose(window)) {
-        glClearColor(0.53f, 0.18f, 0.08f, 1.0f);
+        // glClearColor(0.53f, 0.18f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Draw the target cube
+
+        glUseProgram(targetCubeShader);
+        glUniform3f(glGetUniformLocation(targetCubeShader, "objectColor"), 1.0, 0.5, 0.31);
+        glUniform3f(glGetUniformLocation(targetCubeShader, "lightColor"), 1.0, 1.0, 1.0);
+        glUniform3fv(glGetUniformLocation(targetCubeShader, "lightPos"), 1, &lightCubePosition[0]);
 
         mat4 view;
         vec3 cameraPosFront;
         glm_vec3_add(camera.pos, camera.front, cameraPosFront);
         glm_lookat(camera.pos, cameraPosFront, worldUp, view);
-        int viewLoc = glGetUniformLocation(shaderProgram, "view");
+        int viewLoc = glGetUniformLocation(targetCubeShader, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)view);
 
         mat4 projection;
-        glm_perspective(glm_rad(camera.fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, projection);
-        int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+        glm_perspective(glm_rad(camera.fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1, 100.0, projection);
+        int projectionLoc = glGetUniformLocation(targetCubeShader, "projection");
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection);
 
         mat4 model;
         glm_mat4_identity(model);
-        glm_translate(model, (vec3){ 0.0f,  0.0f,  0.0f});
-        int modelLoc = glGetUniformLocation(shaderProgram, "model");
+        glm_translate(model, (vec3){ 0.0,  0.0,  0.0});
+        int modelLoc = glGetUniformLocation(targetCubeShader, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model);
 
+        glBindVertexArray(targetCubeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // Draw the light cube
+        glUseProgram(lightCubeShader);
+        viewLoc = glGetUniformLocation(lightCubeShader, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)view);        
+        projectionLoc = glGetUniformLocation(lightCubeShader, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection);
+        glm_mat4_identity(model);
+        glm_translate(model, lightCubePosition);
+        glm_scale(model, (vec3){0.2, 0.2, 0.2});
+        modelLoc = glGetUniformLocation(lightCubeShader, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model);
+
+        glBindVertexArray(lightCubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glfwSwapBuffers(window);
