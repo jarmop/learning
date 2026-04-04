@@ -29,7 +29,7 @@ char *read_file(const char *path) {
     fseek(f, 0, SEEK_END);
     long fsize = ftell(f);
     fseek(f, 0, SEEK_SET);
-    char *str = malloc(fsize + 1);
+    char *str = (char *)malloc(fsize + 1);
     if (fread(str, fsize, 1, f) != 1) {
         perror(path);
         exit(1);

@@ -18,7 +18,6 @@
 
 #include "../../lib/stb_image.h"
 #include "mesh.hpp"
-#include "shader_m.hpp"
 
 using namespace std;
 
@@ -40,10 +39,10 @@ public:
     }
 
     // draws the model, and thus all its meshes
-    void Draw(Shader &shader)
+    void Draw(GLuint shaderProgram)
     {
         for(unsigned int i = 0; i < meshes.size(); i++)
-            meshes[i].Draw(shader);
+            meshes[i].Draw(shaderProgram);
     }
     
 private:
