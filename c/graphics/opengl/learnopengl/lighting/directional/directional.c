@@ -25,11 +25,11 @@ struct camera {
     float speed;
     float fov;
 } camera = {
-    {0.0, 0.0, 3.0}, // pos
-    {0.0, 0.0, -1.0}, // front
-    {1.0, 0.0, 0.0},  // right
-    -90.0, // yaw
-    0.0, // pitch
+    {-2.0, 1.5, 3.5}, // pos
+    {0.0, 0.0, 0.0}, // front
+    {0.0, 0.0, 0.0},  // right
+    -60.0, // yaw
+    -20.0, // pitch
     2.5, // speed
     MAX_FOV // fov
 };
@@ -60,6 +60,15 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     } 
 }
 
+void updateCamera() {
+    camera.front[0] = cos(glm_rad(camera.yaw)) * cos(glm_rad(camera.pitch));
+    camera.front[1] = sin(glm_rad(camera.pitch));
+    camera.front[2] = sin(glm_rad(camera.yaw)) * cos(glm_rad(camera.pitch));
+    glm_normalize(camera.front);
+    glm_cross(camera.front, worldUp, camera.right);
+    glm_normalize(camera.right);
+}
+
 void mouse_callback(GLFWwindow* window, double mouseX, double mouseY) {
     (void) window;
     if (!mouseRightPressed) {
@@ -84,12 +93,7 @@ void mouse_callback(GLFWwindow* window, double mouseX, double mouseY) {
         camera.pitch = -89.0;
     }
 
-    camera.front[0] = cos(glm_rad(camera.yaw)) * cos(glm_rad(camera.pitch));
-    camera.front[1] = sin(glm_rad(camera.pitch));
-    camera.front[2] = sin(glm_rad(camera.yaw)) * cos(glm_rad(camera.pitch));
-    glm_normalize(camera.front);
-    glm_cross(camera.front, worldUp, camera.right);
-    glm_normalize(camera.right);
+    updateCamera();
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
@@ -234,10 +238,9 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    vec3  lightCubePosition = {1.2, 1.0, 2.0};
-
     GLuint targetCubeShader = get_shader_program("lighting/directional/target_cube.vs", "lighting/directional/target_cube.fs");
-    GLuint lightCubeShader = get_shader_program("lighting/directional/light_cube.vs", "lighting/directional/light_cube.fs");
+
+    updateCamera();
 
     // Render loop. Each iteration renders a new frame.
     while(!glfwWindowShouldClose(window)) {
@@ -248,9 +251,12 @@ int main() {
 
         glUseProgram(targetCubeShader);
         glUniform3f(glGetUniformLocation(targetCubeShader, "objectColor"), 1.0, 0.5, 0.31);
-        glUniform3f(glGetUniformLocation(targetCubeShader, "lightColor"), 1.0, 1.0, 1.0);
-        glUniform3fv(glGetUniformLocation(targetCubeShader, "lightPos"), 1, &lightCubePosition[0]);
         glUniform3fv(glGetUniformLocation(targetCubeShader, "viewPos"), 1, &camera.pos[0]);
+        glUniform3f(glGetUniformLocation(targetCubeShader, "light.color"), 1.0, 1.0, 1.0);
+        glUniform3f(glGetUniformLocation(targetCubeShader, "light.direction"), -0.2, -1.0, -0.3);
+        glUniform3f(glGetUniformLocation(targetCubeShader, "light.ambient"), 0.2, 0.2, 0.2);
+        glUniform3f(glGetUniformLocation(targetCubeShader, "light.diffuse"), 0.5, 0.5, 0.5);
+        glUniform3f(glGetUniformLocation(targetCubeShader, "light.specular"), 1.0, 1.0, 1.0);
 
         mat4 view;
         vec3 cameraPosFront;
@@ -271,21 +277,6 @@ int main() {
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model);
 
         glBindVertexArray(targetCubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        // Draw the light cube
-        glUseProgram(lightCubeShader);
-        viewLoc = glGetUniformLocation(lightCubeShader, "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)view);        
-        projectionLoc = glGetUniformLocation(lightCubeShader, "projection");
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection);
-        glm_mat4_identity(model);
-        glm_translate(model, lightCubePosition);
-        glm_scale(model, (vec3){0.2, 0.2, 0.2});
-        modelLoc = glGetUniformLocation(lightCubeShader, "model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model);
-
-        glBindVertexArray(lightCubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glfwSwapBuffers(window);
