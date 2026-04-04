@@ -178,17 +178,17 @@ private:
             aiString str;
             mat->GetTexture(type, i, &str);
             // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-            bool skip = false;
+            bool isTextureLoaded = false;
             for(unsigned int j = 0; j < textures_loaded.size(); j++)
             {
                 if(std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
                 {
                     textures.push_back(textures_loaded[j]);
-                    skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
+                    isTextureLoaded = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
                     break;
                 }
             }
-            if(!skip)
+            if(!isTextureLoaded)
             {   // if texture hasn't been loaded already, load it
                 Texture texture;
                 texture.id = TextureFromFile(str.C_Str(), this->directory);
