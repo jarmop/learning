@@ -250,6 +250,7 @@ int main() {
         glUniform3f(glGetUniformLocation(targetCubeShader, "objectColor"), 1.0, 0.5, 0.31);
         glUniform3f(glGetUniformLocation(targetCubeShader, "lightColor"), 1.0, 1.0, 1.0);
         glUniform3fv(glGetUniformLocation(targetCubeShader, "lightPos"), 1, &lightCubePosition[0]);
+        glUniform3fv(glGetUniformLocation(targetCubeShader, "viewPos"), 1, &camera.pos[0]);
 
         mat4 view;
         vec3 cameraPosFront;
