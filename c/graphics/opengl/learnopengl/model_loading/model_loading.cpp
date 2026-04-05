@@ -198,7 +198,6 @@ int main()
     // load models
     // -----------
     Model ourModel("../assets/backpack/backpack.obj");
-
     
     // draw in wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
