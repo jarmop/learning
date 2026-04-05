@@ -7,8 +7,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "../lib/stb_image.h"
 #include "../lib/get_shader_program.h"
-#include "learnopengl/model.hpp"
+// #include "learnopengl/model.hpp"
+#include "model_loader.h"
 
 // settings
 const unsigned int SCREEN_WIDTH = 800;
@@ -114,6 +116,51 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
+// unsigned int VAO, VBO, EBO;
+
+// void setupMesh() {
+//     // create buffers/arrays
+//     glGenVertexArrays(1, &VAO);
+//     glGenBuffers(1, &VBO);
+//     glGenBuffers(1, &EBO);
+
+//     glBindVertexArray(VAO);
+//     // load data into vertex buffers
+//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//     // A great thing about structs is that their memory layout is sequential for all its items.
+//     // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
+//     // again translates to 3/2 floats which translates to a byte array.
+//     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);  
+
+//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+//     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+
+//     // set the vertex attribute pointers
+//     // vertex Positions
+//     glEnableVertexAttribArray(0);	
+//     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+//     // vertex normals
+//     glEnableVertexAttribArray(1);	
+//     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+//     // vertex texture coords
+//     glEnableVertexAttribArray(2);	
+//     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+//     // vertex tangent
+//     glEnableVertexAttribArray(3);
+//     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+//     // vertex bitangent
+//     glEnableVertexAttribArray(4);
+//     glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+//     // ids
+//     glEnableVertexAttribArray(5);
+//     glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, m_BoneIDs));
+
+//     // weights
+//     glEnableVertexAttribArray(6);
+//     glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
+//     glBindVertexArray(0);
+// }
+
 /**
  * GLFW input getters like glfwGetKey return the last state for the specified 
  * key, ignoring GLFW_REPEAT as it's the same as GLFW_PRESS in this context, so 
@@ -161,7 +208,7 @@ int main()
     GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
-        fprintf(stderr, "Failed to create GLFW window");
+        fprintf(stderr, "Failed to create GLFW window\n");
         glfwTerminate();
         return -1;
     }
@@ -179,7 +226,7 @@ int main()
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        fprintf(stderr, "Failed to initialize GLAD");
+        fprintf(stderr, "Failed to initialize GLAD\n");
 
         return -1;
     }
@@ -197,7 +244,9 @@ int main()
 
     // load models
     // -----------
-    Model ourModel("../assets/backpack/backpack.obj");
+    // Model ourModel("../assets/backpack/backpack.obj");
+    load_obj("../assets/backpack", "backpack.obj");
+
     
     // draw in wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -206,8 +255,8 @@ int main()
 
     // render loop
     // -----------
-    while (!glfwWindowShouldClose(window))
-    {
+    // while (!glfwWindowShouldClose(window)) {
+    while (false) {
         // render
         // ------
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
@@ -241,7 +290,7 @@ int main()
         glm_scale(model, translation2);
         int modelLoc = glGetUniformLocation(shaderProgram, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model);
-        ourModel.Draw(shaderProgram);
+        // ourModel.Draw(shaderProgram);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
