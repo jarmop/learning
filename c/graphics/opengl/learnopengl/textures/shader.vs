@@ -8,4 +8,6 @@ void main() {
     gl_Position = vec4(aPos, 1.0);
     // vertexColor = vec4(aColor, 1.0);
     texCoord = aTexCoord;
+    // texCoord = vec2(aTexCoord.x, aTexCoord.y);
+
 }

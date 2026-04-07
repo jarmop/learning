@@ -18,6 +18,35 @@ void handle_input(GLFWwindow *window) {
         glfwSetWindowShouldClose(window, true);
 }
 
+void setTexture(GLuint texture, GLenum textureUnit, const char *imagePath, GLint format) {
+    glActiveTexture(textureUnit); // select texture unit 0 as the unit to bind to
+    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    unsigned char *data = stbi_load(imagePath, &width, &height, &nrChannels, 0);
+    if (data) {
+        /**
+         * Set the main texture image
+         */
+        glTexImage2D(
+            GL_TEXTURE_2D,      // target
+            0,                  // level of detail (0 = the main image)
+            format,             // internal format
+            width,              // width of the image
+            height,             // height of the image
+            0,                  // Border width. Affects the dimensions of the texture (whatever that means)
+            format,             // format of the data
+            GL_UNSIGNED_BYTE,   // type of the data
+            data                // the pixel data
+        );
+        // Generate the various lower resolution versions of the main image
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        fprintf(stderr, "Failed to load %s\n", imagePath);
+    }
+    stbi_image_free(data);
+}
 
 int main() {
     glfwInit();
@@ -35,7 +64,6 @@ int main() {
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    GLuint shaderProgram = get_shader_program("textures/shader.vs", "textures/shader.fs");
 
     // Vertex array object
     GLuint vao;
@@ -76,42 +104,23 @@ int main() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0); // select texture unit 0 as the unit to bind to
-    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    // Tell shader that texSampler should use texture unit 0
-    glUseProgram(shaderProgram);
-    glUniform1i(glGetUniformLocation(shaderProgram, "texSampler"), 0);
+    GLuint textures[2];
+    // Fill the textures array with two texture names, and mark those names as
+    // being used. Not strictly necessary.
+    glGenTextures(2, textures);
 
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char *data = stbi_load("assets/container.jpg", &width, &height, &nrChannels, 0);
-    if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        fprintf(stderr, "Failed to load texture\n");
-    }
-    stbi_image_free(data);
+    setTexture(textures[0], GL_TEXTURE0, "assets/container.jpg", GL_RGB);
+    setTexture(textures[1], GL_TEXTURE1, "assets/awesomeface.png", GL_RGBA);
+
+    GLuint shaderProgram = get_shader_program("textures/shader.vs", "textures/shader.fs");
+    glUseProgram(shaderProgram);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texSampler1"), 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texSampler2"), 1);
 
     // Render loop. Each iteration renders a new frame.
     while(!glfwWindowShouldClose(window)) {
-        // glClearColor(1.0f, 0.33f, 0.1f, 1.0f);
         glClearColor(0.53f, 0.18f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
-        // bind Texture
-        glBindTexture(GL_TEXTURE_2D, texture);
-
-        glUseProgram(shaderProgram);
 
         // glDrawArrays(GL_TRIANGLES, 0, 3);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
