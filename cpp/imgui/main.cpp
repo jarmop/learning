@@ -1,5 +1,6 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 #ifndef IMGUI_DISABLED
 #include "imgui.h"
@@ -7,21 +8,36 @@
 #include "backends/imgui_impl_opengl3.h"
 #endif
 
-#include <iostream>
+#include "lib/get_shader_program.h"
 
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
+static void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
+    (void)window;
     glViewport(0, 0, width, height);
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     (void) scancode; (void) mods;
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
 }
 
-GLFWwindow* init_window() {
+GLFWmonitor *getLaptopMonitor() {
+    int monitorsLen;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitorsLen);
+    int monitorIndex = -1;
+    std::string monitorName = "eDP-1";
+    for (int i = 0; i < monitorsLen; i++) {
+        std::string currentMonitorName = glfwGetMonitorName(monitors[i]);
+        if (currentMonitorName == monitorName) {
+            monitorIndex = i;
+        }
+    }    
+
+    return monitors[monitorIndex];
+}
+
+GLFWwindow *initWindow() {
     if (!glfwInit())
     {
         std::cerr << "Failed to init GLFW\n";
@@ -33,7 +49,9 @@ GLFWwindow* init_window() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "ImGui + GLFW + GLAD", nullptr, nullptr);
+    GLFWmonitor *monitor = getLaptopMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+    GLFWwindow *window = glfwCreateWindow(mode->width, mode->height, "ImGui + GLFW + GLAD", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create window\n";
@@ -47,8 +65,8 @@ GLFWwindow* init_window() {
     // Enable vsync
     glfwSwapInterval(1);
 
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetKeyCallback(window, key_callback);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    glfwSetKeyCallback(window, keyCallback);
 
     // Initialize the OpenGL function pointers for GLAD using the cross-platform
     // getter function provided by GLFW
@@ -63,7 +81,7 @@ GLFWwindow* init_window() {
 }
 
 #ifndef IMGUI_DISABLED
-void init_imgui(GLFWwindow* window) {
+void initImgui(GLFWwindow *window) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -75,14 +93,19 @@ void init_imgui(GLFWwindow* window) {
 #endif
 
 #ifndef IMGUI_DISABLED
-void render_imgui(ImGuiIO& io) {
+void renderImgui(ImGuiIO& io, bool *showDemo) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    if (*showDemo) {
+        ImGui::ShowDemoWindow(showDemo);
+    }
+
     ImGui::Begin("Demo");
     ImGui::Text("Hello from ImGui!");
     ImGui::Text("FPS: %.1f", io.Framerate);
+    ImGui::Checkbox("Demo Window", showDemo);      // Edit bools storing our window open/close state
     ImGui::End();
 
     ImGui::Render();
@@ -93,40 +116,61 @@ void render_imgui(ImGuiIO& io) {
 
 int main()
 {
-    GLFWwindow* window = init_window();
+    GLFWwindow *window = initWindow();
 
 #ifndef IMGUI_DISABLED
-    init_imgui(window);
+    initImgui(window);
     ImGuiIO& io = ImGui::GetIO();
+    bool showDemo = false;
 #endif
+
+    GLuint vertexArrays[1];
+    glGenVertexArrays(1, vertexArrays);
+    glBindVertexArray(vertexArrays[0]);
+
+    // Create buffer
+    GLuint buffers[1];
+    glGenBuffers(1, buffers);
+    glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+
+    // Store vertex positions into the buffer
+    float vertexPositions[] = {
+         0.0,  0.5, 0.0, // top
+         0.5, -0.5, 0.0, // bottom right
+        -0.5, -0.5, 0.0, // bottom left
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+
+    // Tell the vertex shader how to interpret the buffer data
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    Shader shaders[] = {
+        {GL_VERTEX_SHADER, "shaders/shader.vs"},
+        // {GL_FRAGMENT_SHADER, "shaders/shader.fs"},
+    };
+    GLuint shaderProgram = get_shader_program(shaders, 1);
+    glUseProgram(shaderProgram);
 
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
 
-        int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
-
-        glViewport(0, 0, display_w, display_h);
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        // int displayWidth, displayHeight;
+        // glfwGetFramebufferSize(window, &displayWidth, &displayHeight);
+        // glViewport(0, 0, displayWidth, displayHeight);
+        // glClearColor(0.1, 0.1, 0.1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
 #ifndef IMGUI_DISABLED
-        render_imgui(io);
+    renderImgui(io, &showDemo);
 #endif
 
         glfwSwapBuffers(window);
     }
-
-    // -------------------------
-    // Cleanup
-    // -------------------------
-    // ImGui_ImplOpenGL3_Shutdown();
-    // ImGui_ImplGlfw_Shutdown();
-    // ImGui::DestroyContext();
-
-    // glfwDestroyWindow(window);
-    // glfwTerminate();
 
     return 0;
 }

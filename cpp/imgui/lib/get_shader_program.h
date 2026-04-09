@@ -29,7 +29,7 @@ GLuint compile_shader(GLenum shaderType, int shdrSrcLen, const char *shdrSrc[]) 
 }
 
 char *read_file(const char *path) {
-    FILE *f = fopen(path, "rb");
+    FILE* f = fopen(path, "rb");
     if (!f) {
         perror(path);
         exit(1);

@@ -3,13 +3,15 @@ IMGUI_SOURCES = imgui/*.cpp imgui/backends/*.cpp
 default: slow
 
 build_with_imgui:
-	g++ main.cpp glad/glad.c \
+	g++ -Wall -Wextra \
+	main.cpp glad/glad.c \
 	${IMGUI_SOURCES} \
 	-Iimgui \
 	-lglfw -lGL -ldl \
 
 build_without_imgui:
-	g++ main.cpp glad/glad.c \
+	g++ -Wall -Wextra \
+	main.cpp glad/glad.c \
 	-lglfw -lGL -ldl \
 	-DIMGUI_DISABLED \
 

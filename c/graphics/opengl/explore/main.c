@@ -65,8 +65,8 @@ int main() {
          0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    // Specify the array to store the vertex attribute arrays in 
-    // (in other words, how OpenGL should interpret the vertex data)
+    
+    // Pointer for the position attribute values
     glVertexAttribPointer(
         // index – identifies the generic vertex attribute array being described.
         // We specified "location = 0" in the vertex shader.
@@ -84,9 +84,10 @@ int main() {
         (void*)0
     );
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    // Pointer for the color attribute values
+    // glVertexAttribPointer( index, size, type, normalized, stride, pointer )
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
 
     // Uncomment this call to draw in wireframe polygons.
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
