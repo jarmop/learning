@@ -2,16 +2,59 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-static void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
+#include "state.hpp"
+
+bool mouseRightPressed = false;
+bool firstCursorPos = true;
+double prevXpos = 0.0;
+double prevYpos = 0.0;
+
+static void onFramebufferSize(GLFWwindow *window, int width, int height) {
     (void)window;
     glViewport(0, 0, width, height);
 }
 
-void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+void onKey(GLFWwindow *window, int key, int scancode, int action, int mods) {
     (void) scancode; (void) mods;
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
+}
+
+void onMouseButton(GLFWwindow *window, int button, int action, int mods) {
+    (void) mods;
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        if (action == GLFW_PRESS) {
+            mouseRightPressed = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else {
+            mouseRightPressed = false;
+            firstCursorPos = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    } 
+}
+
+void onCursorPos(GLFWwindow* window, double xpos, double ypos) {
+    (void) window;
+    if (!mouseRightPressed) {
+        return;
+    }
+    // fprintf(stderr, "x: %d, y: %d\n", (int)xpos, (int)ypos);
+
+    if (firstCursorPos) {
+        firstCursorPos = false;
+        prevXpos = xpos;
+        prevYpos = ypos;
+    }
+
+    float mouseSensitivity = 0.1;
+    camera.yaw -= mouseSensitivity * (prevXpos - xpos);
+    camera.pitch -= mouseSensitivity * (prevYpos - ypos);
+    // fprintf(stderr, "x: %d, y: %d\n", (int)(prevXpos - xpos), (int)(prevYpos - ypos));
+
+    prevXpos = xpos;
+    prevYpos = ypos;
 }
 
 GLFWmonitor *getLaptopMonitor() {
@@ -57,8 +100,10 @@ GLFWwindow *initWindow() {
     // Enable vsync
     glfwSwapInterval(1);
 
-    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-    glfwSetKeyCallback(window, keyCallback);
+    glfwSetFramebufferSizeCallback(window, onFramebufferSize);
+    glfwSetKeyCallback(window, onKey);
+    glfwSetMouseButtonCallback(window, onMouseButton);
+    glfwSetCursorPosCallback(window, onCursorPos);
 
     // Initialize the OpenGL function pointers for GLAD using the cross-platform
     // getter function provided by GLFW

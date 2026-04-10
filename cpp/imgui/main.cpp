@@ -7,11 +7,13 @@
 #include "lib/get_shader_program.h"
 #include "window.hpp"
 #include "gui.hpp"
+#include "state.hpp"
 
 int SCR_WIDTH = 1900; int SCR_HEIGHT = 1200;
 
 int main() {
     GLFWwindow *window = initWindow();
+    initState();
 
 #ifndef IMGUI_DISABLED
     ImGuiIO& io = initImgui(window);
@@ -90,8 +92,8 @@ int main() {
 
     glm::mat4 model = glm::mat4(1.0f);
     // model = glm::rotate(model,  glm::radians(30.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-    model = glm::rotate(model,  glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model,  glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    // model = glm::rotate(model,  glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    // model = glm::rotate(model,  glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -111,7 +113,8 @@ int main() {
         int displayWidth, displayHeight;
         glfwGetFramebufferSize(window, &displayWidth, &displayHeight);
         projection = glm::perspective(glm::radians(45.0f), (float)displayWidth / (float)displayHeight, 0.1f, 100.0f);
-        // projection = glm::rotate(projection,  glm::radians(-15.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        projection = glm::rotate(projection,  glm::radians(camera.yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+        projection = glm::rotate(projection,  glm::radians(camera.pitch), glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
         // int displayWidth, displayHeight;
