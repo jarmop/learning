@@ -43,7 +43,7 @@ GLFWwindow *initWindow() {
 
     GLFWmonitor *monitor = getLaptopMonitor();
     const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-    GLFWwindow *window = glfwCreateWindow(mode->width, mode->height, "ImGui + GLFW + GLAD", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(mode->width / 2, mode->height, "ImGui + GLFW + GLAD", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create window\n";
