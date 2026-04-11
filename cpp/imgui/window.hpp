@@ -35,12 +35,20 @@ void onMouseButton(GLFWwindow *window, int button, int action, int mods) {
     } 
 }
 
+void updateCamera() {
+    camera.front[0] = cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+    camera.front[1] = sin(glm::radians(camera.pitch));
+    camera.front[2] = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+    glm::normalize(camera.front);
+    camera.right = glm::cross(camera.front, worldUp);
+    glm::normalize(camera.right);
+}
+
 void onCursorPos(GLFWwindow* window, double xpos, double ypos) {
     (void) window;
     if (!mouseRightPressed) {
         return;
     }
-    // fprintf(stderr, "x: %d, y: %d\n", (int)xpos, (int)ypos);
 
     if (firstCursorPos) {
         firstCursorPos = false;
@@ -49,12 +57,13 @@ void onCursorPos(GLFWwindow* window, double xpos, double ypos) {
     }
 
     float mouseSensitivity = 0.1;
-    camera.yaw -= mouseSensitivity * (prevXpos - xpos);
-    camera.pitch -= mouseSensitivity * (prevYpos - ypos);
-    // fprintf(stderr, "x: %d, y: %d\n", (int)(prevXpos - xpos), (int)(prevYpos - ypos));
+    camera.yaw += mouseSensitivity * (xpos - prevXpos);
+    camera.pitch -= mouseSensitivity * (ypos - prevYpos);
 
     prevXpos = xpos;
     prevYpos = ypos;
+
+    updateCamera();
 }
 
 GLFWmonitor *getLaptopMonitor() {

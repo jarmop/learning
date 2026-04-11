@@ -3,13 +3,35 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/io.hpp>
 
 #include "lib/get_shader_program.h"
 #include "window.hpp"
 #include "gui.hpp"
 #include "state.hpp"
 
-int SCR_WIDTH = 1900; int SCR_HEIGHT = 1200;
+#include <iostream>
+
+void onFrame(GLFWwindow *window) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        camera.pos += camera.speed * camera.front;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        camera.pos -= camera.speed * camera.front;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        camera.pos += camera.speed * camera.right;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        camera.pos -= camera.speed * camera.right;
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        camera.pos += camera.speed * worldUp;
+    }
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+        camera.pos -= camera.speed * worldUp;
+    }
+}
 
 int main() {
     GLFWwindow *window = initWindow();
@@ -91,21 +113,22 @@ int main() {
     glUseProgram(shaderProgram);
 
     glm::mat4 model = glm::mat4(1.0f);
-    // model = glm::rotate(model,  glm::radians(30.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-    // model = glm::rotate(model,  glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    // model = glm::rotate(model,  glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-    unsigned int sceneLoc = glGetUniformLocation(shaderProgram, "view");
-    glm::mat4 scene = glm::mat4(1.0f);
-    // z is negative, because we are moving the scene away from us
-    scene = glm::translate(scene, glm::vec3(0.0f, 0.0f, -3.0f));
-    glUniformMatrix4fv(sceneLoc, 1, GL_FALSE, glm::value_ptr(scene));
+    updateCamera();
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+        onFrame(window);
+
+        unsigned int sceneLoc = glGetUniformLocation(shaderProgram, "view");
+        glm::mat4 scene = glm::mat4(1.0f);
+        // z is negative, because we are moving the scene away from us
+        scene = glm::translate(scene, -camera.pos);
+        scene = glm::lookAt(camera.pos, camera.pos + camera.front, camera.up);
+        glUniformMatrix4fv(sceneLoc, 1, GL_FALSE, glm::value_ptr(scene));
 
         unsigned int projectionLoc  = glGetUniformLocation(shaderProgram, "projection");
         glm::mat4 projection;
@@ -113,8 +136,8 @@ int main() {
         int displayWidth, displayHeight;
         glfwGetFramebufferSize(window, &displayWidth, &displayHeight);
         projection = glm::perspective(glm::radians(45.0f), (float)displayWidth / (float)displayHeight, 0.1f, 100.0f);
-        projection = glm::rotate(projection,  glm::radians(camera.yaw), glm::vec3(0.0f, 1.0f, 0.0f));
-        projection = glm::rotate(projection,  glm::radians(camera.pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+        // projection = glm::rotate(projection,  glm::radians(camera.yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+        // projection = glm::rotate(projection,  glm::radians(camera.pitch), glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
         // int displayWidth, displayHeight;
