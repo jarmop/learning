@@ -10,14 +10,16 @@ struct Light {
 
 // According to LearnOpenGL, the normal should be normalized in this shader, but
 // we know it's already normalized, so normalizing again seems overly cautious
-in vec3 normal;
 in vec3 fragPos;
-
-out vec4 fragColor;
+in vec3 normal;
+in vec2 texCoord;
 
 uniform vec3 objectColor;
 uniform vec3 viewPos;
 uniform Light light;
+uniform sampler2D texSampler;
+
+out vec4 fragColor;
 
 void main() {
     // ambient
@@ -35,5 +37,6 @@ void main() {
     float angularDistance = max(dot(viewDirection, reflectDirection), 0.0);
     vec3 specular = light.specular * pow(angularDistance, shininess) * light.color;
 
-    fragColor = vec4((ambient + diffuse + specular) * objectColor, 1.0);
+    // fragColor = vec4((ambient + diffuse + specular) * objectColor, 1.0);
+    fragColor = texture(texSampler, texCoord);
 }

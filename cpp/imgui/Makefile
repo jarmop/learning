@@ -5,6 +5,7 @@ default: slow
 build_with_imgui:
 	g++ -Wall -Wextra \
 	main.cpp glad/glad.c \
+	 lib/stb_image.c \
 	${IMGUI_SOURCES} \
 	-Iimgui \
 	-lglfw -lGL -ldl \
@@ -12,6 +13,7 @@ build_with_imgui:
 build_without_imgui:
 	g++ -Wall -Wextra \
 	main.cpp glad/glad.c \
+	 lib/stb_image.c \
 	-lglfw -lGL -ldl \
 	-DIMGUI_DISABLED \
 

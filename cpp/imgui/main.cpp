@@ -8,6 +8,7 @@
 
 #include "lib/get_shader_program.h"
 #include "lib/obj_loader.hpp"
+#include "lib/stb_image.h"
 #include "window.hpp"
 #include "gui.hpp"
 #include "state.hpp"
@@ -31,6 +32,36 @@ void onFrame(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
         camera.pos -= camera.speed * worldUp;
     }
+}
+
+void setTexture(GLuint texture, GLenum textureUnit, const char *imagePath, GLint format) {
+    glActiveTexture(textureUnit); // select texture unit 0 as the unit to bind to
+    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    unsigned char *data = stbi_load(imagePath, &width, &height, &nrChannels, 0);
+    if (data) {
+        /**
+         * Set the main texture image
+         */
+        glTexImage2D(
+            GL_TEXTURE_2D,      // target
+            0,                  // level of detail (0 = the main image)
+            format,             // internal format
+            width,              // width of the image
+            height,             // height of the image
+            0,                  // Border width. Affects the dimensions of the texture (whatever that means)
+            format,             // format of the data
+            GL_UNSIGNED_BYTE,   // type of the data
+            data                // the pixel data
+        );
+        // Generate the various lower resolution versions of the main image
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        fprintf(stderr, "Failed to load %s\n", imagePath);
+    }
+    stbi_image_free(data);
 }
 
 int main() {
@@ -57,7 +88,8 @@ int main() {
 
     int vpStride = 3;
     int vnStride = 3;
-    int vStride = vpStride + vnStride;
+    int vtStride = 2;
+    int vStride = vpStride + vnStride + vtStride;
     int numOfVertices;
     float *vertexData = loadObj(&numOfVertices);
 
@@ -75,6 +107,14 @@ int main() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, vnStride, GL_FLOAT, GL_FALSE, vStride * sizeof(float), (void*)(vpStride * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, vtStride, GL_FLOAT, GL_FALSE, vStride * sizeof(float), (void*)((vpStride + vnStride) * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    GLuint textures[1];
+    glGenTextures(1, textures);
+    // setTexture(textures[0], GL_TEXTURE0, "assets/crate.jpg", GL_RGB);
+    setTexture(textures[0], GL_TEXTURE0, "assets/moon_diffuse.png", GL_RGBA);
+    // setTexture(textures[0], GL_TEXTURE0, "assets/moon_bump.png", GL_RGBA);
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -84,6 +124,7 @@ int main() {
     };
     GLuint shaderProgram = get_shader_program(shaders, 2);
     glUseProgram(shaderProgram);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texSampler"), 0);
 
     glm::mat4 model = glm::mat4(1.0f);
 
