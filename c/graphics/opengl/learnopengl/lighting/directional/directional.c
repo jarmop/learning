@@ -232,13 +232,8 @@ int main() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    GLuint lightCubeVAO;
-    glGenVertexArrays(1, &lightCubeVAO);
-    glBindVertexArray(lightCubeVAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
     GLuint targetCubeShader = get_shader_program("lighting/directional/target_cube.vs", "lighting/directional/target_cube.fs");
+    glUseProgram(targetCubeShader);
 
     updateCamera();
 
@@ -249,7 +244,6 @@ int main() {
 
         // Draw the target cube
 
-        glUseProgram(targetCubeShader);
         glUniform3f(glGetUniformLocation(targetCubeShader, "objectColor"), 1.0, 0.5, 0.31);
         glUniform3fv(glGetUniformLocation(targetCubeShader, "viewPos"), 1, &camera.pos[0]);
         glUniform3f(glGetUniformLocation(targetCubeShader, "light.color"), 1.0, 1.0, 1.0);

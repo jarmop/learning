@@ -43,6 +43,8 @@ int main() {
     bool showDemo = false;
 #endif
 
+    // Render elements at the front over the ones in the back
+    glEnable(GL_DEPTH_TEST);
 
     GLuint vertexArrays[1];
     glGenVertexArrays(1, vertexArrays);
@@ -53,24 +55,34 @@ int main() {
     glGenBuffers(1, buffers);
     glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 
-    int vStride = 3;
+    int vpStride = 3;
+    int vnStride = 3;
+    int vStride = vpStride + vnStride;
     int numOfVertices;
     float *vertexData = loadObj(&numOfVertices);
+
+    // for (int i = 0; i < numOfVertices * vStride; i++) {
+    //     fprintf(stderr, "%f, ", vertexData[i]);
+    //     if ((i + 1) % vStride == 0) {
+    //         fprintf(stderr, "\n");
+    //     }
+    // }
 
     glBufferData(GL_ARRAY_BUFFER, numOfVertices * vStride * sizeof(float *), vertexData, GL_STATIC_DRAW);
     // Tell the vertex shader how to interpret the buffer data
     // glVertexAttribPointer( index, size (values per attribute), type, normalized, stride, pointer )
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glVertexAttribPointer(0, vStride, GL_FLOAT, GL_FALSE, vStride * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, vpStride, GL_FLOAT, GL_FALSE, vStride * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, vnStride, GL_FLOAT, GL_FALSE, vStride * sizeof(float), (void*)(vpStride * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     Shader shaders[] = {
         {GL_VERTEX_SHADER, "shaders/shader.vs"},
-        // {GL_FRAGMENT_SHADER, "shaders/shader.fs"},
+        {GL_FRAGMENT_SHADER, "shaders/shader.fs"},
     };
-    GLuint shaderProgram = get_shader_program(shaders, 1);
+    GLuint shaderProgram = get_shader_program(shaders, 2);
     glUseProgram(shaderProgram);
 
     glm::mat4 model = glm::mat4(1.0f);
@@ -101,11 +113,21 @@ int main() {
         // projection = glm::rotate(projection,  glm::radians(camera.pitch), glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+        // Lights
+        glUniform3f(glGetUniformLocation(shaderProgram, "objectColor"), 1.0, 0.5, 0.31);
+        glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, &camera.pos[0]);
+        glUniform3f(glGetUniformLocation(shaderProgram, "light.color"), 1.0, 1.0, 1.0);
+        glUniform3f(glGetUniformLocation(shaderProgram, "light.direction"), -0.2, -1.0, -0.3);
+        glUniform3f(glGetUniformLocation(shaderProgram, "light.ambient"), 0.2, 0.2, 0.2);
+        glUniform3f(glGetUniformLocation(shaderProgram, "light.diffuse"), 0.5, 0.5, 0.5);
+        glUniform3f(glGetUniformLocation(shaderProgram, "light.specular"), 1.0, 1.0, 1.0);
+
         // int displayWidth, displayHeight;
         // glfwGetFramebufferSize(window, &displayWidth, &displayHeight);
         // glViewport(0, 0, displayWidth, displayHeight);
         // glClearColor(0.1, 0.1, 0.1, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         glDrawArrays(GL_TRIANGLES, 0, numOfVertices);
 
 #ifndef IMGUI_DISABLED

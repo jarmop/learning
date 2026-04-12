@@ -89,8 +89,8 @@ float *loadObj(int *numOfVertices) {
     int vStride = 3;
     int nStride = 3;
     int fStride = 4;
-    // int vDataBufStride = vStride + nStride;
-    int vDataBufStride = vStride;
+    int vDataBufStride = vStride + nStride;
+    // int vDataBufStride = vStride;
     float vDataBuf[10000] = {0};
     for (int i = 0; i < fBufLen; i += fStride) {
         // face i
@@ -109,9 +109,9 @@ float *loadObj(int *numOfVertices) {
             vDataBuf[vDataBufLen + 0] = vBuf[vi[pi] + 0];
             vDataBuf[vDataBufLen + 1] = vBuf[vi[pi] + 1];
             vDataBuf[vDataBufLen + 2] = vBuf[vi[pi] + 2];
-            // vDataBuf[vDataBufLen + 3] = nBuf[ni[j]];
-            // vDataBuf[vDataBufLen + 4] = nBuf[ni[j] + 1];
-            // vDataBuf[vDataBufLen + 5] = nBuf[ni[j] + 2];
+            vDataBuf[vDataBufLen + 3] = nBuf[ni[pi] + 0];
+            vDataBuf[vDataBufLen + 4] = nBuf[ni[pi] + 1];
+            vDataBuf[vDataBufLen + 5] = nBuf[ni[pi] + 2];
             vDataBufLen += vDataBufStride;
         }
 
@@ -123,9 +123,9 @@ float *loadObj(int *numOfVertices) {
             vDataBuf[vDataBufLen + 0] = vBuf[vi[pi] + 0];
             vDataBuf[vDataBufLen + 1] = vBuf[vi[pi] + 1];
             vDataBuf[vDataBufLen + 2] = vBuf[vi[pi] + 2];
-            // vDataBuf[vDataBufLen + 3] = nBuf[ni[j]];
-            // vDataBuf[vDataBufLen + 4] = nBuf[ni[j] + 3];
-            // vDataBuf[vDataBufLen + 5] = nBuf[ni[j] + 2];
+            vDataBuf[vDataBufLen + 3] = nBuf[ni[pi] + 0];
+            vDataBuf[vDataBufLen + 4] = nBuf[ni[pi] + 1];
+            vDataBuf[vDataBufLen + 5] = nBuf[ni[pi] + 2];
             vDataBufLen += vDataBufStride;
         }
     }

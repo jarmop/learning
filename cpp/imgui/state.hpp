@@ -18,9 +18,9 @@ typedef struct {
 Camera camera;
 
 void initState() {
-    camera.yaw = -90.0;
-    camera.pitch = 0.0;
-    camera.pos = glm::vec3(0.0, 0.0, 6.0);
+    camera.yaw = -62.0;
+    camera.pitch = -25.0;
+    camera.pos = glm::vec3(-3.0, 3.0, 6.0);
     camera.front = glm::vec3(0.0, 0.0, -1.0);
     camera.up = glm::vec3(0.0, 1.0, 0.0);
     camera.right = glm::vec3(1.0, 0.0, 0.0);
