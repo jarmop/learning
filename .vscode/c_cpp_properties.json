@@ -24,15 +24,14 @@
                 "/usr/lib/x86_64-linux-gnu/graphene-1.0/include",
                 "/usr/include/libdrm",
                 "/usr/include/efi",
-                "/usr/include/libsoup-3.0",
                 "/usr/include/atk-1.0",
-                "/usr/include/webkitgtk-4.1",
-                "/usr/include/fmt"
+                "/usr/include/fmt",
+                "/home/jarmo/development/lib/vulkansdk/1.3.275.0/x86_64/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu17",
-            "cppStandard": "gnu++17",
+            "cppStandard": "gnu++20",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],
