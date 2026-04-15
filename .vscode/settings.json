@@ -24,6 +24,11 @@
         "editor.formatOnSave": false
     },
     "[cpp]": {
-        "editor.formatOnSave": false
-    }
+        "editor.formatOnSave": true
+    },
+    // "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, IndentStyle: space, ColumnLimit: 100}",
+    // "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Visual Studio, IndentWidth: 2, IndentStyle: space, ColumnLimit: 100}",
+    // "C_Cpp.clang_format_fallbackStyle": "none",
+
+    "editor.guides.indentation": false
 }
