@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cmake -B build
-cmake --build build
+time cmake -B build
+time cmake --build build
 build/bin/HowToVulkan 

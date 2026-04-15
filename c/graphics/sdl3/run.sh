@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cmake -S . -B build
-cmake --build build
+time cmake -S . -B build
+time cmake --build build
 build/hello
