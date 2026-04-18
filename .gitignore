@@ -21,3 +21,4 @@ vmlinuz
 bzImage
 *.gz
 *.img
+*.inc
