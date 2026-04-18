@@ -761,8 +761,8 @@ int main(int argc, char* argv[]) {
 #pragma endregion
 
   // Render loop
-  uint64_t lastTime{SDL_GetTicks()};
-  bool quit{false};
+  uint64_t lastTime = SDL_GetTicks();
+  bool quit = false;
   while (!quit) {
     // Sync
     chk(vkWaitForFences(device, 1, &fences[frameIndex], true, UINT64_MAX));
