@@ -171,12 +171,26 @@ void createLogicalDevice() {
     vkGetDeviceQueue(device, presentFamily, 0, &presentQueue);
 }
 
+static VkExtent2D choose_extent(GLFWwindow* window, const VkSurfaceCapabilitiesKHR* caps) {
+    if (caps->currentExtent.width != UINT32_MAX) return caps->currentExtent;
+
+    int w, h;
+    glfwGetFramebufferSize(window, &w, &h);
+    VkExtent2D e = { (uint32_t)w, (uint32_t)h };
+
+    if (e.width < caps->minImageExtent.width) e.width = caps->minImageExtent.width;
+    if (e.width > caps->maxImageExtent.width) e.width = caps->maxImageExtent.width;
+    if (e.height < caps->minImageExtent.height) e.height = caps->minImageExtent.height;
+    if (e.height > caps->maxImageExtent.height) e.height = caps->maxImageExtent.height;
+    return e;
+}
+
 /* Swapchain */
 void createSwapchain() {
     VkSurfaceCapabilitiesKHR caps;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &caps);
 
-    swapchainExtent = caps.currentExtent;
+    swapchainExtent = choose_extent(window, &caps);
 
     uint32_t formatCount;
     vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, NULL);
