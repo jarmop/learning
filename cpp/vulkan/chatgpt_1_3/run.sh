@@ -1,14 +1,11 @@
 #!/bin/bash
 
-# glslc shaders/vert.vert -o vert.spv
-# glslc shaders/frag.frag -o frag.spv
+glslangValidator -V -S vert shaders/vert.glsl -o shaders/vert.spv
+glslangValidator -V -S frag shaders/frag.glsl -o shaders/frag.spv
 
-glslangValidator -V shaders/vert.glsl -o shaders/vert.spv
-glslangValidator -V shaders/frag.glsl -o frag.spv
+xxd -i shaders/vert.spv > shaders/vert_spv.inc
+xxd -i shaders/frag.spv > shaders/frag_spv.inc
 
-# xxd -i vert.spv > vert_spv.inc
-# xxd -i frag.spv > frag_spv.inc
+g++ main.cpp -lvulkan -lglfw
 
-# g++ main.cpp -lvulkan -lglfw
-
-# ./a.out
+./a.out

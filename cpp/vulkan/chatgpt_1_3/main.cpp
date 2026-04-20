@@ -16,13 +16,16 @@
 // vertex: positions from hardcoded array
 // fragment: outputs color
 
-const std::vector<uint32_t> VERT_SHADER = {
-#include "vert_spv.inc"
-};
+// const std::vector<uint32_t> VERT_SHADER = {
+// #include "shaders/vert_spv.inc"
+// };
 
-const std::vector<uint32_t> FRAG_SHADER = {
-#include "frag_spv.inc"
-};
+// const std::vector<uint32_t> FRAG_SHADER = {
+// #include "shaders/frag_spv.inc"
+// };
+
+#include "shaders/frag_spv.inc"
+#include "shaders/vert_spv.inc"
 
 // ---------- Config ----------
 const uint32_t WIDTH = 800;
@@ -208,9 +211,9 @@ class App {
     s.formats.resize(count);
     vkGetPhysicalDeviceSurfaceFormatsKHR(dev, surface, &count, s.formats.data());
 
-    vkGetPhysicalDevicePresentModesKHR(dev, surface, &count, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(dev, surface, &count, nullptr);
     s.modes.resize(count);
-    vkGetPhysicalDevicePresentModesKHR(dev, surface, &count, s.modes.data());
+    vkGetPhysicalDeviceSurfacePresentModesKHR(dev, surface, &count, s.modes.data());
 
     return s;
   }
@@ -300,19 +303,24 @@ class App {
     vkCreateRenderPass(device, &info, nullptr, &renderPass);
   }
 
-  VkShaderModule makeModule(const std::vector<uint32_t>& code) {
+  VkShaderModule makeModule(const uint32_t* code, size_t size) {
     VkShaderModuleCreateInfo info{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
-    info.codeSize = code.size() * sizeof(uint32_t);
-    info.pCode = code.data();
+    info.codeSize = size;
+    info.pCode = code;
 
     VkShaderModule mod;
-    vkCreateShaderModule(device, &info, nullptr, &mod);
+    if (vkCreateShaderModule(device, &info, nullptr, &mod) != VK_SUCCESS)
+      throw std::runtime_error("shader module");
+
     return mod;
   }
 
   void createPipeline() {
-    VkShaderModule vert = makeModule(VERT_SHADER);
-    VkShaderModule frag = makeModule(FRAG_SHADER);
+    VkShaderModule vert =
+        makeModule(reinterpret_cast<const uint32_t*>(shaders_vert_spv), shaders_vert_spv_len);
+
+    VkShaderModule frag =
+        makeModule(reinterpret_cast<const uint32_t*>(shaders_frag_spv), shaders_frag_spv_len);
 
     VkPipelineShaderStageCreateInfo vs{VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
     vs.stage = VK_SHADER_STAGE_VERTEX_BIT;
