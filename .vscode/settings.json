@@ -21,7 +21,7 @@
         "editor.formatOnSave": false
     },
     "[c]": {
-        "editor.formatOnSave": false
+        "editor.formatOnSave": true
     },
     "[cpp]": {
         "editor.formatOnSave": true
