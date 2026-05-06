@@ -30,5 +30,5 @@
     // "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Visual Studio, IndentWidth: 2, IndentStyle: space, ColumnLimit: 100}",
     // "C_Cpp.clang_format_fallbackStyle": "none",
 
-    "editor.guides.indentation": false
+    // "editor.guides.indentation": false
 }
