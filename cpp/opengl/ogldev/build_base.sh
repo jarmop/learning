@@ -2,8 +2,6 @@ if [ -v $ROOTDIR ]; then
     ROOTDIR=".."
 fi
 
-echo "wtf"
-
 CC=g++
 # OGL_CPPFLAGS="$CPPFLAGS -I$ROOTDIR/Include -I$ROOTDIR/Common/FreetypeGL -I$ROOTDIR/Common/3rdparty/ImGui/GLFW/ -std=c++20"
 OGL_CPPFLAGS="$CPPFLAGS -I$ROOTDIR/include -std=c++20"
