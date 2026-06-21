@@ -17,7 +17,7 @@
 
     Terrain Rendering - demo 1
 */
-
+// clang-format off
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
