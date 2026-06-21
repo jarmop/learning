@@ -1,12 +1,14 @@
 package terrain
 
+import "core:fmt"
+import "core:math"
 import "core:math/linalg/glsl"
+import "core:os"
+
 import gl "vendor:OpenGL"
 import "vendor:glfw"
-import "core:fmt"
-import "core:os"
+
 import stbi "vendor:stb/image"
-import "core:math"
 
 framebuffer_size_callback :: proc "c" (window: glfw.WindowHandle, width: i32, height: i32) {
 	gl.Viewport(0, 0, width, height)
@@ -61,7 +63,7 @@ mouse_callback :: proc "c" (window: glfw.WindowHandle, xposIn: f64, yposIn: f64)
 		pitch = -89
 	}
 
-	front := glsl.vec3{
+	front := glsl.vec3 {
 		math.cos(glsl.radians(yaw)) * math.cos(glsl.radians(pitch)),
 		math.sin(glsl.radians(pitch)),
 		math.sin(glsl.radians(yaw)) * glsl.cos(glsl.radians(pitch)),
@@ -119,7 +121,8 @@ main :: proc() {
 	glfw.SetScrollCallback(window, scroll_callback)
 
 	glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
-
+	
+// odinfmt: disable
 	vertices := [?]f32 {
         -0.5, -0.5, -0.5,  0.0, 0.0,
          0.5, -0.5, -0.5,  1.0, 0.0,
@@ -163,8 +166,9 @@ main :: proc() {
         -0.5,  0.5,  0.5,  0.0, 0.0,
         -0.5,  0.5, -0.5,  0.0, 1.0,
 	}
+// odinfmt: enable
 
-	cubePositions := [?]glsl.vec3{
+	cubePositions := [?]glsl.vec3 {
 		{0.0, 0.0, 0.0},
 		{2.0, 5.0, -15.0},
 		{-1.5, -2.2, -2.5},
@@ -269,7 +273,12 @@ main :: proc() {
 		view *= glsl.mat4LookAt(cameraPos, cameraPos + cameraFront, cameraUp)
 
 		projection: glsl.mat4 = 1
-		projection *= glsl.mat4Perspective(glsl.radians_f32(45), f32(f32(SCR_WIDTH) / f32(SCR_HEIGHT)), 0.1, 100)
+		projection *= glsl.mat4Perspective(
+			glsl.radians_f32(45),
+			f32(f32(SCR_WIDTH) / f32(SCR_HEIGHT)),
+			0.1,
+			100,
+		)
 
 		shader_set_mat4(shaderProgram, "projection", projection)
 		shader_set_mat4(shaderProgram, "view", view)
