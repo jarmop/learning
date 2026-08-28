@@ -6,6 +6,7 @@ import "core:math/linalg/glsl"
 import "core:os"
 import gl "vendor:OpenGL"
 import glfw "vendor:glfw"
+import stbi "vendor:stb/image"
 
 Vec3 :: [3]f32
 Vec2 :: [2]f32
@@ -81,10 +82,35 @@ globe_init :: proc() {
 	gl.EnableVertexAttribArray(2)
 
 	gl.BindVertexArray(0)
+
+	globe_texture: u32
+
+	// TEXTURE
+	gl.GenTextures(1, &globe_texture)
+	gl.BindTexture(gl.TEXTURE_2D, globe_texture)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+	stbi.set_flip_vertically_on_load(1)
+	width, height, nrChannels: i32
+	data := stbi.load("./Ground075_1K-JPG_Color.jpg", &width, &height, &nrChannels, 0)
+	if data == nil {
+		fmt.println("Failed to load texture")
+		os.exit(-1)
+	}
+
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, data)
+	gl.GenerateMipmap(gl.TEXTURE_2D)
+
+	stbi.image_free(data)
 }
 
 globe_draw :: proc() {
 	gl.UseProgram(program)
+
+	shader_set_int(program, "texture_sampler", 0)
 
 	view: glsl.mat4 = 1
 	view *= glsl.mat4LookAt(camera.pos, camera.pos + camera.front, camera.up)
@@ -111,6 +137,10 @@ globe_draw :: proc() {
 	gl.DrawElements(gl.TRIANGLES, i32(len(mesh.indices)), gl.UNSIGNED_INT, nil)
 
 	gl.BindVertexArray(0)
+}
+
+shader_set_int :: proc(id: u32, name: cstring, value: i32) {
+	gl.Uniform1i(gl.GetUniformLocation(id, name), value)
 }
 
 shader_set_mat4 :: proc(program_id: u32, name: cstring, value_param: glsl.mat4) {
