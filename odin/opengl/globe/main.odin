@@ -5,7 +5,7 @@ import gl "vendor:OpenGL"
 import glfw "vendor:glfw"
 
 WINDOW_WIDTH: i32 = 800
-WINDOW_HEIGHT: i32 = 600
+WINDOW_HEIGHT: i32 = 800
 
 window: glfw.WindowHandle
 

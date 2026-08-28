@@ -28,8 +28,8 @@ mesh: Sphere_Mesh
 
 rings := 32
 
-globe_spin_angle: f32 = 0
-globe_tilt_angle: f32 = 0
+globe_spin_angle: f32 = -110
+globe_tilt_angle: f32 = 25
 
 globe_init :: proc() {
 	shaders_ok: bool
@@ -95,7 +95,8 @@ globe_init :: proc() {
 
 	stbi.set_flip_vertically_on_load(1)
 	width, height, nrChannels: i32
-	data := stbi.load("./Ground075_1K-JPG_Color.jpg", &width, &height, &nrChannels, 0)
+	// data := stbi.load("./Ground075_1K-JPG_Color.jpg", &width, &height, &nrChannels, 0)
+	data := stbi.load("./world.jpg", &width, &height, &nrChannels, 0)
 	if data == nil {
 		fmt.println("Failed to load texture")
 		os.exit(-1)
@@ -177,9 +178,10 @@ generate_uv_sphere :: proc(segments: int, rings: int, radius: f32) -> Sphere_Mes
 			cos_phi := f32(math.cos(phi))
 
 			// Unit sphere position
-			px := sin_theta * cos_phi
-			py := cos_theta
+			px := -sin_theta * cos_phi
+			py := -cos_theta
 			pz := sin_theta * sin_phi
+
 
 			position := Vec3{px * radius, py * radius, pz * radius}
 

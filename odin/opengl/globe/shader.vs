@@ -16,5 +16,12 @@ void main()
     normal = mat3(model) * a_normal;
     uv = a_uv;
 
-    gl_Position = projection * view * model * vec4(a_position, 1.0);
+    vec3 pos = a_position;
+    // pos.x = -pos.x;
+    // pos.y = -pos.y;
+    // pos.z = -pos.z;
+
+    // gl_Position = projection * view * model * vec4(a_position, 1.0);
+    gl_Position = projection * view * model * vec4(pos, 1.0);
+    // gl_Position = vec4(pos, 1.0);
 }
