@@ -5,7 +5,7 @@ import gl "vendor:OpenGL"
 import glfw "vendor:glfw"
 
 WINDOW_WIDTH: i32 = 800
-WINDOW_HEIGHT: i32 = 800
+WINDOW_HEIGHT: i32 = 600
 
 window: glfw.WindowHandle
 
@@ -27,13 +27,14 @@ main :: proc() {
 	io_init()
 	globe_init()
 
-	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+	gl.Enable(gl.DEPTH_TEST)
+	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+	gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 
 	for !glfw.WindowShouldClose(window) {
 		glfw.PollEvents()
 
-		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
-		gl.Clear(gl.COLOR_BUFFER_BIT)
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		globe_draw()
 

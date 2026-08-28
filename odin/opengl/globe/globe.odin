@@ -25,7 +25,10 @@ program: u32
 vao: u32
 mesh: Sphere_Mesh
 
-rings := 16
+rings := 32
+
+globe_spin_angle: f32 = 0
+globe_tilt_angle: f32 = 0
 
 globe_init :: proc() {
 	shaders_ok: bool
@@ -96,8 +99,8 @@ globe_draw :: proc() {
 	)
 
 	model: glsl.mat4 = 1
-	model *= glsl.mat4Rotate({1.0, 1.0, 0.0}, glsl.radians(f32(30)))
-	// model *= glsl.mat4Translate(POSITION)
+	model *= glsl.mat4Rotate({1.0, 0.0, 0.0}, glsl.radians(globe_tilt_angle))
+	model *= glsl.mat4Rotate({0.0, 1.0, 0.0}, glsl.radians(globe_spin_angle))
 
 	shader_set_mat4(program, "view", view)
 	shader_set_mat4(program, "projection", projection)

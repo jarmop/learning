@@ -62,8 +62,6 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 			mouse_left_pressed = false
 			first_cursor_pos_left = true
 		}
-
-		fmt.println(mouse_left_pressed)
 	}
 }
 
@@ -76,14 +74,10 @@ cursor_pos_callback :: proc "c" (window: glfw.WindowHandle, x, y: f64) {
 			prev_cursor_y = y
 			first_cursor_pos_left = false
 		}
-		// world_pos.x = world_pos.x + f32(x - prev_cursor_x)
-		// world_pos.y = world_pos.y + f32(y - prev_cursor_y)
 
-		x_diff := f32(x - prev_cursor_x)
-		y_diff := f32(y - prev_cursor_y)
-
-		fmt.println("x", x_diff)
-		fmt.println("y", y_diff)
+		speed: f32 = 0.25
+		globe_spin_angle += f32(x - prev_cursor_x) * speed
+		globe_tilt_angle += f32(y - prev_cursor_y) * speed
 
 		prev_cursor_x = x
 		prev_cursor_y = y
