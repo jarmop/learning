@@ -75,9 +75,14 @@ cursor_pos_callback :: proc "c" (window: glfw.WindowHandle, x, y: f64) {
 			first_cursor_pos_left = false
 		}
 
-		speed: f32 = 0.25
+		speed: f32 = 0.22
 		globe_spin_angle += f32(x - prev_cursor_x) * speed
 		globe_tilt_angle += f32(y - prev_cursor_y) * speed
+		if globe_tilt_angle > 90 {
+			globe_tilt_angle = 90
+		} else if globe_tilt_angle < -90 {
+			globe_tilt_angle = -90
+		}
 
 		prev_cursor_x = x
 		prev_cursor_y = y
